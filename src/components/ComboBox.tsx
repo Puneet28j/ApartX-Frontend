@@ -14,6 +14,10 @@ import {
   CommandList,
   CommandShortcut,
 } from "@/components/ui/command";
+import USDTLogo from "../assets/usdt logo.svg";
+import BNBLogo from "../assets/bnb logo.svg";
+import Etherium from "../assets/etherium logo.svg";
+import Bitcoin from "../assets/Bitcoin Logo.svg";
 import {
   Popover,
   PopoverContent,
@@ -26,22 +30,22 @@ const CryptoCurrencyWallets = [
   {
     value: "usdt",
     label: "USDT",
-    icon: <TbCoinBitcoinFilled size={24} />,
+    icon: USDTLogo,
   },
   {
     value: "etherium",
     label: "Etherium",
-    icon: <TbCurrencyEthereum className="h-10 w-10" />,
+    icon: Etherium,
   },
   {
     value: "bitcoin",
     label: "Bitcoin",
-    icon: <TbCoinBitcoinFilled className="h-10 w-10" />,
+    icon: Bitcoin,
   },
   {
     value: "bnb",
     label: "BNB",
-    icon: <RiBnbFill className="h-20 w-20" />,
+    icon: BNBLogo,
   },
 ];
 
@@ -56,13 +60,19 @@ const Combobox = () => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="max-w-[300px] h-16 justify-between text-md"
+          className="min-w-[230px] h-16 justify-center text-md"
         >
           {value ? (
             <div className="flex items-center gap-2">
               {
-                CryptoCurrencyWallets.find((wallet) => wallet.value === value)
-                  ?.icon
+                <img
+                  src={
+                    CryptoCurrencyWallets.find(
+                      (wallet) => wallet.value === value
+                    )?.icon
+                  }
+                  alt=""
+                />
               }
               <span>
                 {
@@ -72,16 +82,16 @@ const Combobox = () => {
               </span>
             </div>
           ) : (
-            "Select crypto currency wallet..."
+            "Select crypto currency..."
           )}
-          <ChevronsUpDown className="opacity-50 ml-2" />
+          {/* <ChevronsUpDown className="opacity-50 ml-2" /> */}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[250px]  p-0">
         <Command className="bg-[#171717] text-white">
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder="Search crypto currency..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No crypto found.</CommandEmpty>
             <CommandGroup>
               {CryptoCurrencyWallets.map((wallet) => (
                 <CommandItem
@@ -93,7 +103,9 @@ const Combobox = () => {
                   }}
                   className="bg-[#171717] text-white"
                 >
-                  <div>{wallet.icon}</div>
+                  <div>
+                    <img src={wallet.icon} alt="icons" className="h-10 w-10" />
+                  </div>
                   <div className="text-lg">{wallet.label.toUpperCase()}</div>
                   <Check
                     className={cn(

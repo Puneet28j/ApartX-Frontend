@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/input-otp";
 
 const RegistrationTwo = () => {
-  const REGEX_OTP = /^[0-9]{6}$/; // Regex for 6-digit OTP
-
   const navigate = useNavigate();
   return (
     <div className="flex flex-col h-full w-full bg-[#070707]  py-6 ">
@@ -45,12 +43,12 @@ const RegistrationTwo = () => {
             className="w-full"
           >
             <InputOTPGroup>
-              <InputOTPSlot index={0} className="text-3xl font-semibold" />
-              <InputOTPSlot index={1} className="text-3xl font-semibold" />
+              <InputOTPSlot index={0} className="text-3xl font-semibold " />
+              <InputOTPSlot index={1} className="text-3xl font-semibold " />
               <InputOTPSlot index={2} className="text-3xl font-semibold" />
               <InputOTPSlot index={3} className="text-3xl font-semibold" />
               <InputOTPSlot index={4} className="text-3xl font-semibold" />
-              <InputOTPSlot index={5} className="text-3xl font-semibold" />
+              <InputOTPSlot index={5} className="text-3xl font-semibold " />
             </InputOTPGroup>
           </InputOTP>
           <div className="text-base leading-[18px]">

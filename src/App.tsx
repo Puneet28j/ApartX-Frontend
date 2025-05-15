@@ -13,6 +13,8 @@ import RegistrationOne from "./Pages/RegistrationOne";
 import RegistrationTwo from "./Pages/RegistrationTwo";
 import MainScreen from "./Pages/MainScreen";
 import SelectCryptoCurrency from "./Pages/SelectCryptoCurrency";
+import ProfileScreen from "./Pages/Profile";
+import TransferReceipt from "./Pages/TransferReceipt";
 
 const App = () => {
   return (
@@ -58,6 +60,8 @@ const App = () => {
             <Route path="/register" element={<RegistrationOne />} />
             <Route path="/verify-otp" element={<RegistrationTwo />} />
             <Route path="/main-screen" element={<MainScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/transfer-receipt" element={<TransferReceipt />} />
             <Route
               path="/select-wallet-send"
               element={<SelectCryptoCurrency />}
