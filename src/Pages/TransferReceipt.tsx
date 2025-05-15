@@ -72,7 +72,7 @@ const TransferReceipt = () => {
             />
             <Button
               className="w-full h-12 bg-[#38AD46] text-white font-semibold rounded-[16px]"
-              onClick={() => navigate("/verify-otp")}
+              onClick={() => navigate("/main-screen")}
             >
               Done
             </Button>
