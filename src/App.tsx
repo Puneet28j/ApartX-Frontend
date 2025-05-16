@@ -12,64 +12,137 @@ import LoginForm from "./Pages/LoginForm";
 import RegistrationOne from "./Pages/RegistrationOne";
 import RegistrationTwo from "./Pages/RegistrationTwo";
 import MainScreen from "./Pages/MainScreen";
-import SelectCryptoCurrency from "./Pages/SelectCryptoCurrency";
 import ProfileScreen from "./Pages/Profile";
 import TransferReceipt from "./Pages/TransferReceipt";
+import ReceiveCurrency from "./Pages/ReceiveCurrency";
+import SendCurrency from "./Pages/SendCurrency";
 
 const App = () => {
   return (
     <Router>
       <div className="bg-[#070707] min-h-screen">
-        <MobileLayout>
-          <Routes>
-            <Route
-              path="/onboarding-1"
-              element={
+        <Routes>
+          <Route
+            path="/onboarding-1"
+            element={
+              <MobileLayout>
                 <Onboarding
                   mainLogo={OnBoardingOneLogo}
                   text="Trusted by millions of people, part of one part"
                   smallLogo={OnBoardingOneSlider}
                   to="/onboarding-2"
                 />
-              }
-            />
-            <Route
-              path="/onboarding-2"
-              element={
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/onboarding-2"
+            element={
+              <MobileLayout>
                 <Onboarding
                   mainLogo={OnboardingTwoLogo}
                   text="Spend money to generate, passive income"
                   smallLogo={OnboardingTwoSlider}
                   to="/onboarding-3"
                 />
-              }
-            />
-            <Route
-              path="/onboarding-3"
-              element={
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/onboarding-3"
+            element={
+              <MobileLayout>
                 <Onboarding
                   mainLogo={OnboardingThreeLogo}
                   text="Receive Money From Anywhere In The World"
                   smallLogo={OnBoardingOneSlider}
                   to="/getStarted"
                 />
-              }
-            />
-            <Route path="/getStarted" element={<GetStarted />} />
-            <Route path="/login-register" element={<LoginForm />} />
-            <Route path="/register" element={<RegistrationOne />} />
-            <Route path="/verify-otp" element={<RegistrationTwo />} />
-            <Route path="/main-screen" element={<MainScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/transfer-receipt" element={<TransferReceipt />} />
-            <Route
-              path="/select-wallet-send"
-              element={<SelectCryptoCurrency />}
-            />
-            {/* Default route */}
-            <Route index element={<SplashScreen />} />
-          </Routes>
-        </MobileLayout>
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/getStarted"
+            element={
+              <MobileLayout>
+                <GetStarted />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/login-register"
+            element={
+              <MobileLayout>
+                <LoginForm />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <MobileLayout>
+                <RegistrationOne />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/verify-otp"
+            element={
+              <MobileLayout>
+                <RegistrationTwo />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/main-screen"
+            element={
+              <MobileLayout>
+                <MainScreen />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <MobileLayout>
+                <ProfileScreen />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/transfer-receipt"
+            element={
+              <MobileLayout>
+                <TransferReceipt />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/select-wallet-send"
+            element={
+              <MobileLayout>
+                <SendCurrency />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/select-wallet-receive"
+            element={
+              <MobileLayout>
+                <ReceiveCurrency />
+              </MobileLayout>
+            }
+          />
+          {/* Default route */}
+          <Route
+            index
+            element={
+              <MobileLayout>
+                <SplashScreen />
+              </MobileLayout>
+            }
+          />
+        </Routes>
       </div>
     </Router>
   );

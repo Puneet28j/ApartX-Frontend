@@ -12,7 +12,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandShortcut,
 } from "@/components/ui/command";
 import USDTLogo from "../assets/usdt logo.svg";
 import BNBLogo from "../assets/bnb logo.svg";
@@ -23,8 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { TbCoinBitcoinFilled, TbCurrencyEthereum } from "react-icons/tb";
-import { RiBnbFill } from "react-icons/ri";
 
 const CryptoCurrencyWallets = [
   {
@@ -49,13 +46,26 @@ const CryptoCurrencyWallets = [
   },
 ];
 
-const Combobox = () => {
+const Combobox = ({
+  placeholder,
+  wallets,
+}: {
+  placeholder: string;
+  wallets: {
+    value: string;
+    label: string;
+    icon: string;
+  }[];
+}) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="bg-[#171717] text-white border-none" asChild>
+      <PopoverTrigger
+        className="bg-[#171717] text-gray-400 border-none max-w-[250px] mx-auto"
+        asChild
+      >
         <Button
           variant="outline"
           role="combobox"
@@ -64,36 +74,26 @@ const Combobox = () => {
         >
           {value ? (
             <div className="flex items-center gap-2">
-              {
-                <img
-                  src={
-                    CryptoCurrencyWallets.find(
-                      (wallet) => wallet.value === value
-                    )?.icon
-                  }
-                  alt=""
-                />
-              }
+              <img
+                src={wallets.find((wallet) => wallet.value === value)?.icon}
+                alt=""
+              />
               <span>
-                {
-                  CryptoCurrencyWallets.find((wallet) => wallet.value === value)
-                    ?.label
-                }
+                {wallets.find((wallet) => wallet.value === value)?.label}
               </span>
             </div>
           ) : (
-            "Select crypto currency..."
+            placeholder
           )}
-          {/* <ChevronsUpDown className="opacity-50 ml-2" /> */}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[250px]  p-0">
+      <PopoverContent className="max-w-[250px] bg-[#171717] text-white p-0">
         <Command className="bg-[#171717] text-white">
           <CommandInput placeholder="Search crypto currency..." />
           <CommandList>
             <CommandEmpty>No crypto found.</CommandEmpty>
             <CommandGroup>
-              {CryptoCurrencyWallets.map((wallet) => (
+              {wallets.map((wallet) => (
                 <CommandItem
                   key={wallet.value}
                   value={wallet.value}
@@ -101,7 +101,7 @@ const Combobox = () => {
                     setValue(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
-                  className="bg-[#171717] text-white"
+                  className=" text-white bg-black"
                 >
                   <div>
                     <img src={wallet.icon} alt="icons" className="h-10 w-10" />

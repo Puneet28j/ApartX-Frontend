@@ -91,6 +91,7 @@ export default {
         ".no-scrollbar::-webkit-scrollbar": {
           display: "none",
         },
+        ".scrollbar-gutter-stable": { "scrollbar-gutter": "stable" },
         ".no-scrollbar": {
           "-ms-overflow-style": "none" /* IE and Edge */,
           "scrollbar-width": "none" /* Firefox */,
@@ -99,6 +100,6 @@ export default {
     },
   ],
   variants: {
-    scrollbar: ["rounded"], // Optional: for rounded scrollbars
+    scrollbar: ["rounded"],
   },
 };

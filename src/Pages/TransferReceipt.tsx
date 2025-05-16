@@ -9,7 +9,7 @@ const TransferReceipt = () => {
   const navigate = useNavigate();
   return (
     <div
-      className="min-h-screen flex flex-col px-4 py-6 w-full bg-cover bg-no-repeat items-center"
+      className="min-h-screen flex flex-col px-4 py-6 w-full bg-cover bg-no-repeat  items-center"
       style={{ backgroundImage: `url(${ReceiptBg})` }}
     >
       {/* Back button */}
@@ -26,9 +26,9 @@ const TransferReceipt = () => {
       </div>
 
       {/* Receipt Card Wrapper */}
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md ">
         {/* Background Card Image */}
-        <img src={TransferCard} alt="Transfer Card" className="w-full" />
+        <img src={TransferCard} alt="Transfer Card" className="w-full mb-20" />
 
         {/* Overlay content */}
         <div className="absolute  inset-0 px-6 py-6 flex flex-col items-center">
@@ -54,7 +54,7 @@ const TransferReceipt = () => {
           {/* Dashed Divider - Now Centered */}
           <img
             src={Line}
-            className="w-full absolute top-[53%] mb-6"
+            className="w-full absolute top-[47%] mb-6"
             alt="Divider"
           />
 

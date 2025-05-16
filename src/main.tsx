@@ -6,8 +6,8 @@ import MobileLayout from "./components/Layout/MobileLayout.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MobileLayout>
-      <App />
-    </MobileLayout>
+    {/* <MobileLayout> */}
+    <App />
+    {/* </MobileLayout> */}
   </StrictMode>
 );

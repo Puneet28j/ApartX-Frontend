@@ -16,6 +16,18 @@
     }
 
   
+/* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+.your-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge */
+.your-scroll-container {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */ 
+}
+
+
 
 
 @font-face {

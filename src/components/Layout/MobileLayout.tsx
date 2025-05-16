@@ -6,8 +6,8 @@ interface MobileLayoutProps {
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   return (
-    <div className="fixed inset-0 flex justify-center font-display bg-[#070707]">
-      <div className="w-full max-w-lg h-full  bg-[#070707] shadow-lg overflow-hidden">
+    <div className=" max-h-screen w-full fixed inset-0 bg-[#070707] font-display flex justify-center overflow-y-auto overflow-x-hidden">
+      <div className="w-full max-w-lg bg-[#070707] shadow-lg flex flex-col max-h-screen overflow-x-hidden">
         {children}
       </div>
     </div>
