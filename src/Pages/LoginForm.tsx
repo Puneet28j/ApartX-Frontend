@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-3 py-6">
       {/* 1. Header (always at top) */}
@@ -16,17 +19,28 @@ const LoginForm = () => {
       </div>
 
       {/* 2. Center box (grows to fill, then centers its children) */}
-      <div className="flex-1 flex flex-col justify-center space-y-4">
+      <div className="flex-1 flex flex-col  justify-center space-y-4">
         <input
           type="text"
           className="h-12 bg-white rounded-lg px-4 w-full"
           placeholder="Login / Mobile No."
         />
-        <input
-          type="password"
-          className="h-12 bg-white rounded-lg px-4 w-full"
-          placeholder="Password"
-        />
+        <div className="relative w-full">
+          <input
+            type={showPassword ? "text" : "password"}
+            // value={value}
+            // onChange={onChange}
+            placeholder={"Enter Password"}
+            className="h-12 bg-white rounded-lg px-4 w-full"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            {showPassword ? <EyeOffIcon size={30} /> : <EyeIcon size={30} />}
+          </button>
+        </div>
         <div className="text-white no-underline text-right text-sm ">
           Forgot Password?
         </div>

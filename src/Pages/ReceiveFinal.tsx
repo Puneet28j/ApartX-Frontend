@@ -9,6 +9,10 @@ import USDTLogo from "../assets/usdt logo.svg";
 import BNBLogo from "../assets/bnb logo.svg";
 import Etherium from "../assets/etherium logo.svg";
 import Bitcoin from "../assets/Bitcoin Logo.svg";
+import Binance from "../assets/binance.svg";
+import MetaMask from "../assets/fox.svg";
+import CoinBase from "../assets/Coinbase.svg";
+import TrustWallet from "../assets/TrustWallet.svg";
 
 const wallets = [
   {
@@ -33,7 +37,14 @@ const wallets = [
   },
 ];
 
-const ReceiveCurrency = () => {
+const wallets2 = [
+  { value: "binance", label: "Binance", icon: Binance },
+  { value: "metamask", label: "MetaMask", icon: MetaMask },
+  { value: "coinbase", label: "CoinBase", icon: CoinBase },
+  { value: "trustWallet", label: "Trust Wallet", icon: TrustWallet },
+];
+
+const ReceiveFinal = () => {
   const navigate = useNavigate();
   const [showWalletIDInput, setShowWalletIDInput] = useState<boolean>(false);
 
@@ -63,7 +74,7 @@ const ReceiveCurrency = () => {
         {/* Header */}
         <div className="flex-none text-start">
           <h2 className="mt-3 font-medium text-[#F7F7F7] text-[22px] leading-tight">
-            Select Crypto Currency
+            Select your blockchain wallet
           </h2>
           <p className="text-[#F7F7F7] text-sm mt-1">
             Select a crypto currency for Sending to Recipient.
@@ -73,14 +84,15 @@ const ReceiveCurrency = () => {
         {/* Form */}
         <div className="mt-10 flex justify-center">
           <div className="w-full max-w-[350px] border-4 relative border-white rounded-[20px] flex justify-center">
-            <div className="flex flex-col items-center w-full">
-              <User2Icon className="text-white h-[80px] w-[80px] rounded-full border-2 border-white mt-2" />
+            <div className="flex flex-col items-center pb-4 w-full">
+              {/* <User2Icon className="text-white h-[80px] w-[80px] rounded-full border-2 border-white mt-2" />
               <div className="text-white text-[20px] text-center mt-2">
                 John
-              </div>
-              <div className="mt-4 w-full flex justify-center">
+              </div> */}
+              <div className="mt-4 w-full flex flex-col justify-center">
+                <div className="text-white text-center">Enter Amount</div>
                 <Combobox
-                  placeholder="Send crypto currency"
+                  placeholder="Select crypto currency"
                   wallets={wallets}
                 />
               </div>
@@ -89,14 +101,20 @@ const ReceiveCurrency = () => {
                 className="h-14 mb-2 bg-transparent rounded-none px-4 border-b-4 border-b-white border-t-0 border-l-0 border-r-0 w-[300px] mt-4 text-white focus:outline-none text-4xl text-center placeholder:text-2xl mx-auto"
                 placeholder="Enter amount"
               />
+              <div className="mt-4 w-full flex flex-col justify-center">
+                <div className="text-white text-center">Select wallet</div>
+                <Combobox placeholder="Select wallet" wallets={wallets2} />
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Footer */}
+
         <div className="flex flex-col gap-3 pt-10">
           <Button
             className="w-full h-12 bg-[#6552FE] text-white font-semibold rounded-[16px]"
-            onClick={() => navigate("/receive-final")}
+            onClick={() => navigate("/request-submitted")}
           >
             Continue
           </Button>
@@ -106,4 +124,4 @@ const ReceiveCurrency = () => {
   );
 };
 
-export default ReceiveCurrency;
+export default ReceiveFinal;

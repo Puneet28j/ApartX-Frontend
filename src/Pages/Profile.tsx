@@ -69,7 +69,10 @@ const ProfileScreen = () => {
             VIEW PORTFOLIO
           </button>
           {/* Invite & Earn Button */}
-          <button className="w-full border-2 border-[#6552FE] text-[#FEF052] py-3 rounded-full text-center font-bold text-lg ">
+          <button
+            onClick={() => navigate("/invite-and-earn")}
+            className="w-full border-2 border-[#6552FE] text-[#FEF052] py-3 rounded-full text-center font-bold text-lg "
+          >
             Invite & Earn
           </button>
         </div>

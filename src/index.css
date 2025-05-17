@@ -6,6 +6,7 @@
 
 @theme {
   --font-display: "Poppins", "sans-serif";
+  --font-racing: "Racing Sans One", "sans-serif";
   --animate-caret-blink: caret-blink 1.25s ease-out infinite,
    @keyframes caret-blink {
           "0%,70%,100%": { opacity: "1" },
@@ -36,6 +37,13 @@
   font-weight: 400;
   font-display: swap;
   src: url("../src/assets/fonts/Poppins-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: Racing Sans One;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../src/assets/fonts/RacingSansOne-Regular.ttf") format("truetype");
 }
 
 @theme inline {

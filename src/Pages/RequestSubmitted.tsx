@@ -3,9 +3,10 @@ import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import TransferCard from "../assets/Subtract.svg";
 import { useNavigate } from "react-router-dom";
 import Line from "../assets/Line 3 (1).svg";
+import foxImage from "../assets/fox.svg";
 import { Button } from "@/components/ui/button";
 
-const TransferReceipt = () => {
+const RequestSubmitted = () => {
   const navigate = useNavigate();
 
   return (
@@ -23,7 +24,7 @@ const TransferReceipt = () => {
 
       {/* Page Title */}
       <div className="text-white text-2xl font-semibold text-center mb-4">
-        Transfer Receipt
+        Request Submitted
       </div>
 
       {/* Card Wrapper */}
@@ -44,17 +45,25 @@ const TransferReceipt = () => {
           <div className="flex flex-col items-center">
             <CircleCheck className="w-20 h-20 fill-green-500 text-black mb-4" />
             <div className="text-black text-xl font-bold mb-1 text-center">
-              Transfer Successful
+              Request Submitted
             </div>
             <div className="text-black text-sm mb-6 text-center">
-              Your transfer has been successfully done.
+              Your request for receiving crypto currency has been successfully
+              submitted.
             </div>
-            <div className="text-black text-sm">Total Transfer</div>
-            <div className="text-green-600 text-4xl font-bold mb-6">4000</div>
+            <div className="text-black text-sm">Total Amount</div>
+            <div className="text-[#FF0000] text-4xl font-bold mb-6">4000</div>
           </div>
 
           {/* Bottom Section */}
-          <div className="flex flex-col gap-3 mt-auto pb-6">
+          <div className="flex flex-col justify-center items-center gap-3 mt-auto pb-6">
+            <div className="text-black text-center text-[14px] font-medium">
+              In wallet
+            </div>
+            <div className="bg-black rounded-md flex items-center justify-center gap-3 w-[160px] h-[50px]">
+              <img className="h-[55px] w-[55px]" src={foxImage} alt="" />
+              <div className="text-white">Metamask</div>
+            </div>
             <div className="text-black font-medium text-sm">
               Transfer Destination
             </div>
@@ -77,4 +86,4 @@ const TransferReceipt = () => {
   );
 };
 
-export default TransferReceipt;
+export default RequestSubmitted;

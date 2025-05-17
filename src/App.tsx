@@ -16,6 +16,10 @@ import ProfileScreen from "./Pages/Profile";
 import TransferReceipt from "./Pages/TransferReceipt";
 import ReceiveCurrency from "./Pages/ReceiveCurrency";
 import SendCurrency from "./Pages/SendCurrency";
+import Passbook from "./Pages/PassBook";
+import InviteAndEarn from "./Pages/Invite&Earn";
+import ReceiveFinal from "./Pages/ReceiveFinal";
+import RequestSubmitted from "./Pages/RequestSubmitted";
 
 const App = () => {
   return (
@@ -133,6 +137,39 @@ const App = () => {
               </MobileLayout>
             }
           />
+          <Route
+            path="/receive-final"
+            element={
+              <MobileLayout>
+                <ReceiveFinal />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/request-submitted"
+            element={
+              <MobileLayout>
+                <RequestSubmitted />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/passbook"
+            element={
+              <MobileLayout>
+                <Passbook />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/invite-and-earn"
+            element={
+              <MobileLayout>
+                <InviteAndEarn />
+              </MobileLayout>
+            }
+          />
+
           {/* Default route */}
           <Route
             index

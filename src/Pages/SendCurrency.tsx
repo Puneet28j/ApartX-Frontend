@@ -62,7 +62,7 @@ const SendCurrency = () => {
       <div className="flex flex-col gap-6 w-full flex-grow">
         {/* Header */}
         <div className="flex-none text-start">
-          <h2 className="mt-3 font-medium text-[#F7F7F7] text-[28px] leading-tight">
+          <h2 className="mt-3 font-medium text-[#F7F7F7] text-[22px] leading-tight">
             Select Crypto Currency
           </h2>
           <p className="text-[#F7F7F7] text-sm mt-1">

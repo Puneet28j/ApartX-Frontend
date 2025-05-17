@@ -16,7 +16,7 @@ const SplashScreen = () => {
   }, [navigate]);
 
   return (
-    <div className="h-full w-full flex justify-center items-center bg-black">
+    <div className="h-full w-full flex justify-center items-center bg-white">
       <div className="max-w-sm w-full px-4">
         <img
           src={SplashScreenLogo}
