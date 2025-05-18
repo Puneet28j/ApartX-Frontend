@@ -52,6 +52,7 @@ const ProfileScreen = () => {
           <div className="grid grid-cols-2 gap-4 mb-4">
             {plans.slice(0, 2).map((plan) => (
               <button
+                onClick={() => navigate("/investment-plan")}
                 key={plan.id}
                 className="bg-gradient-to-r  from-red-700 to-red-500 py-3 px-2 rounded-full text-sm font-semibold"
               >

@@ -20,6 +20,7 @@ import Passbook from "./Pages/PassBook";
 import InviteAndEarn from "./Pages/Invite&Earn";
 import ReceiveFinal from "./Pages/ReceiveFinal";
 import RequestSubmitted from "./Pages/RequestSubmitted";
+import InvestmentPlan from "./Pages/InvestmentPlan";
 
 const App = () => {
   return (
@@ -166,6 +167,14 @@ const App = () => {
             element={
               <MobileLayout>
                 <InviteAndEarn />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/investment-plan"
+            element={
+              <MobileLayout>
+                <InvestmentPlan />
               </MobileLayout>
             }
           />
