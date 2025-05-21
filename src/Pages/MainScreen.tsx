@@ -1,37 +1,22 @@
+import { BookText, Home, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  Settings,
-  Send,
-  Download,
-  Home,
-  BookText,
-  IdCard,
-  User2Icon,
-} from "lucide-react";
 import FlowerImage from "../assets/Shape 1.svg";
 import DiceImage from "../assets/shape-2 (1).jpg";
 import USDTLogo from "../assets/usdt logo.svg";
-import BNBLogo from "../assets/bnb logo.svg";
-import Etherium from "../assets/etherium logo.svg";
-import Bitcoin from "../assets/Bitcoin Logo.svg";
-import SendDollar from "../assets/Send Dollar.svg";
-import ReceiveDollar from "../assets/Recive Dollar.svg";
-import Meshgradient from "../assets/mesh-gradient 1.svg";
-import ReferAndEarn from "../assets/ReferAndEarn.svg";
-import InvestIcon from "../assets/Invest.svg";
-import usdtblack from "../assets/UsdtBlack.svg";
-import { Separator } from "@/components/ui/separator";
+
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import InvestIcon from "../assets/Invest.svg";
+import Meshgradient from "../assets/mesh-gradient 1.svg";
+import ReceiveDollar from "../assets/Recive Dollar.svg";
+import ReferAndEarn from "../assets/ReferAndEarn.svg";
+import SendDollar from "../assets/Send Dollar.svg";
+import usdtblack from "../assets/UsdtBlack.svg";
 
 const MainScreen = () => {
   const navigate = useNavigate();
 
-  const currencyConfig = [
-    { label: "USDT", value: "$ 0.00", icon: USDTLogo },
-    { label: "Bitcoin", value: "$ 0.00", icon: Bitcoin },
-    { label: "Ethereum", value: "$ 0.00", icon: Etherium },
-    { label: "BNB", value: "$ 0.00", icon: BNBLogo },
-  ];
+  const currencyConfig = [{ label: "USDT", value: "$ 0.00", icon: USDTLogo }];
 
   return (
     <div className="w-full  h-full relative overflow-hidden  bg-[#2D2B2B]">
@@ -121,7 +106,7 @@ const MainScreen = () => {
           </div>
           <div className="h-6 w-px bg-white opacity-40" />
           <div className="flex flex-col items-center gap-1">
-            <button onClick={() => navigate("/select-wallet-send")}>
+            <button onClick={() => navigate("/investment-plan")}>
               <img
                 src={InvestIcon}
                 alt="Invest"

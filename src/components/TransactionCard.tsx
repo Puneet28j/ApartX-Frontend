@@ -1,7 +1,12 @@
 import React from "react";
 import { Calendar } from "lucide-react";
 
-export type TransactionType = "Income" | "Withdraw" | "Paid" | "Deposit";
+export type TransactionType =
+  | "Income"
+  | "Withdraw"
+  | "Paid"
+  | "Deposit"
+  | "Referral";
 
 export interface TransactionData {
   id: string;
@@ -17,6 +22,7 @@ const tagColors: Record<TransactionType, string> = {
   Withdraw: "bg-blue-400",
   Paid: "bg-orange-300 text-black",
   Deposit: "bg-green-300 text-black",
+  Referral: "bg-purple-500 text-white",
 };
 
 const amountColors = {

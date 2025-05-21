@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import GetstartedImg from "../assets/GetstartedLogo.png";
+import NewLogoGetStarted from "../assets/new-logo-getstarted.svg";
 import { useNavigate } from "react-router-dom";
 
 const GetStarted = () => {
@@ -10,7 +10,7 @@ const GetStarted = () => {
       {/* logo at top */}
       <div className="flex-none flex justify-center mt-12">
         <img
-          src={GetstartedImg}
+          src={NewLogoGetStarted}
           alt="getstarted Logo"
           className="w-[280px] h-[280px] rounded-[12px]"
         />

@@ -41,6 +41,14 @@ const mockTransactions: TransactionData[] = [
     walletImage: FoxImage,
   },
   {
+    id: "50",
+    username: "Eaz5487568cvguytoxxxj",
+    time: "Yesterday at 16:34",
+    type: "Referral",
+    amount: 240,
+    walletImage: FoxImage,
+  },
+  {
     id: "5",
     username: "Eaz5487568cvguytoxxxj",
     time: "Yesterday at 16:34",

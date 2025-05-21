@@ -10,6 +10,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [referralId, setReferralId] = useState("");
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707]  py-6 ">
@@ -82,13 +83,25 @@ const Register = () => {
               className="h-12 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
             />
           </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-white font-medium text-sm">
+              Enter Referral ID
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Referral ID"
+              value={referralId}
+              onChange={(e) => setReferralId(e.target.value)}
+              className="h-12 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
+            />
+          </div>
         </div>
 
         {/* Footer */}
         <div className="mt-auto flex flex-col gap-3 pt-10">
           <Button
             className="w-full h-12 bg-[#6552FE] text-white font-semibold rounded-[16px]"
-            onClick={() => navigate("/verify-otp")}
+            onClick={() => navigate("/login-register")}
           >
             Register
           </Button>

@@ -13,15 +13,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import USDTLogo from "../assets/usdt logo.svg";
-import BNBLogo from "../assets/bnb logo.svg";
-import Etherium from "../assets/etherium logo.svg";
-import Bitcoin from "../assets/Bitcoin Logo.svg";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import USDTLogo from "../assets/usdt logo.svg";
+import BNBLogo from "../assets/bnb logo.svg";
+import Etherium from "../assets/etherium logo.svg";
+import Bitcoin from "../assets/Bitcoin Logo.svg";
 
 const CryptoCurrencyWallets = [
   {
@@ -31,7 +32,7 @@ const CryptoCurrencyWallets = [
   },
   {
     value: "etherium",
-    label: "Etherium",
+    label: "Ethereum",
     icon: Etherium,
   },
   {
@@ -49,6 +50,7 @@ const CryptoCurrencyWallets = [
 const Combobox = ({
   placeholder,
   wallets,
+  onChange, // ✅ Accept onChange from parent
 }: {
   placeholder: string;
   wallets: {
@@ -56,9 +58,12 @@ const Combobox = ({
     label: string;
     icon: string;
   }[];
+  onChange?: (value: string) => void; // ✅ Optional function prop
 }) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+
+  const selectedWallet = wallets.find((wallet) => wallet.value === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -72,15 +77,14 @@ const Combobox = ({
           aria-expanded={open}
           className="min-w-[230px] h-16 justify-center text-md"
         >
-          {value ? (
+          {selectedWallet ? (
             <div className="flex items-center gap-2">
               <img
-                src={wallets.find((wallet) => wallet.value === value)?.icon}
+                src={selectedWallet.icon}
                 alt=""
+                className="h-[55px] w-[55px]"
               />
-              <span>
-                {wallets.find((wallet) => wallet.value === value)?.label}
-              </span>
+              <span className="text-white">{selectedWallet.label}</span>
             </div>
           ) : (
             placeholder
@@ -98,21 +102,27 @@ const Combobox = ({
                   key={wallet.value}
                   value={wallet.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    const newValue = currentValue === value ? "" : currentValue;
+                    setValue(newValue);
+                    onChange?.(newValue); // ✅ Inform parent
                     setOpen(false);
                   }}
-                  className=" text-white bg-black"
+                  className="text-white hover:bg-[#2a2a2a] cursor-pointer"
                 >
-                  <div>
-                    <img src={wallet.icon} alt="icons" className="h-10 w-10" />
+                  <div className="flex items-center gap-3 w-full">
+                    <img
+                      src={wallet.icon}
+                      alt={wallet.label}
+                      className="h-8 w-8"
+                    />
+                    <span className="text-md font-medium">{wallet.label}</span>
+                    <Check
+                      className={cn(
+                        "ml-auto h-5 w-5 text-green-500",
+                        value === wallet.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
                   </div>
-                  <div className="text-lg">{wallet.label.toUpperCase()}</div>
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === wallet.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
                 </CommandItem>
               ))}
             </CommandGroup>

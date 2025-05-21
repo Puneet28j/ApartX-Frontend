@@ -1,52 +1,129 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Combobox from "@/components/ComboBox";
 import { useState } from "react";
 import USDTLogo from "../assets/usdt logo.svg";
 import BNBLogo from "../assets/bnb logo.svg";
 import Etherium from "../assets/etherium logo.svg";
 import Bitcoin from "../assets/Bitcoin Logo.svg";
 import SelectComponent from "@/components/Select";
+import USDTLOGO from "../assets/usdt logo.svg";
 
-const wallets = [
+// Define types
+type Wallet = {
+  value: string;
+  label: string;
+  icon: string;
+};
+
+type Tariff = {
+  value: string;
+  label: string;
+  rate: string;
+  duration: string;
+  minAmount: number;
+  maxAmount: number;
+};
+
+const wallets: Wallet[] = [
   { value: "usdt", label: "USDT", icon: USDTLogo },
   { value: "etherium", label: "Etherium", icon: Etherium },
   { value: "bitcoin", label: "Bitcoin", icon: Bitcoin },
   { value: "bnb", label: "BNB", icon: BNBLogo },
 ];
 
-const tariffs = [
+const tariffs: Tariff[] = [
   {
-    value: "security",
-    label: "Security",
-    rate: "4–5%",
-    duration: "7 Days",
-    minAmount: 25,
-    maxAmount: 500000,
+    value: "gold",
+    label: "GOLD",
+    rate: "1.5%",
+    duration: "Day",
+    minAmount: 50,
+    maxAmount: 500,
   },
   {
-    value: "basic",
-    label: "Basic",
-    rate: "1-1.5%",
-    duration: "15 Days",
-    minAmount: 25,
-    maxAmount: 1000,
+    value: "diamond",
+    label: "Diamond",
+    rate: "2%",
+    duration: "Day",
+    minAmount: 501,
+    maxAmount: 5000,
   },
   {
-    value: "advance",
-    label: "Advance",
-    rate: "15.2%",
-    duration: "25 Days",
-    minAmount: 1000,
-    maxAmount: 10000,
+    value: "platinum",
+    label: "Platinum",
+    rate: "3%",
+    duration: "Day",
+    minAmount: 5001,
+    maxAmount: 25000,
+  },
+  {
+    value: "master",
+    label: "Master",
+    rate: "5%",
+    duration: "Day",
+    minAmount: 25000,
+    maxAmount: 100000, // This is a placeholder, will be displayed as "25000+"
   },
 ];
 
 const InvestmentPlan = () => {
   const navigate = useNavigate();
-  const [selectedTariff, setSelectedTariff] = useState(tariffs[0]);
-  const [amount, setAmount] = useState(tariffs[0].minAmount); // ← set initial value to minAmount
+  const [selectedTariff, setSelectedTariff] = useState<Tariff>(tariffs[0]);
+  const [amount, setAmount] = useState<number>(selectedTariff.minAmount);
+  const [error, setError] = useState<string>("");
+
+  // Validate the amount based on tariff limits
+  const validateAmount = (
+    value: number,
+    tariff: Tariff = selectedTariff
+  ): boolean => {
+    if (value < tariff.minAmount) {
+      setError(
+        `Amount must be at least ${tariff.minAmount.toLocaleString()} USD`
+      );
+      return false;
+    }
+
+    // Special handling for Master plan - no upper limit
+    if (tariff.value !== "master" && value > tariff.maxAmount) {
+      setError(
+        `Amount must not exceed ${tariff.maxAmount.toLocaleString()} USD`
+      );
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
+
+  // Handle tariff change
+  const handleTariffChange = (tariff: Tariff): void => {
+    setSelectedTariff(tariff);
+    setAmount(tariff.minAmount);
+    setError(""); // Clear errors when tariff changes
+  };
+
+  // Handle amount change
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const inputVal = e.target.value;
+
+    if (inputVal === "") {
+      setAmount(0);
+      setError(
+        `Amount must be at least ${selectedTariff.minAmount.toLocaleString()} USD`
+      );
+      return;
+    }
+
+    const val = Number(inputVal);
+    if (isNaN(val)) {
+      return;
+    }
+
+    setAmount(val);
+    validateAmount(val);
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-4 pt-6 pb-28 relative">
@@ -72,45 +149,47 @@ const InvestmentPlan = () => {
 
       {/* Select Currency */}
       <div className="bg-[#3A3232] py-4 px-8 rounded-2xl h-[142px] mb-5">
-        <p className="text-white font-semibold ">Select Currency</p>
+        <p className="text-white font-semibold">Supported Currency</p>
         <div className="flex justify-center items-center h-full">
-          <Combobox placeholder="Select currency" wallets={wallets} />
+          <div className="bg-black w-[160px] mb-2 items-center rounded-lg gap-4 justify-center h-[60px] mx-auto flex">
+            <img className="h-[50px] w-[50px]" src={USDTLOGO} alt="" />
+            <div className="text-white text-[20px]">USDT</div>
+          </div>
         </div>
       </div>
 
-      {/* Tariff */}
       {/* Tariff */}
       <div className="bg-[#3A3232] p-4 rounded-2xl h-[142px] mb-5">
         <p className="text-white font-semibold mb-2">Tariff</p>
         <SelectComponent
           TariffList={tariffs}
           selectedTariff={selectedTariff}
-          setSelectedTariff={(tariff) => {
-            setSelectedTariff(tariff);
-            setAmount(tariff.minAmount); // ← update amount on tariff change
-          }}
+          setSelectedTariff={handleTariffChange}
         />
       </div>
 
       {/* Deposit Amount */}
-      <div className="bg-[#3A3232] h-[142px] p-4 rounded-2xl">
+      <div className="bg-[#3A3232] h-auto p-4 rounded-2xl">
         <p className="text-white font-semibold mb-2">Deposit Amount</p>
-        <div className="flex items-center border rounded-xl px-4 py-3 border-white">
+        <div
+          className={`flex items-center border rounded-xl px-4 py-3 ${
+            error ? "border-red-500" : "border-white"
+          }`}
+        >
           <input
             type="number"
             value={amount === 0 ? "" : amount}
-            onChange={(e) => {
-              const val = e.target.value;
-              setAmount(val === "" ? 0 : Number(val));
-            }}
-            min={selectedTariff.minAmount}
-            max={selectedTariff.maxAmount}
+            onChange={handleAmountChange}
             className="bg-transparent text-white outline-none flex-1 placeholder:text-white"
-            placeholder={`Min. ${selectedTariff.minAmount}`}
+            placeholder={`Min. ${selectedTariff.minAmount.toLocaleString()}`}
           />
-
           <span className="text-white font-semibold">USD</span>
         </div>
+
+        {/* Error Message */}
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+
+        {/* Min/Max Display */}
         <div className="flex justify-between text-sm text-white mt-2">
           <span>
             Min. Amount:{" "}
@@ -121,7 +200,9 @@ const InvestmentPlan = () => {
           <span>
             Max. Amount:{" "}
             <span className="text-green-500 font-semibold">
-              {selectedTariff.maxAmount.toLocaleString("en-IN")}
+              {selectedTariff.value === "master"
+                ? `${selectedTariff.minAmount.toLocaleString()}+`
+                : selectedTariff.maxAmount.toLocaleString()}
             </span>
           </span>
         </div>
@@ -129,7 +210,22 @@ const InvestmentPlan = () => {
 
       {/* Continue Button */}
       <div className="absolute bottom-4 left-0 right-0 px-4">
-        <Button className="w-full bg-[#7553FF] text-white text-base py-6 rounded-2xl">
+        <Button
+          className={`w-full text-white text-base py-6 rounded-2xl ${
+            error ? "bg-gray-500 cursor-not-allowed" : "bg-[#7553FF]"
+          }`}
+          disabled={!!error || amount < selectedTariff.minAmount}
+          onClick={() => {
+            // Only proceed if amount is valid
+            if (validateAmount(amount)) {
+              // Your continue logic here
+              console.log("Proceeding with investment:", {
+                plan: selectedTariff.label,
+                amount: amount,
+              });
+            }
+          }}
+        >
           Continue
         </Button>
       </div>

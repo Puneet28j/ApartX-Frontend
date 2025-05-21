@@ -21,6 +21,8 @@ import InviteAndEarn from "./Pages/Invite&Earn";
 import ReceiveFinal from "./Pages/ReceiveFinal";
 import RequestSubmitted from "./Pages/RequestSubmitted";
 import InvestmentPlan from "./Pages/InvestmentPlan";
+import Dashboard from "./Admin/AdminDashboard";
+import { DashboardLayout } from "./components/admin/DashboardLayout";
 
 const App = () => {
   return (

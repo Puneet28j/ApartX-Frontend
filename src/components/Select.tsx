@@ -1,13 +1,3 @@
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 type Tariff = {
   duration: string;
   label: string;
@@ -16,6 +6,14 @@ type Tariff = {
   minAmount: number;
   maxAmount: number;
 };
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 
 const SelectComponent = ({
   TariffList,
@@ -34,7 +32,7 @@ const SelectComponent = ({
         if (selected) setSelectedTariff(selected);
       }}
     >
-      <SelectTrigger className="w-full px-4  py-6 border border-white rounded-xl bg-transparent text-white">
+      <SelectTrigger className="w-full px-4 py-6 border border-white rounded-xl bg-transparent text-white">
         <div className="flex justify-between items-center w-full">
           <span className="font-semibold">{selectedTariff.label}</span>
           <span className="text-sm text-gray-300">
@@ -43,19 +41,19 @@ const SelectComponent = ({
         </div>
       </SelectTrigger>
 
-      <SelectContent className="bg-[#1F1F1F] text-white border  w-full px-4 py-2">
+      <SelectContent className="bg-[#1F1F1F] text-white border w-full ">
         <SelectGroup>
           {TariffList.map((tariff) => (
             <SelectItem
               key={tariff.value}
               value={tariff.value}
-              className="py-3 hover:bg-[#2A2A2A] rounded-lg"
+              className="py-3 hover:bg-[#2A2A2A] rounded-lg  w-full"
             >
-              <div className="flex justify-between items-center w-full">
-                <span className="font-semibold ">{tariff.label}</span>
-                <span className="text-sm text-gray-400">
+              <div className="flex relative justify-between items-center w-full gap-10">
+                <div className="font-semibold">{tariff.label}</div>
+                <div className="text-sm text-gray-400 whitespace-nowrap">
                   {tariff.rate} / {tariff.duration}
-                </span>
+                </div>
               </div>
             </SelectItem>
           ))}

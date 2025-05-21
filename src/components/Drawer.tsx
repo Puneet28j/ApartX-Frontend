@@ -112,7 +112,7 @@ export function DrawerDemo() {
 
             <Button
               className="w-full h-12 mt-4 bg-[#38AD46] text-white font-semibold rounded-[16px]"
-              onClick={() => navigate("/verify-otp")}
+              // onClick={() => navigate("/verify-otp")}
             >
               Upload Wallet QR Code
             </Button>
