@@ -5,12 +5,38 @@ import "react-phone-input-2/lib/style.css";
 // import SmallLine from "../assets/smallLine.svg"; // Placeholder for the small line image
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react"; // Optional: lucide icon
+import { auth } from "@/services/api";
+import { toast } from "sonner";
 
 const Register = () => {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [referralId, setReferralId] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    try {
+      // setLoading(true);
+      // if (!phone || !password) {
+      //   toast.error("Please fill in all required fields");
+      //   return;
+      // }
+
+      // const response = await auth.register({
+      //   phoneNumber: phone,
+      //   password,
+      //   referralCode: referralId || undefined,
+      // });
+
+      // toast.success("Registration successful");
+      navigate("/login-register");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707]  py-6 ">
@@ -100,10 +126,11 @@ const Register = () => {
         {/* Footer */}
         <div className="mt-auto flex flex-col gap-3 pt-10">
           <Button
-            className="w-full h-12 bg-[#6552FE] text-white font-semibold rounded-[16px]"
-            onClick={() => navigate("/login-register")}
+            className="w-full h-12 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[16px]"
+            onClick={handleRegister}
+            disabled={loading}
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </Button>
         </div>
       </div>

@@ -55,7 +55,7 @@ export function DrawerDemo() {
               Wallet Status Updated.
             </DialogTitle>
             <DialogDescription className="text-center text-[12px] text-white font-medium">
-              Your Wallet account for crypto transaction has been successfulyy
+              Your Wallet account for crypto transaction has been successfully
               added.
             </DialogDescription>
           </DialogHeader>

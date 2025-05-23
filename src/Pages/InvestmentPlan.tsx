@@ -8,6 +8,8 @@ import Etherium from "../assets/etherium logo.svg";
 import Bitcoin from "../assets/Bitcoin Logo.svg";
 import SelectComponent from "@/components/Select";
 import USDTLOGO from "../assets/usdt logo.svg";
+import { toast } from "sonner";
+import api from "@/services/api";
 
 // Define types
 type Wallet = {
@@ -63,7 +65,7 @@ const tariffs: Tariff[] = [
     rate: "5%",
     duration: "Day",
     minAmount: 25000,
-    maxAmount: 100000, // This is a placeholder, will be displayed as "25000+"
+    maxAmount: 100000,
   },
 ];
 
@@ -72,6 +74,7 @@ const InvestmentPlan = () => {
   const [selectedTariff, setSelectedTariff] = useState<Tariff>(tariffs[0]);
   const [amount, setAmount] = useState<number>(selectedTariff.minAmount);
   const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Validate the amount based on tariff limits
   const validateAmount = (
@@ -85,7 +88,6 @@ const InvestmentPlan = () => {
       return false;
     }
 
-    // Special handling for Master plan - no upper limit
     if (tariff.value !== "master" && value > tariff.maxAmount) {
       setError(
         `Amount must not exceed ${tariff.maxAmount.toLocaleString()} USD`
@@ -101,7 +103,7 @@ const InvestmentPlan = () => {
   const handleTariffChange = (tariff: Tariff): void => {
     setSelectedTariff(tariff);
     setAmount(tariff.minAmount);
-    setError(""); // Clear errors when tariff changes
+    setError("");
   };
 
   // Handle amount change
@@ -125,6 +127,31 @@ const InvestmentPlan = () => {
     validateAmount(val);
   };
 
+  const handleInvestment = async () => {
+    if (!validateAmount(amount)) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.post("/investment/create", {
+        planName: selectedTariff.label,
+        amount: amount,
+      });
+
+      if (response.data) {
+        toast.success("Investment created successfully!");
+        navigate("/profile"); // Navigate back to profile after successful investment
+      }
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || "Failed to create investment"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-4 pt-6 pb-28 relative">
       {/* Back Button and Line */}
@@ -139,7 +166,7 @@ const InvestmentPlan = () => {
       </div>
 
       {/* Header */}
-      <div className="text-start mb-6">
+      <div className="text-start mb-1 sm:mb-6">
         <h2 className="font-semibold text-white text-2xl">Investment Plan</h2>
         <p className="text-sm text-[#D1D1D1] mt-1">
           Select your desired investment plan and crypto currency to grow your
@@ -212,21 +239,14 @@ const InvestmentPlan = () => {
       <div className="absolute bottom-4 left-0 right-0 px-4">
         <Button
           className={`w-full text-white text-base py-6 rounded-2xl ${
-            error ? "bg-gray-500 cursor-not-allowed" : "bg-[#7553FF]"
+            error || isLoading
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-[#7553FF]"
           }`}
-          disabled={!!error || amount < selectedTariff.minAmount}
-          onClick={() => {
-            // Only proceed if amount is valid
-            if (validateAmount(amount)) {
-              // Your continue logic here
-              console.log("Proceeding with investment:", {
-                plan: selectedTariff.label,
-                amount: amount,
-              });
-            }
-          }}
+          disabled={!!error || amount < selectedTariff.minAmount || isLoading}
+          // onClick={handleInvestment}
         >
-          Continue
+          {isLoading ? "Processing..." : "Continue"}
         </Button>
       </div>
     </div>

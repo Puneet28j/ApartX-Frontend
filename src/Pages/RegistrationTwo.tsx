@@ -59,7 +59,7 @@ const RegistrationTwo = () => {
         {/* Footer */}
         <div className="mt-auto flex flex-col gap-3 pt-10">
           <Button
-            className="w-full h-12 bg-[#6552FE] text-white font-semibold rounded-[16px]"
+            className="w-full h-12 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[16px]"
             onClick={() => navigate("/login-register")}
           >
             Register

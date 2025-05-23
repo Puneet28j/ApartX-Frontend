@@ -44,17 +44,8 @@ const SelectComponent = ({
       <SelectContent className="bg-[#1F1F1F] text-white border w-full ">
         <SelectGroup>
           {TariffList.map((tariff) => (
-            <SelectItem
-              key={tariff.value}
-              value={tariff.value}
-              className="py-3 hover:bg-[#2A2A2A] rounded-lg  w-full"
-            >
-              <div className="flex relative justify-between items-center w-full gap-10">
-                <div className="font-semibold">{tariff.label}</div>
-                <div className="text-sm text-gray-400 whitespace-nowrap">
-                  {tariff.rate} / {tariff.duration}
-                </div>
-              </div>
+            <SelectItem key={tariff.value} value={tariff.value} className="p-2">
+              {[tariff.label, `${tariff.rate} / ${tariff.duration}`]}
             </SelectItem>
           ))}
         </SelectGroup>

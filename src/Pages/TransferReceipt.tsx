@@ -55,7 +55,7 @@ const TransferReceipt = () => {
             <div className="flex-[0.53] flex flex-col">
               {/* Top Checkmark - responsive size */}
               <div className="flex justify-center pt-1">
-                <CircleCheck className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 fill-green-500 text-black" />
+                <CircleCheck className="w-24 h-24 sm:w-16 sm:h-16 md:w-20 md:h-20 fill-green-500 text-black" />
               </div>
 
               {/* Transfer Message - responsive text */}

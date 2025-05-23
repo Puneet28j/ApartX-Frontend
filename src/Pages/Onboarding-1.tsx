@@ -39,7 +39,7 @@ const Onboarding = ({ mainLogo, smallLogo, text, to }: OnboardingProps) => {
       {/* bottom: next button */}
       <div className="flex-none">
         <Button
-          className="w-full h-[50px] bg-[#6552FE] text-white font-semibold text-[16px] leading-[24px] rounded-[16px]"
+          className="w-full h-[50px] hover:bg-slate-500 bg-[#6552FE] text-white font-semibold text-[16px] leading-[24px] rounded-[16px]"
           onClick={() => navigate(to)}
         >
           Next

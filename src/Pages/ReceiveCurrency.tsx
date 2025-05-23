@@ -98,7 +98,7 @@ const ReceiveCurrency = () => {
 
         <div className="flex flex-col gap-3 pt-10">
           <Button
-            className="w-full h-12 bg-[#6552FE] text-white font-semibold rounded-[16px]"
+            className="w-full h-12 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[16px]"
             disabled={!amount || parseFloat(amount) <= 0}
             onClick={() =>
               navigate("/receive-final", {

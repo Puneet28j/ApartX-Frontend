@@ -32,7 +32,7 @@ const GetStarted = () => {
       {/* button at bottom */}
       <div className="flex-none">
         <Button
-          className="w-full h-[50px] bg-[#6552FE] text-white font-semibold text-[16px] leading-[24px] rounded-[16px]"
+          className="w-full h-[50px] bg-[#6552FE] text-white hover:bg-slate-500 font-semibold text-[16px] leading-[24px] rounded-[16px]"
           onClick={() => navigate("/login-register")}
         >
           Get Started

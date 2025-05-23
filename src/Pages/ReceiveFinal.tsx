@@ -100,7 +100,7 @@ const ReceiveFinal = () => {
 
         <div className="flex flex-col gap-3 pt-10">
           <Button
-            className="w-full h-12 bg-[#6552FE] text-white font-semibold rounded-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => navigate("/request-submitted")}
             disabled={!selectedWallet}
           >

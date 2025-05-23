@@ -1,32 +1,33 @@
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import OnBoardingOneSlider from "./assets/onboadingOneSlider.svg";
 import OnBoardingOneLogo from "./assets/OnBoardingOneLogo.svg";
-import OnboardingTwoLogo from "./assets/OnBoardingTwoLogo.svg";
 import OnboardingThreeLogo from "./assets/OnBoardingThreeLogo.svg";
+import OnboardingTwoLogo from "./assets/OnBoardingTwoLogo.svg";
 import OnboardingTwoSlider from "./assets/OnBoardingTwoSlider.svg";
-import Onboarding from "./Pages/Onboarding-1";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import SplashScreen from "./Pages/SplashScreen";
-import GetStarted from "./Pages/GetStarted";
 import MobileLayout from "./components/Layout/MobileLayout";
+import GetStarted from "./Pages/GetStarted";
+import InvestmentPlan from "./Pages/InvestmentPlan";
+import InviteAndEarn from "./Pages/Invite&Earn";
 import LoginForm from "./Pages/LoginForm";
+import MainScreen from "./Pages/MainScreen";
+import Onboarding from "./Pages/Onboarding-1";
+import Passbook from "./Pages/PassBook";
+import ProfileScreen from "./Pages/Profile";
+import ReceiveCurrency from "./Pages/ReceiveCurrency";
+import ReceiveFinal from "./Pages/ReceiveFinal";
 import RegistrationOne from "./Pages/RegistrationOne";
 import RegistrationTwo from "./Pages/RegistrationTwo";
-import MainScreen from "./Pages/MainScreen";
-import ProfileScreen from "./Pages/Profile";
-import TransferReceipt from "./Pages/TransferReceipt";
-import ReceiveCurrency from "./Pages/ReceiveCurrency";
-import SendCurrency from "./Pages/SendCurrency";
-import Passbook from "./Pages/PassBook";
-import InviteAndEarn from "./Pages/Invite&Earn";
-import ReceiveFinal from "./Pages/ReceiveFinal";
 import RequestSubmitted from "./Pages/RequestSubmitted";
-import InvestmentPlan from "./Pages/InvestmentPlan";
-import Dashboard from "./Admin/AdminDashboard";
-import { DashboardLayout } from "./components/admin/DashboardLayout";
+import SendCurrency from "./Pages/SendCurrency";
+import SplashScreen from "./Pages/SplashScreen";
+import TransferReceipt from "./Pages/TransferReceipt";
+// import ScannerPage from "./Pages/ScannerPage";
 
 const App = () => {
   return (
     <Router>
+      <Toaster position="top-center" richColors />
       <div className="bg-[#070707] min-h-screen">
         <Routes>
           <Route
@@ -180,6 +181,14 @@ const App = () => {
               </MobileLayout>
             }
           />
+          {/* <Route
+            path="/scanner"
+            element={
+              <MobileLayout>
+                <ScannerPage />
+              </MobileLayout>
+            }
+          /> */}
 
           {/* Default route */}
           <Route
