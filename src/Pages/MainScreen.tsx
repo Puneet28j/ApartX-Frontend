@@ -67,13 +67,13 @@ const MainScreen = () => {
             </div>
             <div className="flex flex-col gap-4">
               <button
-                onClick={() => navigate("/select-wallet-send")}
+                onClick={() => navigate("/select-wallet-receive")}
                 className="bg-orange-500 text-white text-xs sm:text-sm font-semibold px-3 sm:px-5 py-1.5 rounded-full shadow-md border border-orange-300"
               >
                 Withdraw
               </button>
               <button
-                onClick={() => navigate("/select-wallet-receive")}
+                onClick={() => navigate("/select-wallet-send")}
                 className="bg-purple-600 text-white text-xs sm:text-sm font-semibold px-3 sm:px-5 py-1.5 rounded-full shadow-md border border-purple-400"
               >
                 Deposit

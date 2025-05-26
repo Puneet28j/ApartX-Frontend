@@ -5,10 +5,25 @@ import { ArrowLeft, User2Icon } from "lucide-react";
 import { useRef, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import USDTLOGO from "../assets/usdt logo.svg";
+import Combobox from "@/components/ComboBox";
+import Binance from "../assets/binance.svg";
+import MetaMask from "../assets/fox.svg";
+import CoinBase from "../assets/Coinbase.svg";
+import TrustWallet from "../assets/TrustWallet.svg";
+import { useLocation } from "react-router-dom";
+
+const wallets2 = [
+  { value: "binance", label: "Binance", icon: Binance },
+  { value: "metamask", label: "MetaMask", icon: MetaMask },
+  { value: "coinbase", label: "CoinBase", icon: CoinBase },
+  { value: "trustWallet", label: "Trust Wallet", icon: TrustWallet },
+];
 
 const SendCurrency = () => {
   const navigate = useNavigate();
+  const [selectedWallet, setSelectedWallet] = useState("");
   const [amount, setAmount] = useState("");
+  const [walletID, setWalletID] = useState("");
   const [showWalletIDInput, setShowWalletIDInput] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -49,7 +64,7 @@ const SendCurrency = () => {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-3 w-full flex-grow">
+      <div className="flex flex-col gap-1 w-full flex-grow">
         {/* Header */}
         <div className="flex-none text-start">
           <h2 className="mt-1 font-medium text-[#F7F7F7] text-[22px] leading-tight">
@@ -85,82 +100,91 @@ const SendCurrency = () => {
                 className="h-10 mb-2 bg-transparent rounded-none px-4 border-b-1 border-b-white border-t-0 border-l-0 border-r-0 w-[250px] mt-1 text-white focus:outline-none text-xl text-center placeholder:text-xl mx-auto"
                 placeholder="Enter amount"
               />
+              <div className="mt-4 w-full flex flex-col justify-center">
+                <div className="text-white text-center">Select wallet</div>
+                <Combobox
+                  placeholder="Select wallet"
+                  wallets={wallets2}
+                  onChange={(value) => setSelectedWallet(value)}
+                />
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Footer */}
-        {showWalletIDInput ? (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <label className="text-white font-medium text-sm">
-                Wallet ID
-              </label>
-              <input
-                type="text"
-                placeholder="Enter wallet Id"
-                className="h-10 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
+      {/* Footer */}
+      {showWalletIDInput ? (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
+            <label className="text-white font-medium text-sm">Wallet ID</label>
+            <input
+              value={walletID}
+              onChange={(e) => setWalletID(e.target.value)}
+              type="text"
+              placeholder="Enter wallet Id"
+              className="h-10 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-center gap-1">
+            <Separator className="w-1/4" />
+            <span className="text-white">OR</span>
+            <Separator className="w-1/4" />
+          </div>
+
+          {preview && (
+            <div className="flex justify-center">
+              <img
+                src={preview}
+                alt="Screenshot Preview"
+                className="max-h-48 rounded-lg border border-white"
               />
             </div>
+          )}
 
-            <div className="flex items-center justify-center gap-1">
-              <Separator className="w-1/4" />
-              <span className="text-white">OR</span>
-              <Separator className="w-1/4" />
-            </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleScreenshotUpload}
+            className="hidden"
+          />
 
-            {preview && (
-              <div className="flex justify-center">
-                <img
-                  src={preview}
-                  alt="Screenshot Preview"
-                  className="max-h-48 rounded-lg border border-white"
-                />
-              </div>
-            )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleScreenshotUpload}
-              className="hidden"
-            />
-
-            <div className="flex flex-col gap-2">
-              <Button
+          <div className="flex flex-col gap-2">
+            {/* <Button
                 className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
                 onClick={() => navigate("/transfer-receipt")}
               >
                 Scan QR Code
-              </Button>
-              <Button
-                className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
-                onClick={triggerFileSelect}
-              >
-                Add Screenshot
-              </Button>
-
-              <Button
-                className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
-                onClick={() => navigate("/transfer-receipt")}
-              >
-                Pay Now
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3 pt-10">
+              </Button> */}
             <Button
-              className="w-full h-10 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[12px]"
-              disabled={!amount || parseFloat(amount) <= 0}
-              onClick={() => setShowWalletIDInput(true)}
+              className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
+              onClick={triggerFileSelect}
             >
-              Continue
+              Add Screenshot
+            </Button>
+
+            <Button
+              disabled={!walletID}
+              className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
+              onClick={() => navigate("/transfer-receipt")}
+            >
+              Pay Now
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 pt-10">
+          <Button
+            className="w-full h-10 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[12px]"
+            disabled={!amount || parseFloat(amount) <= 0 || !selectedWallet}
+            onClick={() => setShowWalletIDInput(true)}
+          >
+            Continue
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

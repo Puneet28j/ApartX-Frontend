@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home,
@@ -12,10 +12,23 @@ import {
   Pencil,
   Check,
   X,
+  Plus,
 } from "lucide-react";
 import { DrawerDemo } from "@/components/Drawer";
-import { auth } from "@/services/api";
+// import { auth } from "@/services/api";
 import { toast } from "sonner";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import Binance from "../assets/binance.svg";
+import MetaMask from "../assets/fox.svg";
+import CoinBase from "../assets/Coinbase.svg";
+import TrustWallet from "../assets/TrustWallet.svg";
+import { MyWalletsManagement } from "@/components/MyWalletsManagement";
 
 interface QuickActionsProps {
   email: string;
@@ -41,6 +54,10 @@ const ProfileScreen: React.FC = () => {
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
   const [isEditingMobile, setIsEditingMobile] = useState<boolean>(false);
+  const [showWalletDrawer, setShowWalletDrawer] = useState(false);
+  const [userWallets, setUserWallets] = useState<
+    Array<{ type: string; address: string; isDefault: boolean }>
+  >([]);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +67,51 @@ const ProfileScreen: React.FC = () => {
 
   const hasChanges: boolean =
     isEditingName || isEditingEmail || isEditingMobile;
+
+  // useEffect(() => {
+  //   fetchUserWallets();
+  // }, []);
+
+  // const fetchUserWallets = async () => {
+  //   try {
+  //     const response = await fetch("/api/wallet");
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setUserWallets(data.wallets);
+  //     } else {
+  //       toast.error("Failed to fetch wallets");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error fetching wallets");
+  //   }
+  // };
+
+  // const handleSetDefault = async (walletType: string) => {
+  //   try {
+  //     const response = await fetch("/api/wallet/set-default", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ type: walletType }),
+  //     });
+
+  //     if (response.ok) {
+  //       setUserWallets((prevWallets) =>
+  //         prevWallets.map((wallet) =>
+  //           wallet.type === walletType
+  //             ? { ...wallet, isDefault: true }
+  //             : { ...wallet, isDefault: false }
+  //         )
+  //       );
+  //       toast.success("Default wallet updated successfully");
+  //     } else {
+  //       toast.error("Failed to update default wallet");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error updating default wallet");
+  //   }
+  // };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
@@ -61,7 +123,7 @@ const ProfileScreen: React.FC = () => {
 
   const handleLogout = (): void => {
     try {
-      auth.logout();
+      // auth.logout();
       toast.success("Logged out successfully");
       navigate("/login-register");
     } catch (error) {
@@ -226,6 +288,12 @@ const ProfileScreen: React.FC = () => {
         <div className="flex flex-col gap-2 mx-4">
           <button
             onClick={() => navigate("/invite-and-earn")}
+            className="w-full border-2 border-[#6552FE] text-[#6552FE] py-3 rounded-full text-center font-bold text-lg"
+          >
+            View Portfolio
+          </button>
+          <button
+            onClick={() => navigate("/invite-and-earn")}
             className="w-full border-2 border-[#6552FE] text-[#FEF052] py-3 rounded-full text-center font-bold text-lg"
           >
             Invite & Earn
@@ -251,6 +319,62 @@ const ProfileScreen: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Wallet Management Drawer */}
+      <Drawer open={showWalletDrawer} onOpenChange={setShowWalletDrawer}>
+        <DrawerContent className="bg-[#1a1a1a] border-gray-800 text-white">
+          <DrawerHeader>
+            <DrawerTitle className="text-xl font-semibold">
+              Manage Wallets
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="p-4 space-y-4">
+            {userWallets.map((wallet) => (
+              <div
+                key={wallet.type}
+                className="flex items-center justify-between p-4 bg-[#262626] rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={
+                      wallet.type === "binance"
+                        ? Binance
+                        : wallet.type === "metamask"
+                        ? MetaMask
+                        : wallet.type === "coinbase"
+                        ? CoinBase
+                        : TrustWallet
+                    }
+                    alt={wallet.type}
+                    className="w-10 h-10"
+                  />
+                  <div>
+                    <p className="font-medium capitalize">{wallet.type}</p>
+                    <p className="text-sm text-gray-400">{wallet.address}</p>
+                  </div>
+                </div>
+                <button
+                  // onClick={() => handleSetDefault(wallet.type)}
+                  className={`px-4 py-2 rounded-full text-sm ${
+                    wallet.isDefault
+                      ? "bg-[#6552FE] text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                >
+                  {wallet.isDefault ? "Default" : "Set as Default"}
+                </button>
+              </div>
+            ))}
+            <Button
+              onClick={() => navigate("/add-wallet")}
+              className="w-full bg-[#6552FE] hover:bg-[#5542EE] text-white"
+            >
+              <Plus size={20} className="mr-2" />
+              Add New Wallet
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-[#6552FE] py-2 flex justify-around items-center z-50 rounded-t-xl shadow-inner">
@@ -283,10 +407,6 @@ const ProfileScreen: React.FC = () => {
 
 export default ProfileScreen;
 
-const SeparatorNew: React.FC = () => (
-  <div className="h-10 w-px bg-gray-400 opacity-30"></div>
-);
-
 const QuickActions: React.FC<QuickActionsProps> = ({
   email,
   mobile,
@@ -301,7 +421,8 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   setIsEditingEmail,
   setIsEditingMobile,
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  // const [showWalletDrawer, setShowWalletDrawer] = useState(false);
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -389,8 +510,11 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       </div>
 
       {/* Wallet Section */}
-      <div className="bg-gradient-to-r from-[#262626] to-[#1f1f1f] rounded-xl p-4 border border-gray-600">
-        <div className="flex items-center justify-center gap-3">
+      <div
+        className="bg-gradient-to-r from-[#262626] to-[#1f1f1f] rounded-xl p-4 border border-gray-600 cursor-pointer hover:bg-[#2a2a2a] transition-colors"
+        // onClick={() => setShowWalletDrawer(true)}
+      >
+        {/* <div className="flex items-center justify-center gap-3">
           <div className="bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 rounded-xl shadow-md">
             <Wallet className="w-5 h-5 text-white" />
           </div>
@@ -400,7 +524,8 @@ const QuickActions: React.FC<QuickActionsProps> = ({
             </span>
             <span className="text-xs text-gray-400">Tap to manage</span>
           </div>
-        </div>
+        </div> */}
+        <MyWalletsManagement />
       </div>
     </div>
   );

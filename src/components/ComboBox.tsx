@@ -1,7 +1,5 @@
-"use client";
-
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,34 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import USDTLogo from "../assets/usdt logo.svg";
-import BNBLogo from "../assets/bnb logo.svg";
-import Etherium from "../assets/etherium logo.svg";
-import Bitcoin from "../assets/Bitcoin Logo.svg";
-
-const CryptoCurrencyWallets = [
-  {
-    value: "usdt",
-    label: "USDT",
-    icon: USDTLogo,
-  },
-  {
-    value: "etherium",
-    label: "Ethereum",
-    icon: Etherium,
-  },
-  {
-    value: "bitcoin",
-    label: "Bitcoin",
-    icon: Bitcoin,
-  },
-  {
-    value: "bnb",
-    label: "BNB",
-    icon: BNBLogo,
-  },
-];
 
 const Combobox = ({
   placeholder,
@@ -68,14 +38,14 @@ const Combobox = ({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="bg-[#171717] text-gray-400 border-none max-w-[250px] mx-auto"
+        className="bg-[#171717] hover:text-black text-white border-none max-w-[250px] mx-auto"
         asChild
       >
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="min-w-[230px] h-16 justify-center text-md"
+          className="group min-w-[230px] h-16 justify-center text-md bg-[#171717] border-none mx-auto"
         >
           {selectedWallet ? (
             <div className="flex items-center gap-2">
@@ -84,10 +54,12 @@ const Combobox = ({
                 alt=""
                 className="h-[55px] w-[55px]"
               />
-              <span className="text-white">{selectedWallet.label}</span>
+              <span className="text-white group-hover:text-black">
+                {selectedWallet.label}
+              </span>
             </div>
           ) : (
-            placeholder
+            <span className="group-hover:text-black">{placeholder}</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -107,7 +79,7 @@ const Combobox = ({
                     onChange?.(newValue); // ✅ Inform parent
                     setOpen(false);
                   }}
-                  className="text-white hover:bg-[#2a2a2a] cursor-pointer"
+                  className="text-white hover:text-black hover:bg-[#2a2a2a] cursor-pointer"
                 >
                   <div className="flex items-center gap-3 w-full">
                     <img

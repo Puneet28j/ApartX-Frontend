@@ -4,6 +4,7 @@ import TransferCard from "../assets/Subtract.svg";
 import { useNavigate } from "react-router-dom";
 import Line from "../assets/Line 3 (1).svg";
 import { Button } from "@/components/ui/button";
+import foxImage from "../assets/fox.svg";
 
 const TransferReceipt = () => {
   const navigate = useNavigate();
@@ -66,6 +67,9 @@ const TransferReceipt = () => {
                 <p className="text-[10px] sm:text-xs text-black">
                   Your transfer has been successfully done.
                 </p>
+                <p className="text-[14px] sm:text-xs font-bold  text-black">
+                  Transaction Id :6tr2yg3xyt463xb3x3
+                </p>
                 <p className="mt-1 text-base sm:text-base font-bold text-black">
                   Total Transfer
                 </p>
@@ -76,7 +80,12 @@ const TransferReceipt = () => {
             </div>
 
             {/* Bottom Section - Vertically centered with responsive text */}
-            <div className="flex-[0.47] flex flex-col justify-center">
+            <div className="flex-[0.45] flex flex-col  justify-center">
+              <div className="text-center w-full">In wallet</div>
+              <div className="bg-black w-[160px] mb-2 items-center rounded-lg justify-evenly h-[50px] mx-auto flex">
+                <img className="h-[50px] w-[50px]" src={foxImage} alt="" />
+                <div className="text-white text-[12px]">Metamask</div>
+              </div>
               <p className="text-black text-[10px] sm:text-xs font-semibold mb-1">
                 Transfer Destination
               </p>
@@ -85,7 +94,7 @@ const TransferReceipt = () => {
               </div>
               <Button
                 onClick={() => navigate("/main-screen")}
-                className="mt-2 sm:mt-3 w-full bg-green-600 text-white rounded-[16px] hover:bg-green-700 text-xs sm:text-sm py-1"
+                className="mt-2 sm:mt-3 w-full  bg-green-600 text-white rounded-[16px] hover:bg-green-700 text-xs sm:text-sm py-1"
               >
                 Done
               </Button>

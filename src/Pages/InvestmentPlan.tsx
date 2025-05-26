@@ -9,7 +9,7 @@ import Bitcoin from "../assets/Bitcoin Logo.svg";
 import SelectComponent from "@/components/Select";
 import USDTLOGO from "../assets/usdt logo.svg";
 import { toast } from "sonner";
-import api from "@/services/api";
+// import api from "@/services/api";
 
 // Define types
 type Wallet = {
@@ -134,15 +134,15 @@ const InvestmentPlan = () => {
 
     setIsLoading(true);
     try {
-      const response = await api.post("/investment/create", {
-        planName: selectedTariff.label,
-        amount: amount,
-      });
+      // const response = await api.post("/investment/create", {
+      //   planName: selectedTariff.label,
+      //   amount: amount,
+      // });
 
-      if (response.data) {
-        toast.success("Investment created successfully!");
-        navigate("/profile"); // Navigate back to profile after successful investment
-      }
+      // if (response.data) {
+      //   toast.success("Investment created successfully!");
+      navigate("/profile"); // Navigate back to profile after successful investment
+      // }
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Failed to create investment"

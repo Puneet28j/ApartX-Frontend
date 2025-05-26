@@ -16,7 +16,6 @@
         "20%,50%": { opacity: "0" },
     }
 
-  
 /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
 .your-scroll-container::-webkit-scrollbar {
   display: none;
@@ -27,9 +26,6 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */ 
 }
-
-
-
 
 @font-face {
   font-family: Poppins;
@@ -45,8 +41,6 @@
   font-display: swap;
   src: url("../src/assets/fonts/RacingSansOne-Regular.ttf") format("truetype");
 }
-
-
 
 @layer base {
   :root {
@@ -74,7 +68,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    
+
   }
 
   .dark {
@@ -104,7 +98,6 @@
     --chart-5: 340 75% 55%;
     }
 }
-
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -212,7 +205,6 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
-
 
 @layer base {
   * {
