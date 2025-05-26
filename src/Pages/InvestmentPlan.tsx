@@ -2,21 +2,10 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import USDTLogo from "../assets/usdt logo.svg";
-import BNBLogo from "../assets/bnb logo.svg";
-import Etherium from "../assets/etherium logo.svg";
-import Bitcoin from "../assets/Bitcoin Logo.svg";
+
 import SelectComponent from "@/components/Select";
 import USDTLOGO from "../assets/usdt logo.svg";
 import { toast } from "sonner";
-// import api from "@/services/api";
-
-// Define types
-type Wallet = {
-  value: string;
-  label: string;
-  icon: string;
-};
 
 type Tariff = {
   value: string;
@@ -26,13 +15,6 @@ type Tariff = {
   minAmount: number;
   maxAmount: number;
 };
-
-const wallets: Wallet[] = [
-  { value: "usdt", label: "USDT", icon: USDTLogo },
-  { value: "etherium", label: "Etherium", icon: Etherium },
-  { value: "bitcoin", label: "Bitcoin", icon: Bitcoin },
-  { value: "bnb", label: "BNB", icon: BNBLogo },
-];
 
 const tariffs: Tariff[] = [
   {
@@ -244,7 +226,7 @@ const InvestmentPlan = () => {
               : "bg-[#7553FF]"
           }`}
           disabled={!!error || amount < selectedTariff.minAmount || isLoading}
-          // onClick={handleInvestment}
+          onClick={handleInvestment}
         >
           {isLoading ? "Processing..." : "Continue"}
         </Button>

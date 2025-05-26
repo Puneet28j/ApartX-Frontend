@@ -10,7 +10,6 @@ import Binance from "../assets/binance.svg";
 import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
-import { useLocation } from "react-router-dom";
 
 const wallets2 = [
   { value: "binance", label: "Binance", icon: Binance },

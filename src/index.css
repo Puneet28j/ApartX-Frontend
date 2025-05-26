@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "react-phone-input-2/lib/style.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Removed invalid @custom-variant dark (&:is(.dark *)); */
 
 @theme {
   --font-display: "Poppins", "sans-serif";

@@ -5,7 +5,6 @@ import "react-phone-input-2/lib/style.css";
 // import SmallLine from "../assets/smallLine.svg"; // Placeholder for the small line image
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react"; // Optional: lucide icon
-import { auth } from "@/services/api";
 import { toast } from "sonner";
 
 const Register = () => {

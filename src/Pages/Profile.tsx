@@ -1,34 +1,32 @@
-import { useRef, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { DrawerDemo } from "@/components/Drawer";
 import {
-  Home,
-  Wallet,
-  LogOut,
-  Mail,
-  Phone,
-  User,
   ArrowLeft,
   Camera,
-  Pencil,
   Check,
-  X,
+  Home,
+  LogOut,
+  Mail,
+  Pencil,
+  Phone,
   Plus,
+  User,
+  X,
 } from "lucide-react";
-import { DrawerDemo } from "@/components/Drawer";
-// import { auth } from "@/services/api";
-import { toast } from "sonner";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MyWalletsManagement } from "@/components/MyWalletsManagement";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import Binance from "../assets/binance.svg";
-import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
+import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
-import { MyWalletsManagement } from "@/components/MyWalletsManagement";
 
 interface QuickActionsProps {
   email: string;
@@ -44,7 +42,28 @@ interface QuickActionsProps {
   setIsEditingEmail: (editing: boolean) => void;
   setIsEditingMobile: (editing: boolean) => void;
 }
-
+const userWallets = [
+  {
+    type: "binance",
+    address: "0x1234567890abcdef1234567890abcdef12345678",
+    isDefault: true,
+  },
+  {
+    type: "metamask",
+    address: "0xabcdef1234567890abcdef1234567890abcdef12",
+    isDefault: false,
+  },
+  {
+    type: "coinbase",
+    address: "0x7890abcdef1234567890abcdef12345678901234",
+    isDefault: false,
+  },
+  {
+    type: "trustwallet",
+    address: "0x567890abcdef1234567890abcdef123456789012",
+    isDefault: false,
+  },
+];
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("John");
@@ -55,9 +74,7 @@ const ProfileScreen: React.FC = () => {
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
   const [isEditingMobile, setIsEditingMobile] = useState<boolean>(false);
   const [showWalletDrawer, setShowWalletDrawer] = useState(false);
-  const [userWallets, setUserWallets] = useState<
-    Array<{ type: string; address: string; isDefault: boolean }>
-  >([]);
+
   const nameInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);

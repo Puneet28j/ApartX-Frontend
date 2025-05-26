@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+// import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -36,7 +36,7 @@ const wallets = [
 ];
 
 export function DrawerDemo() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
 

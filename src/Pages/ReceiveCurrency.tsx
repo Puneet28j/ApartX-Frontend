@@ -1,37 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import "react-phone-input-2/lib/style.css";
 import { ArrowLeft, User2Icon } from "lucide-react";
-import Combobox from "@/components/ComboBox";
 import { useState } from "react";
-import USDTLogo from "../assets/usdt logo.svg";
-import BNBLogo from "../assets/bnb logo.svg";
-import Etherium from "../assets/etherium logo.svg";
-import Bitcoin from "../assets/Bitcoin Logo.svg";
+import "react-phone-input-2/lib/style.css";
+import { useNavigate } from "react-router-dom";
 import USDTLOGO from "../assets/usdt logo.svg";
-
-const wallets = [
-  {
-    value: "usdt",
-    label: "USDT",
-    icon: USDTLogo,
-  },
-  {
-    value: "etherium",
-    label: "Etherium",
-    icon: Etherium,
-  },
-  {
-    value: "bitcoin",
-    label: "Bitcoin",
-    icon: Bitcoin,
-  },
-  {
-    value: "bnb",
-    label: "BNB",
-    icon: BNBLogo,
-  },
-];
 
 const ReceiveCurrency = () => {
   const navigate = useNavigate();
