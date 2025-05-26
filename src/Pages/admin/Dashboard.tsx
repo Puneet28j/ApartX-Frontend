@@ -82,7 +82,7 @@ export const renderDashboard = () => (
     {/* Stats Cards */}
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4  md:gap-6">
       <Card className="shadow-2xl">
-        <CardContent className="p-6">
+        <CardContent className="px-6 ">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-orange-600" />
@@ -97,7 +97,7 @@ export const renderDashboard = () => (
       </Card>
 
       <Card className="shadow-2xl">
-        <CardContent className="p-6">
+        <CardContent className="px-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
               <ArrowDownLeft className="w-6 h-6 text-green-600" />
@@ -112,7 +112,7 @@ export const renderDashboard = () => (
       </Card>
 
       <Card className="shadow-2xl">
-        <CardContent className="p-6">
+        <CardContent className="px-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
               <ArrowUpRight className="w-6 h-6 text-red-600" />
@@ -127,7 +127,7 @@ export const renderDashboard = () => (
       </Card>
 
       <Card className="shadow-2xl">
-        <CardContent className="p-6">
+        <CardContent className="px-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-blue-600" />
@@ -142,9 +142,9 @@ export const renderDashboard = () => (
       </Card>
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
       {/* Wallet Statistics */}
-      <Card>
+      <Card className="col-span-1 lg:col-span-1 w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Wallet Statistic</CardTitle>
           <Button variant="ghost" size="sm">
@@ -175,7 +175,7 @@ export const renderDashboard = () => (
       </Card>
 
       {/* Recent Investment */}
-      <Card className="col-span-2">
+      <Card className="col-span-1 lg:col-span-3">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Recent Investment</CardTitle>
           <Button variant="ghost" size="sm">

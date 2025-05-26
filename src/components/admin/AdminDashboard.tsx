@@ -1,4 +1,7 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import logo from "@/assets/ApartX 1.svg";
+import Title from "@/assets/Group 48095580.svg";
+import UserImage from "@/assets/virat kohli png.jfif";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { renderDashboard } from "@/Pages/admin/Dashboard";
@@ -24,6 +27,7 @@ import {
   Search,
   Settings,
   TrendingUp,
+  User,
   Users,
   Wallet,
 } from "lucide-react";
@@ -72,7 +76,7 @@ const Dashboard = () => {
         return renderSettings();
       case "LogOut":
         return (
-          <div className="flex items-center justify-center h-96">
+          <div className="flex  items-center justify-center h-96">
             <Card className="w-96">
               <CardContent className="p-8 text-center">
                 <LogOut className="w-16 h-16 mx-auto mb-4 text-gray-400" />
@@ -102,7 +106,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header
-        className={`fixed top-0 h-16 bg-white border-b z-50 transition-all duration-300
+        className={`fixed top-0 font-display h-16 bg-white border-b z-50 transition-all duration-300
         left-0 right-0
         ${isSidebarOpen ? "md:left-64" : "md:left-20"}
         md:right-0
@@ -144,20 +148,55 @@ const Dashboard = () => {
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 font-display bg-black bg-opacity-50 z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed sm:top-16 md:top-0 sm:rounded-tr-2xl md:rounded-none left-0 bottom-0 bg-white border-r transition-all duration-300 z-40
+        className={`fixed sm:top-16 md:top-0 font-display sm:rounded-tr-2xl md:rounded-none left-0 bottom-0 bg-white border-r transition-all duration-300 z-40
           ${isSidebarOpen ? "w-64" : "w-20"}
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
         `}
       >
-        <nav className="p-4 space-y-2">
+        <div
+          className={`flex items-center justify-center ${
+            !isSidebarOpen ? "flex-col gap-0" : "flex"
+          }  gap-0.5`}
+        >
+          <img className="h-24 w-24" src={logo} alt="" />
+          <img className=" w-32" src={Title} alt="" />
+        </div>
+        <Avatar
+          className={`${
+            isSidebarOpen ? "h-[93px] w-[93px]" : "h-[30px] w-[30px]"
+          } mx-auto my-2 border-1`}
+        >
+          <AvatarImage
+            src={UserImage}
+            alt="User Avatar"
+            className={`${
+              isSidebarOpen ? "h-[93px] w-[93px]" : "h-[30px] w-[30px]"
+            } mx-auto my-2 transition-all duration-300 object-contain `}
+          />
+
+          <AvatarFallback>
+            <User
+              className={`${
+                isSidebarOpen ? "h-[93px] w-[93px]" : "h-[30px] w-[30px]"
+              }`}
+            />
+          </AvatarFallback>
+        </Avatar>
+        {isSidebarOpen && (
+          <div className="mx-auto text-center flex flex-col text-lg ">
+            Hello,William
+            <span className="text-[15px] font-[400px]">admin</span>
+          </div>
+        )}
+        <nav className="p-4 space-y-1">
           {sidebarItems.map((item) => (
             <Button
               key={item.id}
@@ -181,7 +220,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main
-        className={`transition-all duration-300 pt-16 ${
+        className={`transition-all duration-300 font-display pt-16 ${
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
         }`}
       >

@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import clipboard from "../assets/clipboard.svg";
 import inviteearn from "../assets/InviteEarn.svg";
+import CopyButton from "../components/CopyButton";
 
 const referredFriends = Array(5).fill({
   mobile: "9456789658",
@@ -11,6 +11,8 @@ const referredFriends = Array(5).fill({
 
 const InviteAndEarn = () => {
   const navigate = useNavigate();
+  const referralCode = "VU5AXIJT";
+  const referralLink = "http://referdemolink.com/demo/VU5AXIJT";
 
   return (
     <div className="relative flex flex-col h-screen max-h-screen bg-black text-white overflow-hidden">
@@ -53,31 +55,19 @@ const InviteAndEarn = () => {
         </div>
 
         {/* Code Section */}
-        <div className="text-center mt-1 sm:mt-6 font-bold text-lg">
-          Your Code
-        </div>
-        <div className="mx-auto py-2 mt-2 w-[284px] h-[40px] bg-[#4C4343] rounded-md flex items-center justify-between px-4">
-          <div className="text-white leading-[32px] text-[28px] font-medium mx-auto">
-            VU5AXIJT
+        <div className="mx-auto py-2 mt-2 w-[200px] h-[40px] text-center bg-[#4C4343] rounded-md flex items-center justify-center px-4">
+          <div className="text-white  leading-[32px] text-[28px] font-medium">
+            {referralCode}
           </div>
-          <img
-            src={clipboard}
-            className="w-[25px] h-[30px] ml-2"
-            alt="Clipboard Icon"
-          />
+          <CopyButton textToCopy={referralCode} />
         </div>
 
         {/* Share Link */}
-        <div className="text-center mt-6 font-bold text-lg">Share link:</div>
-        <div className="ml-4 mt-2 flex items-center space-x-2 px-3 ">
-          <div className="w-[90%] h-10 px-1 flex items-center text-[14px] text-black bg-white rounded-md">
-            http://referdemolink.com/demo/VU5AXIJT
+        <div className="ml-1 mt-2 flex items-center space-x-2 px-3">
+          <div className="w-[90%] h-10 px-3 flex items-center text-[14px] text-black bg-white rounded-md">
+            {referralLink}
           </div>
-          <img
-            src={clipboard}
-            className="w-[20px] h-[20px]"
-            alt="Clipboard Icon"
-          />
+          <CopyButton textToCopy={referralLink} />
         </div>
       </div>
 
