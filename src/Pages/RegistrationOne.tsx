@@ -6,6 +6,9 @@ import "react-phone-input-2/lib/style.css";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react"; // Optional: lucide icon
 import { toast } from "sonner";
+import axios from "axios";
+
+const API_URL = "http://localhost:5000/api/auth";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,28 +17,32 @@ const Register = () => {
   const [referralId, setReferralId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async () => {
-    try {
-      // setLoading(true);
-      // if (!phone || !password) {
-      //   toast.error("Please fill in all required fields");
-      //   return;
-      // }
+const handleRegister = async () => {
+  try {
+    setLoading(true);
 
-      // const response = await auth.register({
-      //   phoneNumber: phone,
-      //   password,
-      //   referralCode: referralId || undefined,
-      // });
-
-      // toast.success("Registration successful");
-      navigate("/login-register");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Registration failed");
-    } finally {
-      setLoading(false);
+    if (!phone || !password || !referralId) {
+      toast.error("All fields are required");
+      return;
     }
-  };
+
+    const formattedMobile = phone.startsWith("+") ? phone : `+${phone}`;
+
+    const response = await axios.post(`${API_URL}/register`, {
+      mobile: formattedMobile,
+      password: password,
+      referralCode: referralId
+    });
+
+    toast.success(response.data.message || "Registration successful");
+    navigate("/login-register");
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707]  py-6 ">
