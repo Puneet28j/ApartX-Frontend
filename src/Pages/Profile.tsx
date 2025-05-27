@@ -306,7 +306,7 @@ const ProfileScreen: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex flex-col gap-2 mx-4">
           <button
-            onClick={() => navigate("/invite-and-earn")}
+            onClick={() => navigate("/portfolio")}
             className="w-full border-2 border-[#6552FE] text-[#6552FE] py-3 rounded-full text-center font-bold text-lg"
           >
             View Portfolio
