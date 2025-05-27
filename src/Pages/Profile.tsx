@@ -27,6 +27,8 @@ import Binance from "../assets/binance.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
+import axios from "axios";
+
 
 interface QuickActionsProps {
   email: string;
