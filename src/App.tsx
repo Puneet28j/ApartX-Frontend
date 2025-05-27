@@ -187,7 +187,10 @@ const App = () => {
         />
 
         {/* Admin Dashboard Route - No MobileLayout wrapper */}
-        <Route path="/admin/*" element={<Dashboard />} />
+        <Route path="/admin" element={<Dashboard />}>
+          <Route path=":tab" element={<Dashboard />} />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
 
         {/* Default route */}
         <Route

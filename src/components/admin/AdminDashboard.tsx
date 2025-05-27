@@ -1,19 +1,16 @@
 import logo from "@/assets/ApartX 1.svg";
 import Title from "@/assets/Group 48095580.svg";
-import UserImage from "@/assets/virat kohli png.jfif";
+import UserImage from "@/assets/viratnew.avif";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { renderDashboard } from "@/Pages/admin/Dashboard";
-import { renderDeposit } from "@/Pages/admin/Deposit";
-import { renderInvestments } from "@/Pages/admin/Investments";
+import { renderDashBoardTabs } from "@/Pages/admin/DashboardTabs";
 import { renderInvestors } from "@/Pages/admin/Investors";
 import { renderPlans } from "@/Pages/admin/Plans";
 import { renderReferralsHistory } from "@/Pages/admin/ReferralsHistory";
 import { renderSettings } from "@/Pages/admin/Settings";
-import { renderTransactions } from "@/Pages/admin/Transactions";
 import { renderWalletSetting } from "@/Pages/admin/WalletSetting";
-import { renderWithdrawals } from "@/Pages/admin/Withdrawals";
 import {
   ArrowDownLeft,
   ArrowUpDown,
@@ -31,10 +28,119 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+const data = [
+  {
+    id: 1,
+    type: "Deposit",
+    plan: "Basic Plan",
+    profileName: "John Doe",
+    mobile: "+1234567890",
+    amount: "$500.00",
+    dateTime: "2023-10-01 12:00 PM",
+    status: "Completed",
+    remarks: "Deposit successful",
+  },
+  {
+    id: 2,
+    type: "Withdrawal",
+    plan: "Premium Plan",
+    profileName: "Jane Smith",
+    mobile: "+0987654321",
+    amount: "$1000.00",
+    dateTime: "2023-10-02 1:30 PM",
+    status: "Pending",
+    remarks: "Withdrawal in process",
+  },
+  {
+    id: 3,
+    type: "Deposit",
+    plan: "Standard Plan",
+    profileName: "Alice Johnson",
+    mobile: "+1122334455",
+    amount: "$750.00",
+    dateTime: "2023-10-03 2:45 PM",
+    status: "Completed",
+    remarks: "Deposit successful",
+  },
+  {
+    id: 4,
+    type: "Withdrawal",
+    plan: "Basic Plan",
+    profileName: "Bob Brown",
+    mobile: "+5566778899",
+    amount: "$300.00",
+    dateTime: "2023-10-04 3:15 PM",
+    status: "Failed",
+    remarks: "Insufficient funds",
+  },
+  {
+    id: 5,
+    type: "Deposit",
+    plan: "Premium Plan",
+    profileName: "Charlie Davis",
+    mobile: "+2233445566",
+    amount: "$1200.00",
+    dateTime: "2023-10-05 4:00 PM",
+    status: "Completed",
+    remarks: "Deposit successful",
+  },
 
+  {
+    id: 6,
+    type: "Withdrawal",
+    plan: "Standard Plan",
+    profileName: "Eve Wilson",
+    mobile: "+3344556677",
+    amount: "$800.00",
+    dateTime: "2023-10-06 5:30 PM",
+    status: "Pending",
+    remarks: "Withdrawal in process",
+  },
+  {
+    id: 7,
+    type: "Deposit",
+    plan: "Basic Plan",
+    profileName: "Frank Miller",
+    mobile: "+4455667788",
+    amount: "$600.00",
+    dateTime: "2023-10-07 6:15 PM",
+    status: "Completed",
+    remarks: "Deposit successful",
+  },
+  {
+    id: 8,
+    type: "Withdrawal",
+    plan: "Premium Plan",
+    profileName: "Grace Lee",
+    mobile: "+9988776655",
+    amount: "$400.00",
+    dateTime: "2023-10-08 7:45 PM",
+    status: "Failed",
+    remarks: "Insufficient funds",
+  },
+];
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("Dashboard");
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Get the current tab from URL, remove the '/admin/' prefix and capitalize first letter
+  const getCurrentTab = () => {
+    const path = location.pathname.split("/admin/")[1] || "dashboard";
+    // Convert known path values to match the exact IDs
+    const pathMap: { [key: string]: string } = {
+      walletsetting: "WalletSetting",
+      referralshistory: "ReferralsHistory",
+      logout: "LogOut",
+      dashboard: "Dashboard",
+    };
+    return (
+      pathMap[path.toLowerCase()] ||
+      path.charAt(0).toUpperCase() + path.slice(1)
+    );
+  };
+
+  const [activeTab, setActiveTab] = useState(getCurrentTab());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -59,13 +165,13 @@ const Dashboard = () => {
       case "WalletSetting":
         return renderWalletSetting();
       case "Deposit":
-        return renderDeposit();
+        return renderDashBoardTabs({ title: "Deposit", data });
       case "Withdrawals":
-        return renderWithdrawals();
+        return renderDashBoardTabs({ title: "Withdrawals", data });
       case "Investments":
-        return renderInvestments();
+        return renderDashBoardTabs({ title: "Investments", data });
       case "Transaction":
-        return renderTransactions();
+        return renderDashBoardTabs({ title: "Transaction", data });
       case "Investors":
         return renderInvestors();
       case "Plans":
@@ -98,7 +204,23 @@ const Dashboard = () => {
           </div>
         );
       default:
+        console.log("Current activeTab:", activeTab);
         return renderDashboard();
+    }
+  };
+
+  // Update activeTab when URL changes
+  useEffect(() => {
+    setActiveTab(getCurrentTab());
+  }, [location.pathname]);
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    // Convert the URL to lowercase for consistency
+    const urlPath = tabId.toLowerCase();
+    navigate(`/admin/${urlPath}`);
+    if (window.innerWidth < 768) {
+      setIsMobileMenuOpen(false);
     }
   };
 
@@ -148,17 +270,25 @@ const Dashboard = () => {
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 font-display bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 font-display bg-transparent bg-opacity-50 z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed sm:top-16 md:top-0 font-display sm:rounded-tr-2xl md:rounded-none left-0 bottom-0 bg-white border-r transition-all duration-300 z-40
+        className={`fixed font-display bg-white border-r transition-all duration-300 z-40
           ${isSidebarOpen ? "w-64" : "w-20"}
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0
+          
+          // Mobile specific styles
+          top-16 bottom-0
+          
+          // Desktop specific styles
+          md:top-0 md:bottom-0 md:translate-x-0
+          
+          // Shared styles
+          left-0
         `}
       >
         <div
@@ -171,7 +301,9 @@ const Dashboard = () => {
         </div>
         <Avatar
           className={`${
-            isSidebarOpen ? "h-[93px] w-[93px]" : "h-[30px] w-[30px]"
+            isSidebarOpen && !isMobileMenuOpen
+              ? "h-[93px] w-[93px]"
+              : "h-[30px] w-[30px]"
           } mx-auto my-2 border-1`}
         >
           <AvatarImage
@@ -196,7 +328,7 @@ const Dashboard = () => {
             <span className="text-[15px] font-[400px]">admin</span>
           </div>
         )}
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 ">
           {sidebarItems.map((item) => (
             <Button
               key={item.id}
@@ -204,14 +336,9 @@ const Dashboard = () => {
               className={`w-full justify-start ${
                 isSidebarOpen ? "px-4" : "px-2"
               }`}
-              onClick={() => {
-                setActiveTab(item.id);
-                if (window.innerWidth < 768) {
-                  setIsMobileMenuOpen(false);
-                }
-              }}
+              onClick={() => handleTabChange(item.id)}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-10 w-10" />
               {isSidebarOpen && <span className="ml-3">{item.label}</span>}
             </Button>
           ))}
