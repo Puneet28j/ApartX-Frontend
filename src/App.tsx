@@ -28,6 +28,8 @@ import SendCurrency from "./Pages/SendCurrency";
 import SplashScreen from "./Pages/SplashScreen";
 import TransferReceipt from "./Pages/TransferReceipt";
 import Dashboard from "./components/admin/AdminDashboard";
+import Portfolio from "./Pages/Portfolio";
+import Setmpin from "./Pages/SetMpin";
 
 const App = () => {
   return (
@@ -182,6 +184,22 @@ const App = () => {
           element={
             <MobileLayout>
               <InvestmentPlan />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/portfolio"
+          element={
+            <MobileLayout>
+              <Portfolio />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/set-mpin"
+          element={
+            <MobileLayout>
+              <Setmpin />
             </MobileLayout>
           }
         />
