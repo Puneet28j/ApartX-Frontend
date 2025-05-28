@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import axios from "axios";
+
+const API_URL = "http://localhost:5000/api/auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -13,27 +16,51 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    try {
-      // setLoading(true);
-      // if (!phoneNumber || !password) {
-      //   toast.error("Please fill in all fields");
-      //   return;
-      // }
+const handleLogin = async () => {
+  try {
+    setLoading(true);
 
-      // const response = await auth.login({
-      //   phoneNumber,
-      //   password,
-      // });
-
-      toast.success("Login successful");
-      navigate("/main-screen");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
+    if (!phoneNumber || !password) {
+      toast.error("Please fill in all fields");
+      return;
     }
-  };
+
+    const formattedMobile = phoneNumber.startsWith("+")
+      ? phoneNumber
+      : `+${phoneNumber}`;
+
+    const deviceId = window.navigator.userAgent; // or a UUID from storage
+
+    const response = await axios.post(`${API_URL}/login`, {
+      mobile: formattedMobile,
+      password: password,
+      deviceId: deviceId,
+    });
+
+    const data = response.data;
+
+    // Save token to localStorage
+    localStorage.setItem("token", data.token);
+
+    // if (data.requireMpin) {
+    //   toast.info("Please set MPIN to continue");
+    //   navigate("/set-mpin");
+    // } else {
+      toast.success("Login successful");
+
+      if (data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/main-screen");
+      }
+    // }
+
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-3 py-6">
