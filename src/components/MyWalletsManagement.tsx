@@ -80,7 +80,6 @@ export const MyWalletsManagement = () => {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(
     dummyWallets.find((w) => w.isDefault)?.id || null
   );
-  console.log(selectedWallet);
   const handleSetDefault = (walletId: string) => {
     setUserWallets((prevWallets) =>
       prevWallets.map((wallet) => ({

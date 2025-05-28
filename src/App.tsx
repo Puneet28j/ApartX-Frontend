@@ -22,7 +22,6 @@ import ProfileScreen from "./Pages/Profile";
 import ReceiveCurrency from "./Pages/ReceiveCurrency";
 import ReceiveFinal from "./Pages/ReceiveFinal";
 import RegistrationOne from "./Pages/RegistrationOne";
-import RegistrationTwo from "./Pages/RegistrationTwo";
 import RequestSubmitted from "./Pages/RequestSubmitted";
 import SendCurrency from "./Pages/SendCurrency";
 import SplashScreen from "./Pages/SplashScreen";
@@ -30,6 +29,7 @@ import TransferReceipt from "./Pages/TransferReceipt";
 import Dashboard from "./components/admin/AdminDashboard";
 import Portfolio from "./Pages/Portfolio";
 import Setmpin from "./Pages/SetMpin";
+import InvestmentPlanFinal from "./Pages/InvestmentPlanFinal";
 
 const App = () => {
   return (
@@ -99,14 +99,7 @@ const App = () => {
             </MobileLayout>
           }
         />
-        <Route
-          path="/verify-otp"
-          element={
-            <MobileLayout>
-              <RegistrationTwo />
-            </MobileLayout>
-          }
-        />
+
         <Route
           path="/main-screen"
           element={
@@ -184,6 +177,14 @@ const App = () => {
           element={
             <MobileLayout>
               <InvestmentPlan />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/investment-plan-final"
+          element={
+            <MobileLayout>
+              <InvestmentPlanFinal />
             </MobileLayout>
           }
         />

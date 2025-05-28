@@ -41,10 +41,53 @@ const mockPortfolioData: PortfolioData[] = [
     date: "2023-10-25",
     amount: 10000,
   },
+  {
+    id: "7",
+    plan: "Platinum Plan",
+    date: "2023-10-30",
+    amount: 15000,
+  },
+  {
+    id: "8",
+    plan: "Master Plan",
+    date: "2023-11-01",
+    amount: -20000,
+  },
+  {
+    id: "9",
+    plan: "Gold Plan",
+    date: "2023-11-05",
+    amount: 5000,
+  },
+  {
+    id: "10",
+    plan: "Diamond Plan",
+    date: "2023-11-10",
+    amount: 10000,
+  },
+  {
+    id: "11",
+    plan: "Platinum Plan",
+    date: "2023-11-15",
+    amount: 15000,
+  },
+  {
+    id: "12",
+    plan: "Master Plan",
+    date: "2023-11-20",
+    amount: -20000,
+  },
 ];
 
 const Portfolio = () => {
   const navigate = useNavigate();
+
+  // Calculate total wallet amount from portfolio data
+  const totalWallet = mockPortfolioData.reduce(
+    (sum, item) => sum + item.amount,
+    0
+  );
+
   return (
     <div className="relative flex flex-col h-screen max-h-screen bg-black text-white">
       {/* Fixed Background Image */}
@@ -61,10 +104,30 @@ const Portfolio = () => {
           <ArrowLeft size={20} className="h-8 w-8 text-white" />
         </button>
       </div>
-      <div className="text-[24px] z-10 mt-[80px] ml-3">Portfolio</div>
+
+      {/* Wallet Amount Display */}
+      <div className="relative z-20 text-center mt-4">
+        <p className="text-gray-200 text-sm">Wallet Balance</p>
+        <h1 className="text-3xl font-bold text-white">
+          {totalWallet.toLocaleString()}
+        </h1>
+      </div>
+
+      <div className="text-[24px] z-10 mt-[20px] ml-3">Portfolio</div>
+
+      {/* Column Headers */}
+      <div className="relative z-20 grid grid-cols-3 px-4 py-3 bg-gray-800 rounded-t-lg mt-4 mx-2">
+        <div className="text-gray-300 font-medium text-sm">Plan</div>
+        <div className="text-gray-300 font-medium text-sm text-center">
+          Invest Date
+        </div>
+        <div className="text-gray-300 font-medium text-sm text-right">
+          Amount
+        </div>
+      </div>
 
       {/* Scrollable Content */}
-      <div className="relative z-20 flex-1 mt-[20px] overflow-y-auto px-2 pb-32">
+      <div className="relative z-20 flex-1 mt-0 overflow-y-auto px-2 pb-32">
         <PortfolioList portfolioData={mockPortfolioData} />
       </div>
 
@@ -90,7 +153,8 @@ const Portfolio = () => {
         >
           <img src={ReferAndEarn} alt="Invite & Earn" />
           <span className="text-[10px] text-center text-white leading-tight">
-            Invite &<br />
+            Invite &
+            <br />
             Earn
           </span>
         </Button>

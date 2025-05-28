@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import SelectComponent from "@/components/Select";
 import USDTLOGO from "../assets/usdt logo.svg";
-import { toast } from "sonner";
 
 type Tariff = {
   value: string;
@@ -56,7 +55,7 @@ const InvestmentPlan = () => {
   const [selectedTariff, setSelectedTariff] = useState<Tariff>(tariffs[0]);
   const [amount, setAmount] = useState<number>(selectedTariff.minAmount);
   const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   // Validate the amount based on tariff limits
   const validateAmount = (
@@ -114,24 +113,13 @@ const InvestmentPlan = () => {
       return;
     }
 
-    setIsLoading(true);
-    try {
-      // const response = await api.post("/investment/create", {
-      //   planName: selectedTariff.label,
-      //   amount: amount,
-      // });
-
-      // if (response.data) {
-      //   toast.success("Investment created successfully!");
-      navigate("/profile"); // Navigate back to profile after successful investment
-      // }
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Failed to create investment"
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    // Instead of processing here, pass the data to final component
+    navigate("/investment-plan-final", {
+      state: {
+        selectedTariff,
+        amount,
+      },
+    });
   };
 
   return (
@@ -221,14 +209,16 @@ const InvestmentPlan = () => {
       <div className="absolute bottom-4 left-0 right-0 px-4">
         <Button
           className={`w-full text-white text-base py-6 rounded-2xl ${
-            error || isLoading
+            error ||
+            amount < selectedTariff.minAmount ||
+            amount > selectedTariff.maxAmount
               ? "bg-gray-500 cursor-not-allowed"
               : "bg-[#7553FF]"
           }`}
-          disabled={!!error || amount < selectedTariff.minAmount || isLoading}
+          disabled={!!error || amount < selectedTariff.minAmount}
           onClick={handleInvestment}
         >
-          {isLoading ? "Processing..." : "Continue"}
+          Continue
         </Button>
       </div>
     </div>
