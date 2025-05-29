@@ -16,51 +16,41 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-const handleLogin = async () => {
-  try {
-    setLoading(true);
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const deviceId =
+        localStorage.getItem("deviceId") ||
+        Math.random().toString(36).substring(7);
 
-    if (!phoneNumber || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+      // Format the phone number consistently
+      const formattedMobile = phoneNumber.startsWith("+")
+        ? phoneNumber
+        : `+${phoneNumber}`;
 
-    const formattedMobile = phoneNumber.startsWith("+")
-      ? phoneNumber
-      : `+${phoneNumber}`;
+      const response = await axios.post(`${API_URL}/login`, {
+        mobile: formattedMobile, // Use formatted mobile number
+        password,
+        deviceId,
+      });
 
-    const deviceId = window.navigator.userAgent; // or a UUID from storage
+      const { token, requireMpin, userId, redirectTo } = response.data;
 
-    const response = await axios.post(`${API_URL}/login`, {
-      mobile: formattedMobile,
-      password: password,
-      deviceId: deviceId,
-    });
+      localStorage.setItem("token", token);
+      localStorage.setItem("deviceId", deviceId);
 
-    const data = response.data;
-
-    // Save token to localStorage
-    localStorage.setItem("token", data.token);
-
-    // if (data.requireMpin) {
-    //   toast.info("Please set MPIN to continue");
-    //   navigate("/set-mpin");
-    // } else {
-      toast.success("Login successful");
-
-      if (data.role === "admin") {
-        navigate("/admin");
+      if (requireMpin) {
+        localStorage.setItem("userId", userId);
+        navigate("/set-mpin");
       } else {
-        navigate("/main-screen");
+        navigate(redirectTo);
       }
-    // }
-
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-3 py-6">

@@ -17,32 +17,36 @@ const Register = () => {
   const [referralId, setReferralId] = useState("");
   const [loading, setLoading] = useState(false);
 
-const handleRegister = async () => {
-  try {
-    setLoading(true);
+  const handleRegister = async () => {
+    try {
+      setLoading(true);
 
-    if (!phone || !password || !referralId) {
-      toast.error("All fields are required");
-      return;
+      if (!phone || !password || !referralId) {
+        toast.error("All fields are required");
+        return;
+      }
+
+      const formattedMobile = phone.startsWith("+") ? phone : `+${phone}`;
+      const deviceId = Math.random().toString(36).substring(7);
+
+      const response = await axios.post(`${API_URL}/register`, {
+        mobile: formattedMobile,
+        password,
+        referralCode: referralId,
+        deviceId,
+      });
+
+      if (response.status === 201) {
+        localStorage.setItem("deviceId", deviceId);
+        toast.success("Registration successful!");
+        navigate("/login-register"); // Navigate to login since MPIN is set after login
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
-
-    const formattedMobile = phone.startsWith("+") ? phone : `+${phone}`;
-
-    const response = await axios.post(`${API_URL}/register`, {
-      mobile: formattedMobile,
-      password: password,
-      referralCode: referralId
-    });
-
-    toast.success(response.data.message || "Registration successful");
-    navigate("/login-register");
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || "Registration failed");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707]  py-6 ">

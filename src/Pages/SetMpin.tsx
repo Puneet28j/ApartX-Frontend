@@ -1,12 +1,16 @@
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+const API_URL = "http://localhost:5000/api/auth";
+
 const Setmpin = () => {
   const navigate = useNavigate();
   const [mpin, setMpin] = useState(["", "", "", ""]);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
   const handlePinChange = (value: string, index: number) => {
@@ -32,11 +36,37 @@ const Setmpin = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const pin = mpin.join("");
     if (pin.length === 4) {
-      // Handle PIN submission
-      toast.success("MPIN set successfully!");
+      try {
+        setIsLoading(true);
+        const userId = localStorage.getItem("userId");
+        const deviceId = localStorage.getItem("deviceId");
+
+        if (!userId || !deviceId) {
+          toast.error("Session expired. Please login again");
+          navigate("/login-register");
+          return;
+        }
+
+        const response = await axios.post(`${API_URL}/set-mpin`, {
+          userId,
+          mpin: pin,
+          deviceId,
+        });
+
+        if (response.status === 200) {
+          toast.success("MPIN set successfully!");
+          // Clear userId since we don't need it anymore
+          localStorage.removeItem("userId");
+          navigate("/main-screen");
+        }
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Failed to set MPIN");
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       toast.error("Please enter a complete 4-digit MPIN");
     }
@@ -89,8 +119,9 @@ const Setmpin = () => {
           <Button
             className="w-full h-12 bg-[#6552FE] text-white font-semibold hover:bg-slate-500 rounded-[16px]"
             onClick={handleSubmit}
+            disabled={isLoading}
           >
-            Continue
+            {isLoading ? "Setting MPIN..." : "Continue"}
           </Button>
         </div>
       </div>

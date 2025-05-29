@@ -1,14 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Check,
-  X,
-  Camera,
-  MessageSquare,
-  ArrowDownRight,
-  // Loader2,
-  QrCode,
-} from "lucide-react";
+import { Check, X, MessageSquare, ArrowDownRight } from "lucide-react";
 import virat from "@/assets/viratnew.avif";
 import {
   Table,
@@ -21,6 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
+import EditableRemarks from "@/components/EditableRemarks";
+import { ScreenshotDialog } from "@/components/admin/ScreenshotDialog";
 
 export interface DataTableProps {
   title: string;
@@ -37,7 +31,10 @@ export interface DataTableProps {
   }[];
   onViewAll?: () => void;
   showViewAll?: boolean;
+  updateRemarks?: UpdateRemarksFunction;
 }
+
+type UpdateRemarksFunction = (id: number, remarks: string) => Promise<void>;
 
 const getStatusStyles = (status: string) => {
   switch (status.toLowerCase()) {
@@ -126,56 +123,66 @@ const MobileCard = ({
         </span>
       </div>
 
-      {dataColumns.remarks && (
-        <div className="flex items-start justify-between py-2">
-          <span className="text-xs font-medium text-gray-500 mt-0.5">
-            Remarks
-          </span>
-          <span className="font-medium text-sm text-gray-900 text-right flex-1 ml-2 leading-tight">
-            {dataColumns.remarks}
-          </span>
-        </div>
-      )}
+      {title !== "Transaction" &&
+        title !== "Investments" &&
+        dataColumns.remarks !== undefined && (
+          <div className="flex items-start justify-between py-2">
+            <span className="text-xs font-medium text-gray-500 mt-0.5">
+              Remarks
+            </span>
+            <div className="flex-1 ml-2">
+              <EditableRemarks
+                initialValue={dataColumns.remarks}
+                onSave={async () => {
+                  // if (props.updateRemarks) {
+                  //   await props.updateRemarks(dataColumns.id, value);
+                  // }
+                }}
+                className="text-sm text-gray-900 text-right leading-tight"
+              />
+            </div>
+          </div>
+        )}
     </div>
 
     {/* Action Buttons */}
-    <div className="flex gap-2">
-      {/* Primary Actions */}
-      <Button
-        className="flex-1 bg-green-500 hover:bg-green-600 text-white border-0 rounded-lg font-medium shadow-sm text-xs h-8"
-        size="sm"
-      >
-        <Check className="h-3 w-3 mr-1" />
-        Approve
-      </Button>
-      <Button
-        className="flex-1 bg-red-500 hover:bg-red-600 text-white border-0 rounded-lg font-medium shadow-sm text-xs h-8"
-        size="sm"
-      >
-        <X className="h-3 w-3 mr-1" />
-        Reject
-      </Button>
+    {title !== "Transaction" && title !== "Investments" && (
+      <div className="flex gap-2">
+        {/* Primary Actions */}
+        <Button
+          className="flex-1 bg-green-500 hover:bg-green-600 text-white border-0 rounded-lg font-medium shadow-sm text-xs h-8"
+          size="sm"
+        >
+          <Check className="h-3 w-3 mr-1" />
+          Approve
+        </Button>
+        <Button
+          className="flex-1 bg-red-500 hover:bg-red-600 text-white border-0 rounded-lg font-medium shadow-sm text-xs h-8"
+          size="sm"
+        >
+          <X className="h-3 w-3 mr-1" />
+          Reject
+        </Button>
 
-      {/* Secondary Actions */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 p-0 w-8 h-8 flex items-center justify-center"
-      >
+        {/* Secondary Actions */}
         {title === "Deposit" ? (
-          <Camera className="h-3 w-3" />
+          <ScreenshotDialog title="Screenshot" imageUrl={virat} />
         ) : (
-          <QrCode className="h-3 w-3" />
+          <ScreenshotDialog
+            title="Qr Code"
+            imageUrl={virat}
+            walletAddress="s62e6dt3gd3bxt263etbxe"
+          />
         )}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 p-0 w-8 h-8 flex items-center justify-center"
-      >
-        <MessageSquare className="h-3 w-3" />
-      </Button>
-    </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 p-0 w-8 h-8 flex items-center justify-center"
+        >
+          <MessageSquare className="h-3 w-3" />
+        </Button>
+      </div>
+    )}
   </div>
 );
 // First, create a proper component instead of just a render function
@@ -200,7 +207,7 @@ const DepositComponent = ({ title, data }: DataTableProps) => {
   // }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full overflow-hidden">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{title}</h2>
       </div>
@@ -216,105 +223,125 @@ const DepositComponent = ({ title, data }: DataTableProps) => {
           ))}
         </div>
       ) : (
-        <Card>
-          <CardContent className="font-[10px]">
-            <Table>
-              <TableCaption>A list of your {title}.</TableCaption>
-              <TableHeader className="bg-gray-100 font-bold">
-                <TableRow className="font-extrabold">
-                  <TableHead>Type</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Profile Name</TableHead>
-                  <TableHead>Mobile</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Remarks</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((dataColumns) => (
-                  <TableRow key={dataColumns.id}>
-                    <TableCell className="font-medium">
-                      <ArrowDownRight className="inline h-8 w-8 rounded-full bg-green-500 text-white" />
-                    </TableCell>
-                    <TableCell>{dataColumns.plan}</TableCell>
-                    <TableCell className="flex items-center gap-1">
-                      <Avatar className="h-8 w-8 rounded-full ">
-                        <AvatarImage
-                          src={virat}
-                          alt="User"
-                          className="object-contain"
-                        />
-                        <AvatarFallback>CN</AvatarFallback>
-                      </Avatar>
-                      <div>{dataColumns.profileName}</div>
-                    </TableCell>
-                    <TableCell>{dataColumns.mobile}</TableCell>
-                    <TableCell>{dataColumns.amount}</TableCell>
-                    <TableCell>{dataColumns.dateTime}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
-                          dataColumns.status
-                        )}`}
-                      >
-                        {dataColumns.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>{dataColumns.remarks}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:cursor-pointer text-green-600"
-                          title="Approve"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:cursor-pointer text-red-600"
-                          title="Reject"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                        {title === "Deposit" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:cursor-pointer text-blue-600"
-                            title="Screenshot"
+        <Card className="w-full">
+          <CardContent className="p-0">
+            <div className="rounded-md overflow-x-auto">
+              <div className="min-w-[1200px] w-full">
+                <Table>
+                  <TableCaption>A list of your {title}.</TableCaption>
+                  <TableHeader className="bg-gray-100 font-bold">
+                    <TableRow className="font-extrabold">
+                      <TableHead>Type</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Profile Name</TableHead>
+                      <TableHead>Mobile</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      {title !== "Transaction" && title !== "Investments" && (
+                        <>
+                          <TableHead className="w-[200px]">Remarks</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.map((dataColumns) => (
+                      <TableRow key={dataColumns.id}>
+                        <TableCell className="font-medium">
+                          <ArrowDownRight className="inline h-8 w-8 rounded-full bg-green-500 text-white" />
+                        </TableCell>
+                        <TableCell>{dataColumns.plan}</TableCell>
+                        <TableCell className="flex items-center gap-1">
+                          <Avatar className="h-8 w-8 rounded-full ">
+                            <AvatarImage
+                              src={virat}
+                              alt="User"
+                              className="object-contain"
+                            />
+                            <AvatarFallback>CN</AvatarFallback>
+                          </Avatar>
+                          <div>{dataColumns.profileName}</div>
+                        </TableCell>
+                        <TableCell>{dataColumns.mobile}</TableCell>
+                        <TableCell>{dataColumns.amount}</TableCell>
+                        <TableCell>{dataColumns.dateTime}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
+                              dataColumns.status
+                            )}`}
                           >
-                            <Camera className="h-4 w-4" />
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:cursor-pointer text-blue-600"
-                            title="Wallet QR"
-                          >
-                            <QrCode className="h-4 w-4" />
-                          </Button>
+                            {dataColumns.status}
+                          </span>
+                        </TableCell>
+                        {title !== "Transaction" && title !== "Investments" && (
+                          <>
+                            <TableCell className="w-[200px] max-w-[200px]">
+                              <div className="w-full max-w-full overflow-hidden">
+                                <EditableRemarks
+                                  initialValue={dataColumns.remarks}
+                                  onSave={async () => {
+                                    // if (props.updateRemarks) {
+                                    //   await props.updateRemarks(
+                                    //     dataColumns.id,
+                                    //     value
+                                    //   );
+                                    // }
+                                  }}
+                                  className="w-full max-w-full"
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 hover:cursor-pointer text-green-600"
+                                  title="Approve"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 hover:cursor-pointer text-red-600"
+                                  title="Reject"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                                {title === "Deposit" ? (
+                                  <ScreenshotDialog
+                                    title="Screenshot"
+                                    imageUrl={virat}
+                                  />
+                                ) : (
+                                  <ScreenshotDialog
+                                    title="Qr Code"
+                                    imageUrl={virat}
+                                    walletAddress="s62e6dt3gd3bxt263etbxe"
+                                  />
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 hover:cursor-pointer text-gray-600"
+                                  title="Remarks"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:cursor-pointer text-gray-600"
-                          title="Remarks"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}

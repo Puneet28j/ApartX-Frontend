@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   mobile: {
@@ -17,18 +17,22 @@ const userSchema = new mongoose.Schema({
   },
   referredBy: {
     type: String,
-    required: true // code of the person who referred them
+    required: true, // code of the person who referred them
   },
   name: String,
-  email: String,
+  email: {
+    type: String,
+    sparse: true, // This allows multiple null values
+    default: "", // Default empty string instead of null
+  },
   profilePic: String,
   role: {
     type: String,
-    default: 'user',
-    enum: ['user', 'admin'],
+    default: "user",
+    enum: ["user", "admin"],
   },
   mpin: String,
   deviceId: String, // for device-specific MPIN
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

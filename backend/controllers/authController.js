@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const sharp = require("sharp");
 const fs = require("fs");
 
@@ -11,10 +11,19 @@ const generateReferralCode = (mobile) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    const { mobile, password, referralCode: referrerCode, name, email, profilePic } = req.body;
+    const {
+      mobile,
+      password,
+      referralCode: referrerCode,
+      name,
+      email,
+      profilePic,
+    } = req.body;
 
     if (!mobile || !password || !referrerCode) {
-      return res.status(400).json({ message: "Mobile, password, and referrer code are required." });
+      return res
+        .status(400)
+        .json({ message: "Mobile, password, and referrer code are required." });
     }
 
     const existingUser = await User.findOne({ mobile });
@@ -31,36 +40,40 @@ exports.registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newReferralCode = generateReferralCode(mobile); // Generate this user's own referral code
 
-const user = new User({
-  mobile,
-  password: hashedPassword,
-  referralCode: newReferralCode,
-  referredBy: referrerCode, // ✅ new field
-  name,
-  email,
-  profilePic,
-  role: 'user',
-});
+    const user = new User({
+      mobile,
+      password: hashedPassword,
+      referralCode: newReferralCode,
+      referredBy: referrerCode, // ✅ new field
+      name,
+      email,
+      profilePic,
+      role: "user",
+    });
 
     await user.save();
-    return res.status(201).json({ message: "User registered successfully.", referralCode: newReferralCode });
-
+    return res
+      .status(201)
+      .json({
+        message: "User registered successfully.",
+        referralCode: newReferralCode,
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error." });
   }
 };
 
-
-
 exports.loginUser = async (req, res) => {
   try {
     const { mobile, password, deviceId } = req.body;
 
     if (!mobile || !password || !deviceId) {
-      return res.status(400).json({ message: "Mobile, password, and deviceId are required" });
+      return res
+        .status(400)
+        .json({ message: "Mobile, password, and deviceId are required" });
     }
-
+    console.log("Login attempt for mobile:", mobile, "on device:", deviceId);
     const user = await User.findOne({ mobile });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -72,7 +85,9 @@ exports.loginUser = async (req, res) => {
     }
 
     // ✅ Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     // ✅ Check MPIN and Device match
     const isMpinMissing = !user.mpin || !user.deviceId;
@@ -85,7 +100,7 @@ exports.loginUser = async (req, res) => {
         token,
         userId: user._id,
         role: user.role,
-        redirectTo: user.role === "admin" ? "/admin" : "/main-screen"
+        redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
       });
     }
 
@@ -94,15 +109,13 @@ exports.loginUser = async (req, res) => {
       message: "Login successful",
       token,
       role: user.role,
-      redirectTo: user.role === "admin" ? "/admin" : "/main-screen"
+      redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
     });
-
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 exports.setMpin = async (req, res) => {
   try {
@@ -120,15 +133,14 @@ exports.setMpin = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: "MPIN set successfully. You can now login." });
-
+    res
+      .status(200)
+      .json({ message: "MPIN set successfully. You can now login." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to set MPIN" });
   }
 };
-
-
 
 exports.updateProfile = async (req, res) => {
   try {

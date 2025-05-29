@@ -9,7 +9,7 @@ import { renderDashBoardTabs } from "@/Pages/admin/DashboardTabs";
 import { renderInvestors } from "@/Pages/admin/Investors";
 import { renderPlans } from "@/Pages/admin/Plans";
 import { renderReferralsHistory } from "@/Pages/admin/ReferralsHistory";
-import { renderSettings } from "@/Pages/admin/Settings";
+// import { renderSettings } from "@/Pages/admin/Settings";
 import { renderWalletSetting } from "@/Pages/admin/WalletSetting";
 import {
   ArrowDownLeft,
@@ -22,7 +22,7 @@ import {
   LogOut,
   Menu,
   Search,
-  Settings,
+  // Settings,
   TrendingUp,
   User,
   Users,
@@ -154,7 +154,7 @@ const Dashboard = () => {
     { icon: Users, label: "Investors", id: "Investors" },
     { icon: Gift, label: "Plans", id: "Plans" },
     { icon: BarChart3, label: "Referrals History", id: "ReferralsHistory" },
-    { icon: Settings, label: "Settings", id: "Settings" },
+    // { icon: Settings, label: "Settings", id: "Settings" },
     { icon: LogOut, label: "LogOut", id: "LogOut" },
   ];
 
@@ -178,8 +178,8 @@ const Dashboard = () => {
         return renderPlans();
       case "ReferralsHistory":
         return renderReferralsHistory();
-      case "Settings":
-        return renderSettings();
+      // case "Settings":
+      //   return renderSettings();
       case "LogOut":
         return (
           <div className="flex  items-center justify-center h-96">
