@@ -20,8 +20,12 @@ router.get('/me', verifyToken, (req, res) => {
 });
 
 const upload = require("../middlewares/uploadMiddleware");
-
 router.put("/update-profile", verifyToken, upload.single("profilePic"), updateProfile);
+
+
+router.get("/", (req, res) => {
+  res.send("Auth API working on server");
+});
 
 
 

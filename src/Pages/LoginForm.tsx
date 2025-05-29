@@ -7,7 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "http://147.93.105.130:5000/api/auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -28,29 +28,68 @@ const LoginForm = () => {
         ? phoneNumber
         : `+${phoneNumber}`;
 
+<<<<<<< HEAD
       const response = await axios.post(`${API_URL}/login`, {
         mobile: formattedMobile, // Use formatted mobile number
         password,
         deviceId,
       });
+=======
+    // const formattedMobile = phoneNumber.startsWith("+")
+    //   ? phoneNumber
+    //   : `+${phoneNumber}`;
+
+    const formattedMobile = phoneNumber.startsWith("+")
+  ? phoneNumber
+  : `+${phoneNumber}`;
+
+
+>>>>>>> 701a228 (mpin redirection)
 
       const { token, requireMpin, userId, redirectTo } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("deviceId", deviceId);
 
+<<<<<<< HEAD
       if (requireMpin) {
         localStorage.setItem("userId", userId);
         navigate("/set-mpin");
+=======
+    const data = response.data;
+
+    // Save token to localStorage
+    localStorage.setItem("token", data.token);
+
+    if (data.requireMpin) {
+      toast.info("Please set MPIN to continue");
+      navigate("/set-mpin");
+    } else {
+      toast.success("Login successful");
+
+      if (data.role === "admin") {
+        navigate("/admin");
+>>>>>>> 701a228 (mpin redirection)
       } else {
         navigate(redirectTo);
       }
+<<<<<<< HEAD
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
+=======
+    }
+
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
+>>>>>>> 701a228 (mpin redirection)
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-3 py-6">
@@ -138,3 +177,6 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+
+
+

@@ -40,6 +40,7 @@ exports.registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newReferralCode = generateReferralCode(mobile); // Generate this user's own referral code
 
+<<<<<<< HEAD
     const user = new User({
       mobile,
       password: hashedPassword,
@@ -50,6 +51,19 @@ exports.registerUser = async (req, res) => {
       profilePic,
       role: "user",
     });
+=======
+const user = new User({
+  mobile,
+  password: hashedPassword,
+  referralCode: newReferralCode,
+  referredBy: referrerCode,
+  name,
+  email: `${mobile.replace(/\D/g, '')}-${Date.now()}@demo.com`, // ✅ unique email
+  profilePic,
+  role: 'user',
+});
+>>>>>>> 701a228 (mpin redirection)
+
 
     await user.save();
     return res
@@ -133,9 +147,22 @@ exports.setMpin = async (req, res) => {
 
     await user.save();
 
+<<<<<<< HEAD
     res
       .status(200)
       .json({ message: "MPIN set successfully. You can now login." });
+=======
+    // ✅ Generate JWT token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(200).json({
+      message: "MPIN set successfully. You can now login.",
+      token,
+      role: user.role,
+      redirectTo: user.role === "admin" ? "/admin" : "/main-screen"
+    });
+
+>>>>>>> 701a228 (mpin redirection)
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to set MPIN" });
