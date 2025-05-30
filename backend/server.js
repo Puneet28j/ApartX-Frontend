@@ -8,7 +8,7 @@ const app = express();
 // Middlewares
 app.use(
   cors({
-    origin: "http://localhost:5173", // Update with your frontend URL
+    origin: ["http://localhost:5173", "https://http://147.93.105.130:5000"], // Update with your frontend URL
     credentials: true,
     methods: "GET,POST,PUT,DELETE",
   })

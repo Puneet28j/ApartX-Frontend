@@ -1,7 +1,6 @@
+import Bg from "@/assets/mainscreenbg.svg";
 import { BookText, Home, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import FlowerImage from "../assets/Shape 1.svg";
-import DiceImage from "../assets/shape-2 (1).jpg";
 import USDTLogo from "../assets/usdt logo.svg";
 
 import { Button } from "@/components/ui/button";
@@ -21,31 +20,24 @@ const MainScreen = () => {
   return (
     <div className="w-full  h-full relative overflow-hidden  bg-[#2D2B2B]">
       {/* === Background Images === */}
-      {/* Flower Image - Top Right */}
-      <img
-        src={FlowerImage}
-        alt="flower"
-        className="fixed sm:absolute top-0 right-0 w-64 max-w-full z-0 pointer-events-none"
-      />
-
-      {/* Dice Image - Bottom Right Background */}
-      <img
-        src={DiceImage}
-        alt="dice background"
-        className="fixed sm:absolute bottom-0 right-0 max-w-lg w-full h-screen  object-bottom backdrop-opacity-100 opacity-[20%] bg-blend-saturation z-10 pointer-events-none"
-      />
+      <div className="absolute inset-0 z-10">
+        <img
+          src={Bg}
+          alt="Flower Background"
+          className="absolute top-0 left-0 w-full h-full object-cover "
+        />
+      </div>
 
       {/* === Scrollable Foreground Content === */}
-      <div className="relative z-20 h-full overflow-y-auto pb-20 px-4 pt-6">
+      <div className="relative z-20 h-full overflow-y-auto pb-20 px-4 ">
         {/* User Greeting */}
-        <div className="flex flex-col items-start gap-2 mb-4 mt-8">
+        <div className="flex flex-col items-start gap-2 mb-2 mt-4">
           <User2Icon
             onClick={() => navigate("/profile")}
             className="w-12 h-12 rounded-full bg-white border-black border-2"
           />
           <h1 className="text-white text-lg font-medium">Hello John</h1>
         </div>
-
         {/* Wallet Card */}
         <div
           className="w-full p-4 rounded-[20px] bg-cover bg-center shadow-md mb-6 text-black"
@@ -81,7 +73,6 @@ const MainScreen = () => {
             </div>
           </div>
         </div>
-
         {/* Send / Receive Actions */}
         <div className="bg-[#111111] rounded-2xl py-4 px-4 sm:px-6 flex justify-around items-center mb-6 text-white">
           <div className="flex flex-col items-center gap-1">
@@ -116,7 +107,6 @@ const MainScreen = () => {
             </button>
           </div>
         </div>
-
         {/* Crypto Balances */}
         <div className="text-white mb-4">
           <h2 className="text-lg font-semibold mb-3">Crypto Balance</h2>
@@ -142,6 +132,26 @@ const MainScreen = () => {
               </div>
             ))}
           </div>
+        </div>
+        <div className="flex flex-col items-end text-start">
+          <div className="text-white text-left mb-2">
+            Get Detail <br />
+            insight about
+            <br /> Apart-x
+          </div>
+          <button
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href = "/Apart-X About.pdf"; // Path relative to public
+              link.download = "ApartX-Details.pdf"; // Optional: custom filename
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+            className="text-white bg-red-600 rounded-full px-3 py-1"
+          >
+            About Apart-X
+          </button>
         </div>
       </div>
 

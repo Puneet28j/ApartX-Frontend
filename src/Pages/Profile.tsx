@@ -66,10 +66,11 @@ const userWallets = [
   },
 ];
 const ProfileScreen: React.FC = () => {
+  const API_URL = "http://localhost:5000"; //localhost:5000/api/auth
   const navigate = useNavigate();
-  const [name, setName] = useState<string>("John");
-  const [email, setEmail] = useState<string>("john@example.com");
-  const [mobile, setMobile] = useState<string>("+1 234 567 8900");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [mobile, setMobile] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
@@ -101,6 +102,14 @@ const ProfileScreen: React.FC = () => {
   useEffect(() => {
     fetchUserProfile();
   }, []);
+  useEffect(() => {
+    return () => {
+      // Cleanup blob URLs when component unmounts
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const fetchUserProfile = async () => {
     setIsLoading(true);
@@ -112,66 +121,62 @@ const ProfileScreen: React.FC = () => {
         return;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/me`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include", // Include cookies if using session-based auth
-        }
-      );
+      const response = await fetch(`${API_URL}/api/auth/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
 
-      // First check if response exists
-      if (!response) {
-        throw new Error("No response from server");
-      }
-
-      // Handle non-JSON responses
-      let data;
-      try {
-        data = await response.json();
-      } catch (error) {
-        console.error("Failed to parse JSON:", error);
-        throw new Error("Invalid response format from server");
-      }
-
-      if (response.ok) {
-        // Update both current and initial values
-        setName(data.name || "");
-        setEmail(data.email || "");
-        setMobile(data.mobile || "");
-        setInitialName(data.name || "");
-        setInitialEmail(data.email || "");
-        setInitialMobile(data.mobile || "");
-
-        if (data.profilePic) {
-          setPreview(
-            data.profilePic.startsWith("http")
-              ? data.profilePic
-              : `${import.meta.env.VITE_API_BASE_URL}${data.profilePic}`
-          );
-        }
-      } else {
-        // Handle error responses
+      if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem("token");
           navigate("/login-register");
           toast.error("Session expired. Please login again.");
-        } else {
-          toast.error(data?.message || "Failed to fetch profile");
+          return;
         }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Profile data received:", data); // Debug log
+
+      // Update both current and initial values
+      setName(data.name || "");
+      setEmail(data.email || "");
+      setMobile(data.mobile || "");
+      setInitialName(data.name || "");
+      setInitialEmail(data.email || "");
+      setInitialMobile(data.mobile || "");
+
+      // Handle profile picture - make sure the URL is correct
+      if (data.profilePic) {
+        const imageUrl = data.profilePic.startsWith("http")
+          ? data.profilePic
+          : `${API_URL}${data.profilePic}`;
+
+        console.log("Setting profile image URL:", imageUrl); // Debug log
+
+        // Test if image loads correctly
+        const img = new Image();
+        img.onload = () => {
+          console.log("Image loaded successfully");
+          setPreview(imageUrl);
+        };
+        img.onerror = () => {
+          console.error("Failed to load image:", imageUrl);
+          setPreview(""); // Clear preview if image fails to load
+        };
+        img.src = imageUrl;
+      } else {
+        setPreview(""); // Clear preview if no profile pic
       }
     } catch (error) {
       console.error("Profile fetch error:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Cannot connect to server. Please try again later."
-      );
+      toast.error("Failed to fetch profile");
     } finally {
       setIsLoading(false);
     }
@@ -238,6 +243,10 @@ const ProfileScreen: React.FC = () => {
       }
 
       setImage(file);
+      // Clean up previous preview URL to prevent memory leaks
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -270,52 +279,64 @@ const ProfileScreen: React.FC = () => {
       if (mobile !== initialMobile) formData.append("mobile", mobile);
       if (image) formData.append("profilePic", image);
 
-      // Debug log
+      // Debug log - add this to see what's being sent
       console.log("Sending data:", {
-        name,
-        email,
-        mobile,
+        name: name !== initialName ? name : "unchanged",
+        email: email !== initialEmail ? email : "unchanged",
+        mobile: mobile !== initialMobile ? mobile : "unchanged",
         hasImage: !!image,
+        imageSize: image?.size,
+        imageType: image?.type,
       });
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/update-profile`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_URL}/api/auth/update-profile`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Remove Content-Type header - let browser set it for FormData
+        },
+        body: formData,
+      });
+
+      // Better response handling
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response:", response.status, errorText);
+        throw new Error(`Server error: ${response.status}`);
+      }
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update profile");
-      }
+      console.log("Update response:", data); // Debug log
 
       // Update state with returned data
-      setName(data.name);
-      setEmail(data.email);
-      setMobile(data.mobile);
-      setInitialName(data.name);
-      setInitialEmail(data.email);
-      setInitialMobile(data.mobile);
+      setName(data.name || name);
+      setEmail(data.email || email);
+      setMobile(data.mobile || mobile);
+      setInitialName(data.name || name);
+      setInitialEmail(data.email || email);
+      setInitialMobile(data.mobile || mobile);
 
+      // Handle profile picture update
       if (data.profilePic) {
-        setPreview(
-          data.profilePic.startsWith("http")
-            ? data.profilePic
-            : `${import.meta.env.VITE_API_BASE_URL}${data.profilePic}`
-        );
+        const newImageUrl = data.profilePic.startsWith("http")
+          ? data.profilePic
+          : `${API_URL}${data.profilePic}`;
+
+        console.log("New image URL:", newImageUrl); // Debug log
+
+        // Clean up old blob URL
+        if (preview && preview.startsWith("blob:")) {
+          URL.revokeObjectURL(preview);
+        }
+
+        setPreview(newImageUrl);
       }
 
-      // Reset edit states
+      // Reset edit states and image
       setIsEditingName(false);
       setIsEditingEmail(false);
       setIsEditingMobile(false);
-      setImage(null);
+      setImage(null); // This is important - clear the file input
 
       toast.success("Profile updated successfully");
     } catch (error) {
@@ -329,16 +350,21 @@ const ProfileScreen: React.FC = () => {
   };
 
   const handleCancelEdits = (): void => {
+    // Clean up blob URL if exists
+    if (preview && preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
+
     // Reset edit states
     setIsEditingName(false);
     setIsEditingEmail(false);
     setIsEditingMobile(false);
 
+    // Reset image
+    setImage(null);
+
     // Refetch profile data to reset values
     fetchUserProfile();
-
-    // Reset image if any
-    setImage(null);
   };
 
   const startEditingName = (): void => {
