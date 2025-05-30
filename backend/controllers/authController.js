@@ -83,19 +83,19 @@ exports.loginUser = async (req, res) => {
       expiresIn: "7d",
     });
 
-    const isMpinMissing = !user.mpin || !user.deviceId;
-    const isNewDevice = user.deviceId !== deviceId;
+    // const isMpinMissing = !user.mpin || !user.deviceId;
+    // const isNewDevice = user.deviceId !== deviceId;
 
-    if (isMpinMissing || isNewDevice) {
-      return res.status(200).json({
-        message: "First time on device. MPIN required.",
-        requireMpin: true,
-        token,
-        userId: user._id,
-        role: user.role,
-        redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
-      });
-    }
+    // if (isMpinMissing || isNewDevice) {
+    //   return res.status(200).json({
+    //     message: "First time on device. MPIN required.",
+    //     requireMpin: true,
+    //     token,
+    //     userId: user._id,
+    //     role: user.role,
+    //     redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
+    //   });
+    // }
 
     return res.status(200).json({
       message: "Login successful",

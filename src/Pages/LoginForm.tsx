@@ -46,22 +46,22 @@ const LoginForm = () => {
       const data = response.data;
 
       // Save token to localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.userId);      // <-- Add this
-      localStorage.setItem("deviceId", deviceId);
+      // localStorage.setItem("token", data.token);
+      // localStorage.setItem("userId", data.userId);      // <-- Add this
+      // localStorage.setItem("deviceId", deviceId);
 
-      if (data.requireMpin) {
-        toast.info("Please set MPIN to continue");
-        navigate("/set-mpin");
-      } else {
-        toast.success("Login successful");
+      // if (data.requireMpin) {
+      //   toast.info("Please set MPIN to continue");
+      //   navigate("/set-mpin");
+      // } else {
+      //   toast.success("Login successful");
 
         if (data.role === "admin") {
           navigate("/admin");
         } else {
           navigate("/main-screen");
         }
-      }
+      // }
 
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
