@@ -31,33 +31,30 @@ exports.registerUser = async (req, res) => {
       return res.status(409).json({ message: "Mobile already registered." });
     }
 
-    // Check if the referral code exists in database (someone else's code)
     const referrer = await User.findOne({ referralCode: referrerCode });
     if (!referrer) {
       return res.status(400).json({ message: "Invalid referral code." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newReferralCode = generateReferralCode(mobile); // Generate this user's own referral code
+    const newReferralCode = generateReferralCode(mobile);
 
     const user = new User({
       mobile,
       password: hashedPassword,
       referralCode: newReferralCode,
-      referredBy: referrerCode, // ✅ new field
+      referredBy: referrerCode,
       name,
-      email,
+      email: `${mobile.replace(/\D/g, '')}-${Date.now()}@demo.com`,
       profilePic,
       role: "user",
     });
 
     await user.save();
-    return res
-      .status(201)
-      .json({
-        message: "User registered successfully.",
-        referralCode: newReferralCode,
-      });
+    return res.status(201).json({
+      message: "User registered successfully.",
+      referralCode: newReferralCode,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error." });
@@ -69,11 +66,9 @@ exports.loginUser = async (req, res) => {
     const { mobile, password, deviceId } = req.body;
 
     if (!mobile || !password || !deviceId) {
-      return res
-        .status(400)
-        .json({ message: "Mobile, password, and deviceId are required" });
+      return res.status(400).json({ message: "Mobile, password, and deviceId are required" });
     }
-    console.log("Login attempt for mobile:", mobile, "on device:", deviceId);
+
     const user = await User.findOne({ mobile });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -84,33 +79,33 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
-    // ✅ Check MPIN and Device match
-    const isMpinMissing = !user.mpin || !user.deviceId;
-    const isNewDevice = user.deviceId !== deviceId;
+    // const isMpinMissing = !user.mpin || !user.deviceId;
+    // const isNewDevice = user.deviceId !== deviceId;
 
-    if (isMpinMissing || isNewDevice) {
-      return res.status(200).json({
-        message: "First time on device. MPIN required.",
-        requireMpin: true,
-        token,
-        userId: user._id,
-        role: user.role,
-        redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
-      });
-    }
+    // if (isMpinMissing || isNewDevice) {
+    //   return res.status(200).json({
+    //     message: "First time on device. MPIN required.",
+    //     requireMpin: true,
+    //     token,
+    //     userId: user._id,
+    //     role: user.role,
+    //     redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
+    //   });
+    // }
 
-    // ✅ Successful login
     return res.status(200).json({
       message: "Login successful",
       token,
       role: user.role,
+      userId: user._id,           // ✅ Add this
+      deviceId: user.deviceId,    // ✅ Optional: helpful for debug
       redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
     });
+
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: "Server error" });
@@ -133,9 +128,16 @@ exports.setMpin = async (req, res) => {
 
     await user.save();
 
-    res
-      .status(200)
-      .json({ message: "MPIN set successfully. You can now login." });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.status(200).json({
+      message: "MPIN set successfully. You can now login.",
+      token,
+      role: user.role,
+      redirectTo: user.role === "admin" ? "/admin" : "/main-screen"
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to set MPIN" });
@@ -145,7 +147,6 @@ exports.setMpin = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const { name, email, mobile } = req.body;
-
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -155,12 +156,9 @@ exports.updateProfile = async (req, res) => {
 
     if (req.file) {
       const outputPath = `uploads/profile_pic/resized-${req.file.filename}`;
-
       await sharp(req.file.path).resize(300, 300).toFile(outputPath);
-
-      fs.unlinkSync(req.file.path); // remove original
-
-      user.profilePic = `/${outputPath}`; // used on frontend: `http://localhost:5000${user.profilePic}`
+      fs.unlinkSync(req.file.path);
+      user.profilePic = `/${outputPath}`;
     }
 
     await user.save();

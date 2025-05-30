@@ -7,7 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "http://147.93.105.130:5000/api/auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -19,32 +19,50 @@ const LoginForm = () => {
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const deviceId =
-        localStorage.getItem("deviceId") ||
-        Math.random().toString(36).substring(7);
 
-      // Format the phone number consistently
+      if (!phoneNumber || !password) {
+        toast.error("Please fill in all fields");
+        return;
+      }
+
+      // const formattedMobile = phoneNumber.startsWith("+")
+      //   ? phoneNumber
+      //   : `+${phoneNumber}`;
+
       const formattedMobile = phoneNumber.startsWith("+")
         ? phoneNumber
         : `+${phoneNumber}`;
 
+
+
+      const deviceId = window.navigator.userAgent; // or a UUID from storage
+
       const response = await axios.post(`${API_URL}/login`, {
-        mobile: formattedMobile, // Use formatted mobile number
-        password,
-        deviceId,
+        mobile: formattedMobile,
+        password: password,
+        deviceId: deviceId,
       });
 
-      const { token, requireMpin, userId, redirectTo } = response.data;
+      const data = response.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("deviceId", deviceId);
+      // Save token to localStorage
+      // localStorage.setItem("token", data.token);
+      // localStorage.setItem("userId", data.userId);      // <-- Add this
+      // localStorage.setItem("deviceId", deviceId);
 
-      if (requireMpin) {
-        localStorage.setItem("userId", userId);
-        navigate("/set-mpin");
-      } else {
-        navigate(redirectTo);
-      }
+      // if (data.requireMpin) {
+      //   toast.info("Please set MPIN to continue");
+      //   navigate("/set-mpin");
+      // } else {
+      //   toast.success("Login successful");
+
+        if (data.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/main-screen");
+        }
+      // }
+
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
@@ -138,3 +156,6 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+
+
+
