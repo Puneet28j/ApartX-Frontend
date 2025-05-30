@@ -4,6 +4,28 @@
 
 /* Removed invalid @custom-variant dark (&:is(.dark *)); */
 
+:root {
+  scrollbar-gutter: stable;
+}
+
+body {
+  overflow-y: scroll;
+  padding-right: 0 !important; /* Prevents layout shift */
+}
+
+/* Ensure dropdowns don't affect layout */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+.prevent-scroll-shift {
+  width: 100vw;
+  padding-right: calc(100vw - 100%);
+}
 @theme {
   --font-display: "Poppins", "sans-serif";
   --font-racing: "Racing Sans One", "sans-serif";

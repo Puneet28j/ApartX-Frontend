@@ -1,7 +1,9 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check, X, MessageSquare, ArrowDownRight } from "lucide-react";
 import virat from "@/assets/viratnew.avif";
+import EditableRemarks from "@/components/EditableRemarks";
+import { ScreenshotDialog } from "@/components/admin/ScreenshotDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -11,10 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect } from "react";
-import EditableRemarks from "@/components/EditableRemarks";
-import { ScreenshotDialog } from "@/components/admin/ScreenshotDialog";
+import { ArrowDownRight, Check, MessageSquare, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export interface DataTableProps {
   title: string;
@@ -49,12 +49,19 @@ const getStatusStyles = (status: string) => {
   }
 };
 
+// Update the MobileCard component to accept editingRemarkId and handleRemarksClick
 const MobileCard = ({
   dataColumns,
   title,
+  editingRemarkId,
+  handleRemarksClick,
+  setEditingRemarkId,
 }: {
   dataColumns: DataTableProps["data"][0];
   title: DataTableProps["title"];
+  editingRemarkId: number | null;
+  handleRemarksClick: (id: number) => void;
+  setEditingRemarkId: React.Dispatch<React.SetStateAction<number | null>>;
 }) => (
   <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3 shadow-md shadow-gray-100/50 mx-2">
     {/* Header Section */}
@@ -123,22 +130,32 @@ const MobileCard = ({
         </span>
       </div>
 
+      {/* Move remarks section here and combine with button */}
       {title !== "Transaction" &&
         title !== "Investments" &&
         dataColumns.remarks !== undefined && (
           <div className="flex items-start justify-between py-2">
-            <span className="text-xs font-medium text-gray-500 mt-0.5">
-              Remarks
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-500 mt-0.5">
+                Remarks
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 p-0 w-6 h-6 flex items-center justify-center"
+                onClick={() => handleRemarksClick(dataColumns.id)}
+              >
+                <MessageSquare className="h-3 w-3" />
+              </Button>
+            </div>
             <div className="flex-1 ml-2">
               <EditableRemarks
                 initialValue={dataColumns.remarks}
                 onSave={async () => {
-                  // if (props.updateRemarks) {
-                  //   await props.updateRemarks(dataColumns.id, value);
-                  // }
+                  setEditingRemarkId(null);
                 }}
                 className="text-sm text-gray-900 text-right leading-tight"
+                isEditing={editingRemarkId === dataColumns.id}
               />
             </div>
           </div>
@@ -174,13 +191,6 @@ const MobileCard = ({
             walletAddress="s62e6dt3gd3bxt263etbxe"
           />
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 p-0 w-8 h-8 flex items-center justify-center"
-        >
-          <MessageSquare className="h-3 w-3" />
-        </Button>
       </div>
     )}
   </div>
@@ -188,7 +198,7 @@ const MobileCard = ({
 // First, create a proper component instead of just a render function
 const DepositComponent = ({ title, data }: DataTableProps) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  // const [isLoading, setIsLoading] = useState(false);
+  const [editingRemarkId, setEditingRemarkId] = useState<number | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -206,6 +216,11 @@ const DepositComponent = ({ title, data }: DataTableProps) => {
   //   );
   // }
 
+  // Add this function to handle remarks icon click
+  const handleRemarksClick = (id: number) => {
+    setEditingRemarkId(id);
+  };
+
   return (
     <div className="space-y-6 w-full overflow-hidden">
       <div className="flex justify-between items-center">
@@ -216,9 +231,12 @@ const DepositComponent = ({ title, data }: DataTableProps) => {
         <div className="space-y-4">
           {data.map((dataColumns) => (
             <MobileCard
+              setEditingRemarkId={setEditingRemarkId}
               key={dataColumns.id}
               title={title}
               dataColumns={dataColumns}
+              editingRemarkId={editingRemarkId}
+              handleRemarksClick={handleRemarksClick}
             />
           ))}
         </div>
@@ -284,13 +302,12 @@ const DepositComponent = ({ title, data }: DataTableProps) => {
                                   initialValue={dataColumns.remarks}
                                   onSave={async () => {
                                     // if (props.updateRemarks) {
-                                    //   await props.updateRemarks(
-                                    //     dataColumns.id,
-                                    //     value
-                                    //   );
+                                    //   await props.updateRemarks(dataColumns.id, value);
                                     // }
+                                    setEditingRemarkId(null);
                                   }}
                                   className="w-full max-w-full"
+                                  isEditing={editingRemarkId === dataColumns.id}
                                 />
                               </div>
                             </TableCell>
@@ -328,7 +345,10 @@ const DepositComponent = ({ title, data }: DataTableProps) => {
                                   variant="outline"
                                   size="sm"
                                   className="h-8 w-8 p-0 hover:cursor-pointer text-gray-600"
-                                  title="Remarks"
+                                  title="Edit Remarks"
+                                  onClick={() =>
+                                    handleRemarksClick(dataColumns.id)
+                                  }
                                 >
                                   <MessageSquare className="h-4 w-4" />
                                 </Button>

@@ -9,19 +9,28 @@ import { renderDashBoardTabs } from "@/Pages/admin/DashboardTabs";
 import { renderInvestors } from "@/Pages/admin/Investors";
 import { renderPlans } from "@/Pages/admin/Plans";
 import { renderReferralsHistory } from "@/Pages/admin/ReferralsHistory";
+
 // import { renderSettings } from "@/Pages/admin/Settings";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { renderWalletSetting } from "@/Pages/admin/WalletSetting";
+
 import {
   ArrowDownLeft,
   ArrowUpDown,
   ArrowUpRight,
   BarChart3,
-  Bell,
   Gift,
   Home,
+  Lock,
   LogOut,
   Menu,
-  Search,
   // Settings,
   TrendingUp,
   User,
@@ -30,6 +39,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Input } from "../ui/input";
+import { PasswordChangeDialog } from "./PasswordChange";
+import { ProfileEditDialog } from "./Profile";
+
 const data = [
   {
     id: 1,
@@ -122,6 +135,24 @@ const data = [
   },
 ];
 const Dashboard = () => {
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+
+  const openProfileDialog = () => {
+    setIsProfileDialogOpen(true);
+  };
+
+  const closeProfileDialog = () => {
+    setIsProfileDialogOpen(false);
+  };
+
+  const openPasswordDialog = () => {
+    setIsPasswordDialogOpen(true);
+  };
+
+  const closePasswordDialog = () => {
+    setIsPasswordDialogOpen(false);
+  };
   const location = useLocation();
   const navigate = useNavigate();
   // Get the current tab from URL, remove the '/admin/' prefix and capitalize first letter
@@ -197,7 +228,12 @@ const Dashboard = () => {
                   >
                     Cancel
                   </Button>
-                  <Button variant="destructive">Logout</Button>
+                  <Button
+                    onClick={() => navigate("/login-register")}
+                    variant="destructive"
+                  >
+                    Logout
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -249,21 +285,62 @@ const Dashboard = () => {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg md:text-xl font-semibold">
+            {/* <h1 className="text-lg md:text-xl font-semibold">
               Admin Dashboard
-            </h1>
+            </h1> */}
+            <Input
+              type="text"
+              placeholder="Search..."
+              className="  w-64 rounded-full bg-gray-200 focus:bg-white transition-colors"
+            />
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <Avatar>
-              <AvatarFallback>AD</AvatarFallback>
-            </Avatar>
-          </div>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-12 w-12 mr-4 rounded-full p-0"
+              >
+                <Avatar>
+                  <AvatarImage
+                    src={UserImage}
+                    alt="User Avatar"
+                    className="h-10 w-10 md:h-12 md:w-12 hover:cursor-pointer rounded-full object-cover"
+                  />
+                  <AvatarFallback>AD</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-50 mr-4">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">William</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    admin@example.com
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={openProfileDialog}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Edit Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={openPasswordDialog}>
+                <Lock className="mr-2 h-4 w-4" />
+                <span>Change Password</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleTabChange("WalletSetting")}
+              >
+                <Wallet className="mr-2 h-4 w-4" />
+                <span>Wallet Setting</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleTabChange("Plans")}>
+                <Gift className="mr-2 h-4 w-4" />
+                <span>Plan</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -353,6 +430,16 @@ const Dashboard = () => {
       >
         <div className="p-4 md:p-6">{renderContent()}</div>
       </main>
+
+      {/* Add the dialogs */}
+      <ProfileEditDialog
+        isOpen={isProfileDialogOpen}
+        onClose={closeProfileDialog}
+      />
+      <PasswordChangeDialog
+        isOpen={isPasswordDialogOpen}
+        onClose={closePasswordDialog}
+      />
     </div>
   );
 };
