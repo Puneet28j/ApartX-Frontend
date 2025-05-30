@@ -12,7 +12,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MyWalletsManagement } from "@/components/MyWalletsManagement";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import CoinBase from "../assets/Coinbase.svg";
 import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 
+// Update QuickActionsProps interface
 interface QuickActionsProps {
   email: string;
   mobile: string;
@@ -74,16 +75,107 @@ const ProfileScreen: React.FC = () => {
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
   const [isEditingMobile, setIsEditingMobile] = useState<boolean>(false);
   const [showWalletDrawer, setShowWalletDrawer] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(
+    null
+  ) as React.RefObject<HTMLInputElement>;
   const emailInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
+
+  // Add this near the top of the file, with other interfaces
+  const [initialName, setInitialName] = useState<string>("");
+  const [initialEmail, setInitialEmail] = useState<string>("");
+  const [initialMobile, setInitialMobile] = useState<string>("");
 
   // store selected file
   const [preview, setPreview] = useState<string>(""); // for previewing image
 
   const hasChanges: boolean =
-    isEditingName || isEditingEmail || isEditingMobile;
+    name !== initialName ||
+    email !== initialEmail ||
+    mobile !== initialMobile ||
+    image !== null;
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login-register");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/me`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include", // Include cookies if using session-based auth
+        }
+      );
+
+      // First check if response exists
+      if (!response) {
+        throw new Error("No response from server");
+      }
+
+      // Handle non-JSON responses
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error("Failed to parse JSON:", error);
+        throw new Error("Invalid response format from server");
+      }
+
+      if (response.ok) {
+        // Update both current and initial values
+        setName(data.name || "");
+        setEmail(data.email || "");
+        setMobile(data.mobile || "");
+        setInitialName(data.name || "");
+        setInitialEmail(data.email || "");
+        setInitialMobile(data.mobile || "");
+
+        if (data.profilePic) {
+          setPreview(
+            data.profilePic.startsWith("http")
+              ? data.profilePic
+              : `${import.meta.env.VITE_API_BASE_URL}${data.profilePic}`
+          );
+        }
+      } else {
+        // Handle error responses
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login-register");
+          toast.error("Session expired. Please login again.");
+        } else {
+          toast.error(data?.message || "Failed to fetch profile");
+        }
+      }
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Cannot connect to server. Please try again later."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // useEffect(() => {
   //   fetchUserWallets();
@@ -133,6 +225,18 @@ const ProfileScreen: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file");
+        return;
+      }
+
       setImage(file);
       setPreview(URL.createObjectURL(file));
     }
@@ -149,37 +253,92 @@ const ProfileScreen: React.FC = () => {
   };
 
   const handleSubmit = async (): Promise<void> => {
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("mobile", mobile);
-    if (image) formData.append("photo", image);
-
+    setIsSubmitting(true);
     try {
-      const res = await fetch("/api/update-profile", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      console.log("Profile updated", data);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login-register");
+        return;
+      }
 
-      // Reset editing states
+      const formData = new FormData();
+
+      // Only append if values have changed
+      if (name !== initialName) formData.append("name", name);
+      if (email !== initialEmail) formData.append("email", email);
+      if (mobile !== initialMobile) formData.append("mobile", mobile);
+      if (image) formData.append("profilePic", image);
+
+      // Debug log
+      console.log("Sending data:", {
+        name,
+        email,
+        mobile,
+        hasImage: !!image,
+      });
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/update-profile`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update profile");
+      }
+
+      // Update state with returned data
+      setName(data.name);
+      setEmail(data.email);
+      setMobile(data.mobile);
+      setInitialName(data.name);
+      setInitialEmail(data.email);
+      setInitialMobile(data.mobile);
+
+      if (data.profilePic) {
+        setPreview(
+          data.profilePic.startsWith("http")
+            ? data.profilePic
+            : `${import.meta.env.VITE_API_BASE_URL}${data.profilePic}`
+        );
+      }
+
+      // Reset edit states
       setIsEditingName(false);
       setIsEditingEmail(false);
       setIsEditingMobile(false);
+      setImage(null);
 
       toast.success("Profile updated successfully");
-    } catch (err) {
-      console.error("Update failed", err);
-      toast.error("Failed to update profile");
+    } catch (error) {
+      console.error("Update failed:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update profile"
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCancelEdits = (): void => {
+    // Reset edit states
     setIsEditingName(false);
     setIsEditingEmail(false);
     setIsEditingMobile(false);
-    // Optionally reset values to original state
+
+    // Refetch profile data to reset values
+    fetchUserProfile();
+
+    // Reset image if any
+    setImage(null);
   };
 
   const startEditingName = (): void => {
@@ -317,16 +476,29 @@ const ProfileScreen: React.FC = () => {
           </button>
 
           {hasChanges && (
-            <div className="flex gap-3 mt-2">
+            <div className="flex gap-3 mt-4">
               <button
                 onClick={handleSubmit}
-                className="flex-1 bg-[#6552FE] text-white py-2.5 rounded-full text-center font-medium text-base flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className={`flex-1 bg-[#6552FE] text-white py-2.5 rounded-full text-center font-medium text-base flex items-center justify-center gap-2 ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                <Check size={18} />
-                Save
+                {isSubmitting ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check size={18} />
+                    Save Changes
+                  </>
+                )}
               </button>
               <button
                 onClick={handleCancelEdits}
+                disabled={isSubmitting}
                 className="flex-1 bg-gray-600 text-white py-2.5 rounded-full text-center font-medium text-base flex items-center justify-center gap-2"
               >
                 <X size={18} />
@@ -418,6 +590,13 @@ const ProfileScreen: React.FC = () => {
           <span className="text-xs mt-1">Logout</span>
         </div>
       </div>
+
+      {/* Add loading state for initial profile load */}
+      {isLoading && (
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin text-[#6552FE]">⏳</div>
+        </div>
+      )}
     </div>
   );
 };

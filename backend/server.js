@@ -6,7 +6,13 @@ require("dotenv").config();
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Update with your frontend URL
+    credentials: true,
+    methods: "GET,POST,PUT,DELETE",
+  })
+);
 app.use(express.json());
 
 // Test route
