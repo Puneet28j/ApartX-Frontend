@@ -1,7 +1,8 @@
-import Bg from "@/assets/mainscreenbg.svg";
+import Bg from "@/assets/Untitled design (12).png";
 import { BookText, Home, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import USDTLogo from "../assets/usdt logo.svg";
+import PhoneImage from "../assets/Blue 3D and modern Crypto currency smartphone Poster (1).png";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -133,25 +134,42 @@ const MainScreen = () => {
             ))}
           </div>
         </div>
-        <div className="flex flex-col items-end text-start">
-          <div className="text-white text-left mb-2">
-            Get Detail <br />
-            insight about
-            <br /> Apart-x
+        {/* Bottom Text and About Button */}
+        <div className="fixed  bottom-12 left-0 right-0 z-20 px-4 max-w-lg mx-auto">
+          <div className="flex items-center justify-center">
+            {/* Phone Image */}
+            <div className="w-auto">
+              <img
+                src={PhoneImage}
+                alt="Phone"
+                className="h-[200px] w-[140px] object-contain"
+              />
+            </div>
+
+            {/* Text and Button Container */}
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="text-white text-left text-lg sm:text-2xl leading-tight font-medium">
+                Get Detail
+                <br />
+                insight about
+                <br /> Apart-x
+              </h3>
+              <button
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = "/Apart-X About.pdf";
+                  link.download = "ApartX-Details.pdf";
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="text-white bg-red-600 rounded-full px-3 py-1.5 text-[14px]  sm:text-[16px] font-semibold
+          hover:bg-red-700 transition-colors duration-200 shadow-lg hover:shadow-xl w-fit"
+              >
+                About Apart-X
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => {
-              const link = document.createElement("a");
-              link.href = "/Apart-X About.pdf"; // Path relative to public
-              link.download = "ApartX-Details.pdf"; // Optional: custom filename
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }}
-            className="text-white bg-red-600 rounded-full px-3 py-1"
-          >
-            About Apart-X
-          </button>
         </div>
       </div>
 

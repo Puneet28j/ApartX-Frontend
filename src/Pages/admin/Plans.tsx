@@ -15,21 +15,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
-// Add the CreatePlanDialog component
-const CreatePlanDialog = () => {
+interface Plan {
+  name: string;
+  minInvestment: string;
+  maxInvestment: string;
+  roi: string;
+  duration: string;
+  status: "Active" | "Inactive";
+}
+
+interface PlanDialogProps {
+  plan?: Plan | null;
+  isEdit?: boolean;
+}
+
+// Replace CreatePlanDialog with this new component
+const PlanDialog = ({ plan = null, isEdit = false }: PlanDialogProps) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    minInvestment: "",
-    maxInvestment: "",
-    roi: "",
-    duration: "",
+    name: plan?.name || "",
+    minInvestment: plan?.minInvestment?.replace(/,/g, "") || "",
+    maxInvestment: plan?.maxInvestment?.replace(/,/g, "") || "",
+    roi: plan?.roi?.replace("%", "") || "",
+    duration: plan?.duration || "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission here
-    console.log(formData);
+    if (isEdit) {
+      console.log("Editing plan:", formData);
+    } else {
+      console.log("Creating plan:", formData);
+    }
     setOpen(false);
   };
 
@@ -43,16 +61,30 @@ const CreatePlanDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Plan
-        </Button>
+        {isEdit ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full sm:w-auto text-xs md:text-sm"
+          >
+            Edit
+          </Button>
+        ) : (
+          <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Plan
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Investment Plan</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Investment Plan" : "Create New Investment Plan"}
+          </DialogTitle>
           <DialogDescription>
-            Fill in the details for the new investment plan.
+            {isEdit
+              ? "Modify the details of the investment plan."
+              : "Fill in the details for the new investment plan."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -124,7 +156,9 @@ const CreatePlanDialog = () => {
             >
               Cancel
             </Button>
-            <Button type="submit">Create Plan</Button>
+            <Button type="submit">
+              {isEdit ? "Save Changes" : "Create Plan"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -132,7 +166,7 @@ const CreatePlanDialog = () => {
   );
 };
 
-const plans = [
+const plans: Plan[] = [
   {
     name: "Basic Plan",
     minInvestment: "100",
@@ -171,7 +205,7 @@ export const renderPlans = () => (
     {/* Header Section - Stack on mobile */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <h2 className="text-xl sm:text-2xl font-bold">Investment Plans</h2>
-      <CreatePlanDialog />
+      <PlanDialog />
     </div>
 
     {/* Cards Grid - Single column on mobile, two columns on tablet and up */}
@@ -226,13 +260,7 @@ export const renderPlans = () => (
 
             {/* Action Buttons - Full width on mobile */}
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full sm:w-auto text-xs md:text-sm"
-              >
-                Edit
-              </Button>
+              <PlanDialog plan={plan} isEdit={true} />
               <Button
                 size="sm"
                 variant={plan.status === "Active" ? "destructive" : "default"}

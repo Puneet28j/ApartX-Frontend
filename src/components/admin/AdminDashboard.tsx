@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { renderDashboard } from "@/Pages/admin/Dashboard";
 import { renderDashBoardTabs } from "@/Pages/admin/DashboardTabs";
-import { renderInvestors } from "@/Pages/admin/Investors";
+import { InvestorsList } from "@/Pages/admin/Investors";
 import { renderPlans } from "@/Pages/admin/Plans";
 import { renderReferralsHistory } from "@/Pages/admin/ReferralsHistory";
 
@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { renderWalletSetting } from "@/Pages/admin/WalletSetting";
+import { WalletSetting } from "@/Pages/admin/WalletSetting";
 
 import {
   ArrowDownLeft,
@@ -194,7 +194,7 @@ const Dashboard = () => {
       case "Dashboard":
         return renderDashboard();
       case "WalletSetting":
-        return renderWalletSetting();
+        return <WalletSetting />; // Use as JSX component
       case "Deposit":
         return renderDashBoardTabs({ title: "Deposit", data });
       case "Withdrawals":
@@ -204,7 +204,7 @@ const Dashboard = () => {
       case "Transaction":
         return renderDashBoardTabs({ title: "Transaction", data });
       case "Investors":
-        return renderInvestors();
+        return <InvestorsList />;
       case "Plans":
         return renderPlans();
       case "ReferralsHistory":
