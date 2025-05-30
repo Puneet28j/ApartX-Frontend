@@ -19,77 +19,56 @@ const LoginForm = () => {
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const deviceId =
-        localStorage.getItem("deviceId") ||
-        Math.random().toString(36).substring(7);
 
-      // Format the phone number consistently
+      if (!phoneNumber || !password) {
+        toast.error("Please fill in all fields");
+        return;
+      }
+
+      // const formattedMobile = phoneNumber.startsWith("+")
+      //   ? phoneNumber
+      //   : `+${phoneNumber}`;
+
       const formattedMobile = phoneNumber.startsWith("+")
         ? phoneNumber
         : `+${phoneNumber}`;
 
-<<<<<<< HEAD
+
+
+      const deviceId = window.navigator.userAgent; // or a UUID from storage
+
       const response = await axios.post(`${API_URL}/login`, {
-        mobile: formattedMobile, // Use formatted mobile number
-        password,
-        deviceId,
+        mobile: formattedMobile,
+        password: password,
+        deviceId: deviceId,
       });
-=======
-    // const formattedMobile = phoneNumber.startsWith("+")
-    //   ? phoneNumber
-    //   : `+${phoneNumber}`;
 
-    const formattedMobile = phoneNumber.startsWith("+")
-  ? phoneNumber
-  : `+${phoneNumber}`;
+      const data = response.data;
 
-
->>>>>>> 701a228 (mpin redirection)
-
-      const { token, requireMpin, userId, redirectTo } = response.data;
-
-      localStorage.setItem("token", token);
+      // Save token to localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.userId);      // <-- Add this
       localStorage.setItem("deviceId", deviceId);
 
-<<<<<<< HEAD
-      if (requireMpin) {
-        localStorage.setItem("userId", userId);
+      if (data.requireMpin) {
+        toast.info("Please set MPIN to continue");
         navigate("/set-mpin");
-=======
-    const data = response.data;
-
-    // Save token to localStorage
-    localStorage.setItem("token", data.token);
-
-    if (data.requireMpin) {
-      toast.info("Please set MPIN to continue");
-      navigate("/set-mpin");
-    } else {
-      toast.success("Login successful");
-
-      if (data.role === "admin") {
-        navigate("/admin");
->>>>>>> 701a228 (mpin redirection)
       } else {
-        navigate(redirectTo);
+        toast.success("Login successful");
+
+        if (data.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/main-screen");
+        }
       }
-<<<<<<< HEAD
+
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
-=======
-    }
-
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
->>>>>>> 701a228 (mpin redirection)
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-3 py-6">
