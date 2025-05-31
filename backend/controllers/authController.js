@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sharp = require("sharp");
 const fs = require("fs");
-const path = require("path");
 
 // Generate new referral code based on mobile
 const generateReferralCode = (mobile) => {
@@ -46,7 +45,7 @@ exports.registerUser = async (req, res) => {
       referralCode: newReferralCode,
       referredBy: referrerCode,
       name,
-      email: `${mobile.replace(/\D/g, "")}-${Date.now()}@demo.com`,
+      email: `${mobile.replace(/\D/g, '')}-${Date.now()}@demo.com`,
       profilePic,
       role: "user",
     });
@@ -67,9 +66,7 @@ exports.loginUser = async (req, res) => {
     const { mobile, password, deviceId } = req.body;
 
     if (!mobile || !password || !deviceId) {
-      return res
-        .status(400)
-        .json({ message: "Mobile, password, and deviceId are required" });
+      return res.status(400).json({ message: "Mobile, password, and deviceId are required" });
     }
 
     const user = await User.findOne({ mobile });
@@ -104,10 +101,11 @@ exports.loginUser = async (req, res) => {
       message: "Login successful",
       token,
       role: user.role,
-      userId: user._id, // ✅ Add this
-      deviceId: user.deviceId, // ✅ Optional: helpful for debug
+      userId: user._id,           // ✅ Add this
+      deviceId: user.deviceId,    // ✅ Optional: helpful for debug
       redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
     });
+
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: "Server error" });
@@ -138,7 +136,7 @@ exports.setMpin = async (req, res) => {
       message: "MPIN set successfully. You can now login.",
       token,
       role: user.role,
-      redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
+      redirectTo: user.role === "admin" ? "/admin" : "/main-screen"
     });
   } catch (err) {
     console.error(err);
@@ -150,65 +148,30 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, email, mobile } = req.body;
     const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (mobile) user.mobile = mobile;
 
-    // Update fields if they exist in request
-    if (name) user.name = name.trim();
-    if (email) user.email = email.trim();
-    if (mobile) user.mobile = mobile.trim();
-
-    // Handle profile picture
     if (req.file) {
-      // Create profile_pic directory if it doesn't exist
-      const profilePicDir = path.join(__dirname, "../uploads/profile_pic");
-      if (!fs.existsSync(profilePicDir)) {
-        fs.mkdirSync(profilePicDir, { recursive: true });
-      }
-
-      const filename = `resized-${Date.now()}-${req.file.originalname}`;
-      const outputPath = path.join("uploads/profile_pic", filename);
-
-      // Delete previous image if exists
-      if (user.profilePic) {
-        const previousImagePath = path.join(__dirname, "..", user.profilePic);
-        if (fs.existsSync(previousImagePath)) {
-          fs.unlinkSync(previousImagePath);
-        }
-      }
-
-      // Process and save new image
-      await sharp(req.file.path)
-        .resize(300, 300, {
-          fit: "cover",
-          position: "center",
-        })
-        .toFile(path.join(__dirname, "..", outputPath));
-
-      // Delete temporary file
+      const outputPath = `uploads/profile_pic/resized-${req.file.filename}`;
+      await sharp(req.file.path).resize(300, 300).toFile(outputPath);
       fs.unlinkSync(req.file.path);
-
-      // Update user profile pic path (store relative path)
-      user.profilePic = outputPath;
+      user.profilePic = `/${outputPath}`;
     }
 
     await user.save();
 
-    // Send back the updated user data
     res.status(200).json({
-      message: "Profile updated successfully",
+      message: "Profile updated",
+      profilePic: user.profilePic,
       name: user.name,
       email: user.email,
       mobile: user.mobile,
-      profilePic: user.profilePic,
     });
   } catch (err) {
-    console.error("Profile update error:", err);
-    res.status(500).json({
-      message: "Failed to update profile",
-      error: err.message,
-    });
+    console.error(err);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
