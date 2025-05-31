@@ -27,6 +27,9 @@ import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import Combobox from "./ComboBox";
 import { Separator } from "./ui/separator";
+import axios from "axios";
+
+const API_URL = "/api";
 
 const wallets = [
   { value: "binance", label: "Binance", icon: Binance },
@@ -35,15 +38,38 @@ const wallets = [
   { value: "trustWallet", label: "Trust Wallet", icon: TrustWallet },
 ];
 
+const [walletID, setWalletID] = useState("");
+const [walletType, setWalletType] = useState("");
+const [qrImage, setQrImage] = useState<File | null>(null);
+
+
 export function DrawerDemo() {
   // const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
 
-  const handleOpenDialog = () => {
-    setOpenDrawer(false); // close drawer
-    setTimeout(() => setOpenDialog(true), 200); // small delay to avoid overlap
-  };
+  const handleOpenDialog = async () => {
+  if (!walletID || !walletType) return alert("Fill all required fields");
+
+  const formData = new FormData();
+  formData.append("walletID", walletID);
+  formData.append("walletType", walletType);
+  if (qrImage) formData.append("qrImage", qrImage);
+
+try {
+  await axios.post(`${API_URL}/wallet/add`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data", // ✅ REQUIRED for file uploads
+    },
+  });
+
+  setOpenDrawer(false);
+  setTimeout(() => setOpenDialog(true), 200);
+} catch (err) {
+  alert("Failed to add wallet");
+}
+  }
+
 
   return (
     <>
@@ -97,11 +123,14 @@ export function DrawerDemo() {
               <label className="text-white font-medium text-sm">
                 Enter Wallet ID
               </label>
-              <input
-                type="text"
-                placeholder="Wallet ID"
-                className="h-12 px-4 border border-white rounded-xl bg-transparent text-white outline-none"
-              />
+            <input
+  type="text"
+  placeholder="Wallet ID"
+  value={walletID}
+  onChange={(e) => setWalletID(e.target.value)}
+  className="h-12 px-4 border border-white rounded-xl bg-transparent text-white outline-none"
+/>
+
             </div>
 
             <div className="flex items-center justify-center gap-0.5 mt-4">
@@ -110,18 +139,30 @@ export function DrawerDemo() {
               <Separator className="max-w-[150px]" />
             </div>
 
-            <Button
-              className="w-full h-12 mt-4 bg-[#38AD46] text-white font-semibold rounded-[16px]"
-              // onClick={() => navigate("/verify-otp")}
-            >
-              Upload Wallet QR Code
-            </Button>
+          <input
+  type="file"
+  accept="image/*"
+  className="hidden"
+  id="uploadQr"
+  onChange={(e) => setQrImage(e.target.files?.[0] || null)}
+ />
+<label htmlFor="uploadQr">
+  <Button className="w-full h-12 mt-4 bg-[#38AD46] text-white font-semibold rounded-[16px]">
+    Upload Wallet QR Code
+  </Button>
+</label>
+
 
             <div className="flex flex-col space-y-4 mt-4">
               <label className="text-white font-medium text-sm">
                 Select a supported wallet type.
               </label>
-              <Combobox placeholder="Enter Wallet" wallets={wallets} />
+            <Combobox
+  placeholder="Enter Wallet"
+  wallets={wallets}
+  onChange={(value) => setWalletType(value)}
+/>
+
             </div>
 
             <DrawerFooter className=" p-0">

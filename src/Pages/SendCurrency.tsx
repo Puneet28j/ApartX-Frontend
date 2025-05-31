@@ -1,3 +1,5 @@
+// File: src/pages/SendCurrency.tsx
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import "react-phone-input-2/lib/style.css";
@@ -10,6 +12,9 @@ import Binance from "../assets/binance.svg";
 import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
+import axios from "axios";
+
+const API_URL = "/api";
 
 const wallets2 = [
   { value: "binance", label: "Binance", icon: Binance },
@@ -48,10 +53,42 @@ const SendCurrency = () => {
     fileInputRef.current?.click();
   };
 
-  console.log(screenshot);
+  const handleSubmit = async () => {
+    if (!amount || !walletID || !selectedWallet) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login first.");
+      navigate("/login-register");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("amount", amount);
+    formData.append("walletType", selectedWallet);
+    formData.append("walletID", walletID);
+    if (screenshot) {
+      formData.append("screenshot", screenshot);
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/wallet/transfer`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Transfer success:", response.data);
+      navigate("/transfer-receipt");
+    } catch (error: any) {
+      console.error("Transfer failed:", error.response?.data || error.message);
+      alert("Transfer failed. Please try again.");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] py-2 overflow-y-auto overflow-x-hidden px-3">
-      {/* Top Back Button + Line */}
       <div className="flex flex-col gap-1 mb-3">
         <button
           onClick={backnavigation}
@@ -62,9 +99,7 @@ const SendCurrency = () => {
         <div className="border-t border-white border-4 w-full" />
       </div>
 
-      {/* Content */}
       <div className="flex flex-col gap-1 w-full flex-grow">
-        {/* Header */}
         <div className="flex-none text-start">
           <h2 className="mt-1 font-medium text-[#F7F7F7] text-[22px] leading-tight">
             Enter Amount
@@ -74,21 +109,14 @@ const SendCurrency = () => {
           </p>
         </div>
 
-        {/* Form */}
         <div className="mt-1 flex justify-center">
           <div className="w-full max-w-[350px] pb-2 border-1 relative border-white rounded-[20px] flex justify-center">
             <div className="flex flex-col items-center w-full">
               <User2Icon className="text-white h-[60px] w-[60px] rounded-full border-2 border-white mt-2" />
-              <div className="text-white text-[15px] text-center mt-2">
-                John
-              </div>
+              <div className="text-white text-[15px] text-center mt-2">John</div>
               <div className="mt-2 w-full flex justify-center">
                 <div className="bg-black w-[160px]  items-center rounded-lg gap-4 justify-center h-[50px] mx-auto flex">
-                  <img
-                    className="h-[40px] w-[40px]"
-                    src={USDTLOGO}
-                    alt="USDT"
-                  />
+                  <img className="h-[40px] w-[40px]" src={USDTLOGO} alt="USDT" />
                   <div className="text-white text-[15px]">USDT</div>
                 </div>
               </div>
@@ -112,7 +140,6 @@ const SendCurrency = () => {
         </div>
       </div>
 
-      {/* Footer */}
       {showWalletIDInput ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col">
@@ -151,12 +178,6 @@ const SendCurrency = () => {
           />
 
           <div className="flex flex-col gap-2">
-            {/* <Button
-                className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
-                onClick={() => navigate("/transfer-receipt")}
-              >
-                Scan QR Code
-              </Button> */}
             <Button
               className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
               onClick={triggerFileSelect}
@@ -167,7 +188,7 @@ const SendCurrency = () => {
             <Button
               disabled={!walletID}
               className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
-              onClick={() => navigate("/transfer-receipt")}
+              onClick={handleSubmit}
             >
               Pay Now
             </Button>

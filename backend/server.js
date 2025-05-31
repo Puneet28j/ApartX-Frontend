@@ -49,12 +49,15 @@ const sendCurrencyRoutes = require("./routes/sendCurrencyRoutes");
 const receiveCurrencyRoutes = require("./routes/receiveCurrencyRoutes");
 const investmentRoutes = require("./routes/investmentRoutes");
 const referralRoutes = require("./routes/referralRoutes");
+const walletRoutes = require("./routes/walletRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api", sendCurrencyRoutes);
 app.use("/api", receiveCurrencyRoutes);
 app.use("/api", investmentRoutes);
 app.use("/api", referralRoutes);
+app.use("/api", walletRoutes);
+
 
 // ✅ MongoDB Connection
 mongoose
