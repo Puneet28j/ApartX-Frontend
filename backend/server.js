@@ -26,11 +26,11 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure static file serving before routes
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Add after static file middleware
+// Add error handling for file serving
 app.use((err, req, res, next) => {
   if (err.code === "ENOENT") {
     console.error("File not found:", req.path);
-    return res.status(404).send("File not found");
+    return res.status(404).json({ message: "File not found" });
   }
   next(err);
 });
