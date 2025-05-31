@@ -66,7 +66,7 @@ const userWallets = [
   },
 ];
 const API_URL = "/api/auth"; //localhost:5000/api/auth
-const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE;
+const IMAGE_BASE = "https://apart-x.pro";
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
