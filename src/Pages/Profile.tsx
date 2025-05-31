@@ -65,8 +65,8 @@ const userWallets = [
     isDefault: false,
   },
 ];
+const API_URL = "/api/auth"; //localhost:5000/api/auth
 const ProfileScreen: React.FC = () => {
-  const API_URL = "/api/auth"; //localhost:5000/api/auth
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -154,21 +154,27 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture - make sure the URL is correct
       if (data.profilePic) {
-        // const baseUrl = API_URL;
+        const baseUrl = API_URL.split("/api/auth")[0]; // Get base URL without /api/auth
         const imageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
-          : `/${data.profilePic}`;
+          : `${baseUrl}/${data.profilePic}`; // Combine base URL with profile pic path
 
-        console.log("Image URL:", imageUrl);
+        console.log("Image URL construction:", {
+          baseUrl,
+          profilePic: data.profilePic,
+          finalUrl: imageUrl,
+        });
 
-        // Test if image loads
         const img = new Image();
         img.onload = () => {
           console.log("Image loaded successfully");
           setPreview(imageUrl);
         };
         img.onerror = (e) => {
-          console.error("Failed to load image:", e);
+          console.error("Failed to load image:", {
+            error: e,
+            attemptedUrl: imageUrl,
+          });
           setPreview("");
         };
         img.src = imageUrl;
@@ -317,11 +323,17 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture update
       if (data.profilePic) {
+        const baseUrl = API_URL.split("/api/auth")[0];
         const newImageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
-          : `/${data.profilePic}`;
+          : `${baseUrl}/${data.profilePic}`;
 
-        // Clean up old blob URL
+        console.log("New profile image:", {
+          baseUrl,
+          profilePic: data.profilePic,
+          finalUrl: newImageUrl,
+        });
+
         if (preview && preview.startsWith("blob:")) {
           URL.revokeObjectURL(preview);
         }
@@ -420,6 +432,17 @@ const ProfileScreen: React.FC = () => {
                   src={preview}
                   alt="Preview"
                   className="object-cover w-full h-full rounded-full"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    console.error("Image load error:", {
+                      src: img.src,
+                      time: new Date().toISOString(),
+                    });
+                    setPreview("");
+                  }}
+                  onLoad={() =>
+                    console.log("Image loaded successfully:", preview)
+                  }
                 />
               ) : (
                 <User className="w-[143px] h-[143px] text-white" />

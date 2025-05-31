@@ -31,11 +31,11 @@ if (!fs.existsSync(uploadsDir)) {
 // ✅ Serve static files
 app.use("/uploads", express.static(uploadsDir));
 
-// ✅ Error handler for static files
+
 app.use((err, req, res, next) => {
   if (err.code === "ENOENT") {
     console.error("File not found:", req.path);
-    return res.status(404).send("File not found");
+    return res.status(404).json({ message: "File not found" });
   }
   next(err);
 });
