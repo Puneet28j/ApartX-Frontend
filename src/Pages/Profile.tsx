@@ -66,6 +66,7 @@ const userWallets = [
   },
 ];
 const API_URL = "/api/auth"; //localhost:5000/api/auth
+const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE;
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
@@ -156,8 +157,9 @@ const ProfileScreen: React.FC = () => {
       if (data.profilePic) {
         const baseUrl = API_URL.split("/api/auth")[0]; // Get base URL without /api/auth
         const imageUrl = data.profilePic.startsWith("http")
-          ? data.profilePic
-          : `${baseUrl}/${data.profilePic}`; // Combine base URL with profile pic path
+  ? data.profilePic
+  : `${IMAGE_BASE}/${data.profilePic}`;
+ // Combine base URL with profile pic path
 
         console.log("Image URL construction:", {
           baseUrl,
