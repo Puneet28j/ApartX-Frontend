@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sharp = require("sharp");
 const fs = require("fs");
+const path = require("path");
 
 // Generate new referral code based on mobile
 const generateReferralCode = (mobile) => {
@@ -148,13 +149,6 @@ exports.setMpin = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const { name, email, mobile } = req.body;
-    console.log("Received update request:", {
-      name,
-      email,
-      mobile,
-      file: req.file,
-    });
-
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -168,39 +162,36 @@ exports.updateProfile = async (req, res) => {
 
     // Handle profile picture
     if (req.file) {
-      // Delete previous image if it exists
-      if (user.profilePic) {
-        const previousImagePath = user.profilePic.startsWith("/")
-          ? `${process.cwd()}${user.profilePic}`
-          : `${process.cwd()}/${user.profilePic}`;
+      // Create profile_pic directory if it doesn't exist
+      const profilePicDir = path.join(__dirname, "../uploads/profile_pic");
+      if (!fs.existsSync(profilePicDir)) {
+        fs.mkdirSync(profilePicDir, { recursive: true });
+      }
 
-        // Check if file exists before trying to delete
+      const filename = `resized-${Date.now()}-${req.file.originalname}`;
+      const outputPath = path.join("uploads/profile_pic", filename);
+
+      // Delete previous image if exists
+      if (user.profilePic) {
+        const previousImagePath = path.join(__dirname, "..", user.profilePic);
         if (fs.existsSync(previousImagePath)) {
-          try {
-            fs.unlinkSync(previousImagePath);
-            console.log("Previous image deleted successfully");
-          } catch (error) {
-            console.error("Error deleting previous image:", error);
-          }
+          fs.unlinkSync(previousImagePath);
         }
       }
 
       // Process and save new image
-      const outputPath = `uploads/profile_pic/resized-${req.file.filename}`;
+      await sharp(req.file.path)
+        .resize(300, 300, {
+          fit: "cover",
+          position: "center",
+        })
+        .toFile(path.join(__dirname, "..", outputPath));
 
-      // Ensure directory exists
-      const dir = "uploads/profile_pic";
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-
-      await sharp(req.file.path).resize(300, 300).toFile(outputPath);
-
-      // Delete the temporary uploaded file
+      // Delete temporary file
       fs.unlinkSync(req.file.path);
 
-      // Update user profile pic path
-      user.profilePic = `/${outputPath}`;
+      // Update user profile pic path (store relative path)
+      user.profilePic = outputPath;
     }
 
     await user.save();

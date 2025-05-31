@@ -1,21 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 // import SmallLine from "../assets/smallLine.svg"; // Placeholder for the small line image
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react"; // Optional: lucide icon
 import { toast } from "sonner";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "/api/auth";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [referralId, setReferralId] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Add useEffect to check URL parameters on component mount
+  useEffect(() => {
+    const referralFromUrl = searchParams.get("ref");
+    if (referralFromUrl) {
+      setReferralId(referralFromUrl);
+    }
+  }, [searchParams]);
 
   const handleRegister = async () => {
     try {

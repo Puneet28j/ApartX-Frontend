@@ -66,7 +66,7 @@ const userWallets = [
   },
 ];
 const ProfileScreen: React.FC = () => {
-  const API_URL = "http://localhost:5000"; //localhost:5000/api/auth
+  const API_URL = "/api/auth"; //localhost:5000/api/auth
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -121,7 +121,7 @@ const ProfileScreen: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/api/auth/me`, {
+      const response = await fetch(`${API_URL}/me`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -154,25 +154,24 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture - make sure the URL is correct
       if (data.profilePic) {
+        // const baseUrl = API_URL;
         const imageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
-          : `${API_URL}${data.profilePic}`;
+          : `/${data.profilePic}`;
 
-        console.log("Setting profile image URL:", imageUrl); // Debug log
+        console.log("Image URL:", imageUrl);
 
-        // Test if image loads correctly
+        // Test if image loads
         const img = new Image();
         img.onload = () => {
           console.log("Image loaded successfully");
           setPreview(imageUrl);
         };
-        img.onerror = () => {
-          console.error("Failed to load image:", imageUrl);
-          setPreview(""); // Clear preview if image fails to load
+        img.onerror = (e) => {
+          console.error("Failed to load image:", e);
+          setPreview("");
         };
         img.src = imageUrl;
-      } else {
-        setPreview(""); // Clear preview if no profile pic
       }
     } catch (error) {
       console.error("Profile fetch error:", error);
@@ -289,7 +288,7 @@ const ProfileScreen: React.FC = () => {
         imageType: image?.type,
       });
 
-      const response = await fetch(`${API_URL}/api/auth/update-profile`, {
+      const response = await fetch(`${API_URL}/update-profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -320,9 +319,7 @@ const ProfileScreen: React.FC = () => {
       if (data.profilePic) {
         const newImageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
-          : `${API_URL}${data.profilePic}`;
-
-        console.log("New image URL:", newImageUrl); // Debug log
+          : `/${data.profilePic}`;
 
         // Clean up old blob URL
         if (preview && preview.startsWith("blob:")) {

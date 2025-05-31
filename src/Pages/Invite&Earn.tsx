@@ -12,7 +12,16 @@ const referredFriends = Array(5).fill({
 const InviteAndEarn = () => {
   const navigate = useNavigate();
   const referralCode = "VU5AXIJT";
-  const referralLink = "http://referdemolink.com/demo/VU5AXIJT";
+
+  // Method 1: Get current domain dynamically
+  const getCurrentDomain = () => {
+    const protocol = window.location.protocol; // http: or https:
+    const hostname = window.location.hostname; // domain name
+    const port = window.location.port ? `:${window.location.port}` : "";
+    return `${protocol}//${hostname}${port}`;
+  };
+
+  const referralLink = `${getCurrentDomain()}/register?ref=${referralCode}`;
 
   return (
     <div className="relative flex flex-col h-screen max-h-screen bg-black text-white overflow-hidden">
@@ -30,6 +39,7 @@ const InviteAndEarn = () => {
             <ArrowLeft size={20} className="h-8 w-8 text-white" />
           </button>
         </div>
+
         {/* Title Row */}
         <div className="flex justify-around items-center mt-[40px] relative z-10">
           <div className="text-[26px] font-racing leading-[100%]">
@@ -56,7 +66,7 @@ const InviteAndEarn = () => {
 
         {/* Code Section */}
         <div className="mx-auto py-2 mt-2 w-[200px] h-[40px] text-center bg-[#4C4343] rounded-md flex items-center justify-center px-4">
-          <div className="text-white  leading-[32px] text-[28px] font-medium">
+          <div className="text-white leading-[32px] text-[28px] font-medium">
             {referralCode}
           </div>
           <CopyButton textToCopy={referralCode} />
@@ -64,7 +74,7 @@ const InviteAndEarn = () => {
 
         {/* Share Link */}
         <div className="ml-1 mt-2 flex items-center space-x-2 px-3">
-          <div className="w-[90%] h-10 px-3 flex items-center text-[14px] text-black bg-white rounded-md">
+          <div className="w-[90%] h-10 px-1 flex items-center text-[14px] text-black bg-white rounded-md">
             {referralLink}
           </div>
           <CopyButton textToCopy={referralLink} />

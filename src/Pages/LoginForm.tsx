@@ -7,7 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
-const API_URL = "http://147.93.105.130:5000/api/auth";
+const API_URL = "/api/auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -25,15 +25,9 @@ const LoginForm = () => {
         return;
       }
 
-      // const formattedMobile = phoneNumber.startsWith("+")
-      //   ? phoneNumber
-      //   : `+${phoneNumber}`;
-
       const formattedMobile = phoneNumber.startsWith("+")
         ? phoneNumber
         : `+${phoneNumber}`;
-
-
 
       const deviceId = window.navigator.userAgent; // or a UUID from storage
 
@@ -46,7 +40,7 @@ const LoginForm = () => {
       const data = response.data;
 
       // Save token to localStorage
-      // localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token);
       // localStorage.setItem("userId", data.userId);      // <-- Add this
       // localStorage.setItem("deviceId", deviceId);
 
@@ -56,13 +50,12 @@ const LoginForm = () => {
       // } else {
       //   toast.success("Login successful");
 
-        if (data.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/main-screen");
-        }
+      if (data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/main-screen");
+      }
       // }
-
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
@@ -156,6 +149,3 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
-
-
-
