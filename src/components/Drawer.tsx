@@ -38,37 +38,39 @@ const wallets = [
   { value: "trustWallet", label: "Trust Wallet", icon: TrustWallet },
 ];
 
-const [walletID, setWalletID] = useState("");
-const [walletType, setWalletType] = useState("");
-const [qrImage, setQrImage] = useState<File | null>(null);
+
 
 
 export function DrawerDemo() {
-  // const navigate = useNavigate();
+  // ✅ All hooks must be here inside the component
+  const [walletID, setWalletID] = useState("");
+  const [walletType, setWalletType] = useState("");
+  const [qrImage, setQrImage] = useState<File | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const handleOpenDialog = async () => {
-  if (!walletID || !walletType) return alert("Fill all required fields");
+    if (!walletID || !walletType) return alert("Fill all required fields");
 
-  const formData = new FormData();
-  formData.append("walletID", walletID);
-  formData.append("walletType", walletType);
-  if (qrImage) formData.append("qrImage", qrImage);
+    const formData = new FormData();
+    formData.append("walletID", walletID);
+    formData.append("walletType", walletType);
+    if (qrImage) formData.append("screenshot", qrImage); // match backend field name
 
-try {
-  await axios.post(`${API_URL}/wallet/add`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data", // ✅ REQUIRED for file uploads
-    },
-  });
+    try {
+      await axios.post(`${API_URL}/wallet/add`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-  setOpenDrawer(false);
-  setTimeout(() => setOpenDialog(true), 200);
-} catch (err) {
-  alert("Failed to add wallet");
-}
-  }
+      setOpenDrawer(false);
+      setTimeout(() => setOpenDialog(true), 200);
+    } catch (err) {
+      alert("Failed to add wallet");
+    }
+  };
+
 
 
   return (

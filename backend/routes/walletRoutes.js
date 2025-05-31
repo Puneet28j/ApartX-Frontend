@@ -12,8 +12,10 @@ const storage = multer.diskStorage({
     cb(null, unique + path.extname(file.originalname));
   }
 });
+
 const upload = multer({ storage });
 
-router.post("/wallet/add", upload.single("qrImage"), addWallet);
+// Use 'screenshot' here to match frontend & Postman field name
+router.post("/wallet/add", upload.single("screenshot"), addWallet);
 
 module.exports = router;

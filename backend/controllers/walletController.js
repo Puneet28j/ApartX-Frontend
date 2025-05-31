@@ -1,24 +1,32 @@
 const UserWallet = require("../models/UserWallet");
 
+
 exports.addWallet = async (req, res) => {
   try {
-    const { walletID, walletType } = req.body;
-    const qrImage = req.file ? req.file.filename : null;
+
+    const { walletID, walletType, userId } = req.body;
 
     if (!walletID || !walletType) {
       return res.status(400).json({ message: "walletID and walletType are required" });
     }
 
+    const qrImagePath = req.file ? req.file.path : null;
+
     const newWallet = new UserWallet({
-      userId: req.user?._id, // if auth middleware used
       walletID,
       walletType,
-      qrImage
+      userId,
+      qrImage: qrImagePath,
     });
 
     await newWallet.save();
-    res.status(201).json({ message: "Wallet saved successfully", data: newWallet });
+
+    return res.status(201).json({
+      message: "Wallet added successfully",
+      wallet: newWallet,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error saving wallet", error: error.message });
+    console.error("🔥 Error adding wallet:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
