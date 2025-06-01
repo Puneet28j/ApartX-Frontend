@@ -1,4 +1,4 @@
-import { DrawerDemo } from "@/components/Drawer";
+import DrawerComponent from "@/components/Drawer";
 import {
   ArrowLeft,
   Camera,
@@ -65,6 +65,7 @@ const userWallets = [
     isDefault: false,
   },
 ];
+
 const API_URL = "/api/auth"; //localhost:5000/api/auth
 const IMAGE_BASE = "https://apart-x.pro";
 const ProfileScreen: React.FC = () => {
@@ -157,9 +158,9 @@ const ProfileScreen: React.FC = () => {
       if (data.profilePic) {
         const baseUrl = API_URL.split("/api/auth")[0]; // Get base URL without /api/auth
         const imageUrl = data.profilePic.startsWith("http")
-  ? data.profilePic
-  : `${IMAGE_BASE}/${data.profilePic}`;
- // Combine base URL with profile pic path
+          ? data.profilePic
+          : `${IMAGE_BASE}/${data.profilePic}`;
+        // Combine base URL with profile pic path
 
         console.log("Image URL construction:", {
           baseUrl,
@@ -623,7 +624,7 @@ const ProfileScreen: React.FC = () => {
           <span className="text-xs mt-1">Home</span>
         </div>
         <div className="flex flex-col items-center text-white">
-          <DrawerDemo />
+          <DrawerComponent />
           <span className="text-[10px] text-center leading-tight mt-1">
             Add Trust
             <br />

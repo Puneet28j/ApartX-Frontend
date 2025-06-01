@@ -2,15 +2,16 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import "react-phone-input-2/lib/style.css";
 import { ArrowLeft } from "lucide-react";
-import Combobox from "@/components/ComboBox";
+// import Combobox from "@/components/ComboBox";
 import { useState } from "react";
 
-import Binance from "../assets/binance.svg";
+import Binance from "../assets/3495812.svg";
 import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import USDTLOGO from "../assets/usdt logo.svg";
 import { useLocation } from "react-router-dom";
+import Combobox from "@/components/ComboBox";
 
 const wallets2 = [
   { value: "binance", label: "Binance", icon: Binance },
@@ -23,7 +24,15 @@ const wallets2 = [
 
 const ReceiveFinal = () => {
   const location = useLocation();
-  const [selectedWallet, setSelectedWallet] = useState("");
+  const [wallets, setWallets] = useState(wallets2);
+
+  const [walletType, setWalletType] = useState<string>("");
+
+  const handleComboboxOpen = (isOpen: boolean) => {
+    if (isOpen) {
+      setWallets(wallets2);
+    }
+  };
 
   const { amount } = location.state || {};
   const navigate = useNavigate();
@@ -87,9 +96,10 @@ const ReceiveFinal = () => {
               <div className="mt-4 w-full flex flex-col justify-center">
                 <div className="text-white text-center">Select wallet</div>
                 <Combobox
-                  placeholder="Select wallet"
-                  wallets={wallets2}
-                  onChange={(value) => setSelectedWallet(value)}
+                  placeholder="Enter Wallet"
+                  wallets={wallets}
+                  onChange={(value) => setWalletType(value)}
+                  onOpenChange={handleComboboxOpen}
                 />
               </div>
             </div>
@@ -102,7 +112,7 @@ const ReceiveFinal = () => {
           <Button
             className="w-full h-12 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => navigate("/request-submitted")}
-            disabled={!selectedWallet}
+            disabled={!walletType}
           >
             Continue
           </Button>

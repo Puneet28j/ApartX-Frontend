@@ -123,7 +123,10 @@ const LoginForm = () => {
             {showPassword ? <EyeOffIcon size={30} /> : <EyeIcon size={30} />}
           </button>
         </div>
-        <div className="text-white no-underline text-right text-sm cursor-pointer">
+        <div
+          onClick={() => navigate("/forget-password")}
+          className="text-white no-underline text-right text-sm cursor-pointer"
+        >
           Forgot Password?
         </div>
       </div>

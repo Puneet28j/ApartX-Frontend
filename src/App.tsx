@@ -30,6 +30,8 @@ import Dashboard from "./components/admin/AdminDashboard";
 import Portfolio from "./Pages/Portfolio";
 import Setmpin from "./Pages/SetMpin";
 import InvestmentPlanFinal from "./Pages/InvestmentPlanFinal";
+import EnterOtp from "./Pages/EnterOtp";
+import ForgetPassword from "./Pages/ForgetPassword";
 
 const App = () => {
   return (
@@ -88,6 +90,22 @@ const App = () => {
           element={
             <MobileLayout>
               <LoginForm />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/forget-password"
+          element={
+            <MobileLayout>
+              <ForgetPassword />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/enter-otp"
+          element={
+            <MobileLayout>
+              <EnterOtp />
             </MobileLayout>
           }
         />

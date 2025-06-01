@@ -15,6 +15,7 @@ const Register = () => {
   const [searchParams] = useSearchParams();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [referralId, setReferralId] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +31,7 @@ const Register = () => {
     try {
       setLoading(true);
 
-      if (!phone || !password || !referralId) {
+      if (!phone || !password || !referralId || !email) {
         toast.error("All fields are required");
         return;
       }
@@ -40,6 +41,7 @@ const Register = () => {
 
       const response = await axios.post(`${API_URL}/register`, {
         mobile: formattedMobile,
+        email,
         password,
         referralCode: referralId,
         deviceId,
@@ -125,6 +127,17 @@ const Register = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="h-12 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
+            />
+          </div>
+          {/* Email */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-white font-medium text-sm">Email</label>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="h-12 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
             />
           </div>

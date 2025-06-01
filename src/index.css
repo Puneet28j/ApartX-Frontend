@@ -8,6 +8,22 @@
   scrollbar-gutter: stable;
 }
 
+/* Allow drawer content to show popovers */
+[data-vaul-drawer] {
+  overflow: visible !important;
+}
+
+[data-vaul-drawer-wrapper] {
+  overflow: visible !important;
+}
+
+/* High z-index for popover */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
 body {
   overflow-y: scroll;
   padding-right: 0 !important; /* Prevents layout shift */

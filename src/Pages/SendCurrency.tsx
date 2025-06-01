@@ -7,12 +7,13 @@ import { ArrowLeft, User2Icon } from "lucide-react";
 import { useRef, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import USDTLOGO from "../assets/usdt logo.svg";
-import Combobox from "@/components/ComboBox";
-import Binance from "../assets/binance.svg";
+// import Combobox from "@/components/ComboBox";
+import Binance from "../assets/3495812.svg";
 import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import axios from "axios";
+import Combobox from "@/components/ComboBox";
 
 const API_URL = "/api";
 
@@ -72,12 +73,16 @@ const SendCurrency = () => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/wallet/transfer`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        `${API_URL}/wallet/transfer`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       console.log("Transfer success:", response.data);
       navigate("/transfer-receipt");
@@ -113,10 +118,16 @@ const SendCurrency = () => {
           <div className="w-full max-w-[350px] pb-2 border-1 relative border-white rounded-[20px] flex justify-center">
             <div className="flex flex-col items-center w-full">
               <User2Icon className="text-white h-[60px] w-[60px] rounded-full border-2 border-white mt-2" />
-              <div className="text-white text-[15px] text-center mt-2">John</div>
+              <div className="text-white text-[15px] text-center mt-2">
+                John
+              </div>
               <div className="mt-2 w-full flex justify-center">
                 <div className="bg-black w-[160px]  items-center rounded-lg gap-4 justify-center h-[50px] mx-auto flex">
-                  <img className="h-[40px] w-[40px]" src={USDTLOGO} alt="USDT" />
+                  <img
+                    className="h-[40px] w-[40px]"
+                    src={USDTLOGO}
+                    alt="USDT"
+                  />
                   <div className="text-white text-[15px]">USDT</div>
                 </div>
               </div>
@@ -133,6 +144,11 @@ const SendCurrency = () => {
                   placeholder="Select wallet"
                   wallets={wallets2}
                   onChange={(value) => setSelectedWallet(value)}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setShowWalletIDInput(false);
+                    }
+                  }}
                 />
               </div>
             </div>

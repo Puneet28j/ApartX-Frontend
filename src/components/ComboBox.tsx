@@ -1,54 +1,75 @@
 import * as React from "react";
-import { Check } from "lucide-react";
-
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
-const Combobox = ({
-  placeholder,
-  wallets,
-  onChange, // ✅ Accept onChange from parent
-}: {
+interface ComboboxProps {
   placeholder: string;
   wallets: {
     value: string;
     label: string;
     icon: string;
   }[];
-  onChange?: (value: string) => void; // ✅ Optional function prop
+  onChange?: (value: string) => void;
+  onOpenChange?: (isOpen: boolean) => void;
+}
+
+const Combobox: React.FC<ComboboxProps> = ({
+  placeholder,
+  wallets,
+  onChange,
+  onOpenChange,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const selectedWallet = wallets.find((wallet) => wallet.value === value);
 
+  const toggleOpen = () => {
+    const newOpen = !open;
+    setOpen(newOpen);
+    // Notify parent component when dropdown opens/closes
+    onOpenChange?.(newOpen);
+  };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSelect = (wallet: (typeof wallets)[0]) => {
+    const newValue = wallet.value === value ? "" : wallet.value;
+    setValue(newValue);
+    onChange?.(newValue);
+    setOpen(false);
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        className="bg-[#171717] hover:text-black text-white border-none max-w-[250px] mx-auto"
-        asChild
-      >
+    <div className="flex justify-center w-full" ref={dropdownRef}>
+      <div className="relative w-full max-w-[250px]">
+        {/* Trigger Button */}
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="group min-w-[230px] h-16 justify-center text-md bg-[#171717] border-none mx-auto"
+          onClick={toggleOpen}
+          className="group min-w-[230px] h-14 justify-between text-md bg-black border-none text-white hover:text-black w-full flex items-center px-4"
         >
           {selectedWallet ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 justify-center">
               <img
                 src={selectedWallet.icon}
                 alt=""
@@ -59,49 +80,53 @@ const Combobox = ({
               </span>
             </div>
           ) : (
-            <span className="group-hover:text-black">{placeholder}</span>
+            <span className="flex-1 text-center group-hover:text-black">
+              {placeholder}
+            </span>
           )}
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-white group-hover:text-black transition-transform duration-200 ml-2",
+              open && "transform rotate-180"
+            )}
+          />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="max-w-[250px] bg-[#171717] text-white p-0">
-        <Command className="bg-[#171717] text-white">
-          <CommandInput placeholder="Search crypto currency..." />
-          <CommandList>
-            <CommandEmpty>No crypto found.</CommandEmpty>
-            <CommandGroup>
-              {wallets.map((wallet) => (
-                <CommandItem
+
+        {/* Custom Dropdown */}
+        {open && (
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-full mt-1 bg-[#171717] border border-gray-600 rounded-md shadow-lg z-[9999] overflow-y-auto">
+            {wallets.length === 0 ? (
+              <div className="p-4 text-center text-white text-sm">
+                No crypto found.
+              </div>
+            ) : (
+              wallets.map((wallet) => (
+                <div
                   key={wallet.value}
-                  value={wallet.value}
-                  onSelect={(currentValue) => {
-                    const newValue = currentValue === value ? "" : currentValue;
-                    setValue(newValue);
-                    onChange?.(newValue); // ✅ Inform parent
-                    setOpen(false);
-                  }}
-                  className="text-white hover:text-black hover:bg-[#2a2a2a] cursor-pointer"
+                  onClick={() => handleSelect(wallet)}
+                  className="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] cursor-pointer text-white hover:text-black transition-colors"
                 >
-                  <div className="flex items-center gap-3 w-full">
-                    <img
-                      src={wallet.icon}
-                      alt={wallet.label}
-                      className="h-8 w-8"
-                    />
-                    <span className="text-md font-medium">{wallet.label}</span>
-                    <Check
-                      className={cn(
-                        "ml-auto h-5 w-5 text-green-500",
-                        value === wallet.value ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                  <img
+                    src={wallet.icon}
+                    alt={wallet.label}
+                    className="h-8 w-8 flex-shrink-0"
+                  />
+                  <span className="text-md font-medium flex-1">
+                    {wallet.label}
+                  </span>
+                  <Check
+                    className={cn(
+                      "h-5 w-5 text-green-500 flex-shrink-0",
+                      value === wallet.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
