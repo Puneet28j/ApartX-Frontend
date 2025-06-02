@@ -4,6 +4,9 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
+require("./utils/dailyROIJob");
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 
 const app = express();
 
@@ -47,15 +50,22 @@ app.get("/", (req, res) => res.send("API is running..."));
 const authRoutes = require("./routes/authRoutes");
 const sendCurrencyRoutes = require("./routes/sendCurrencyRoutes");
 const receiveCurrencyRoutes = require("./routes/receiveCurrencyRoutes");
-const investmentRoutes = require("./routes/investmentRoutes");
-const referralRoutes = require("./routes/referralRoutes");
+const investmentRoutes = require("./routes/investmentPlanRoutes");
 const walletRoutes = require("./routes/walletRoutes");
+const portfolioRoutes = require("./routes/portfolioRoutes");
+const referralRoutes = require("./routes/referralRoutes");
+const userInvestmentRoutes = require("./routes/userInvestmentRoutes"); // path as per your structure
 
-app.use("/api/auth", authRoutes);
+
+
+app.use("/api", userInvestmentRoutes);
+app.use("/api", referralRoutes);
+app.use("/api", portfolioRoutes);
+app.use("/api", walletRoutes);
+app.use("/api", authRoutes);
 app.use("/api", sendCurrencyRoutes);
 app.use("/api", receiveCurrencyRoutes);
 app.use("/api", investmentRoutes);
-app.use("/api", referralRoutes);
 app.use("/api", walletRoutes);
 
 

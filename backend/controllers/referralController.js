@@ -1,33 +1,16 @@
-const Referral = require("../models/Referral");
+const ReferralTree = require("../models/ReferralTree");
 
-exports.createReferral = async (req, res) => {
+
+exports.getMyReferrals  = async (req, res) => {
   try {
-    const { referrerCode, referredMobile, referredName } = req.body;
+    const userId = req.user._id;
 
-    if (!referrerCode || !referredMobile || !referredName) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
+    const downline = await ReferralTree.find({ path: userId })
+      .populate("userId", "name email mobile")
+      .sort({ level: 1 });
 
-    const referral = new Referral({
-      referrerCode,
-      referredMobile,
-      referredName
-    });
-
-    await referral.save();
-    res.status(201).json({ message: "Referral saved", data: referral });
-  } catch (error) {
-    res.status(500).json({ message: "Error saving referral", error: error.message });
-  }
-};
-
-exports.getReferralsByCode = async (req, res) => {
-  try {
-    const { code } = req.params;
-    const referrals = await Referral.find({ referrerCode: code }).sort({ joinedAt: -1 });
-
-    res.status(200).json({ referrals });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching referrals", error: error.message });
+    res.status(200).json({ tree: downline });
+  } catch (err) {
+    res.status(500).json({ message: "Error", error: err.message });
   }
 };

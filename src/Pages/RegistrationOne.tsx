@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react"; // Optional: lucide icon
 import { toast } from "sonner";
 import axios from "axios";
 
-const API_URL = "/api/auth";
+const API_URL = "/api";
 
 const Register = () => {
   const navigate = useNavigate();

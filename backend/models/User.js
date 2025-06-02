@@ -25,6 +25,8 @@ const userSchema = new mongoose.Schema({
     sparse: true, // This allows multiple null values
     default: "", // Default empty string instead of null
   },
+  otpCode: { type: String },
+otpExpiry: { type: Date },
   profilePic: String,
   role: {
     type: String,
