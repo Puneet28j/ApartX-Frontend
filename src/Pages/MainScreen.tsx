@@ -155,16 +155,9 @@ const MainScreen = () => {
                 <br /> Apart-x
               </h3>
               <button
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = "/Apart-X About.pdf";
-                  link.download = "ApartX-Details.pdf";
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-                className="text-white bg-red-600 rounded-full px-3 py-1.5 text-[14px]  sm:text-[16px] font-semibold
-          hover:bg-red-700 transition-colors duration-200 shadow-lg hover:shadow-xl w-fit"
+                onClick={() => navigate("/about-pdf")}
+                className="text-white bg-red-600 rounded-full px-3 py-1.5 text-[14px] sm:text-[16px] font-semibold
+    hover:bg-red-700 transition-colors duration-200 shadow-lg hover:shadow-xl w-fit"
               >
                 About Apart-X
               </button>

@@ -32,6 +32,7 @@ import Setmpin from "./Pages/SetMpin";
 import InvestmentPlanFinal from "./Pages/InvestmentPlanFinal";
 import EnterOtp from "./Pages/EnterOtp";
 import ForgetPassword from "./Pages/ForgetPassword";
+import PDFViewer from "./Pages/PDFViewer";
 
 const App = () => {
   return (
@@ -241,6 +242,14 @@ const App = () => {
 
         {/* Redirect root to admin dashboard */}
         <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route
+          path="/about-pdf"
+          element={
+            <MobileLayout>
+              <PDFViewer />
+            </MobileLayout>
+          }
+        />
       </Routes>
     </Router>
   );
