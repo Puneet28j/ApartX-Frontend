@@ -4,6 +4,12 @@ const receiveCurrencySchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
   amount: { type: Number, required: true },
   wallet: { type: String, required: true },
+  status: {
+    type: String,
+    enum: ["Pending", "Approved", "Disapproved"],
+    default: "Pending"
+  },
+  remark: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now }
 });
 

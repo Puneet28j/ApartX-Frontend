@@ -5,7 +5,7 @@ const userWalletSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false, // Set to true if wallet must be tied to a user
+      required: true   // ✅ now required
     },
     walletID: {
       type: String,
@@ -15,18 +15,36 @@ const userWalletSchema = new mongoose.Schema(
     walletType: {
       type: String,
       required: true,
-      enum: ["binance", "metamask", "coinbase", "trustWallet"], // Optional enum
+      enum: ["binance", "metamask", "coinbase", "trustWallet"],
       lowercase: true,
       trim: true,
     },
     qrImage: {
-      type: String, // This stores the file path of the uploaded image
-      required: false,
+      type: String,
     },
+    balance: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    }
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
+
+// ✅ Virtual populate if needed later
+// userWalletSchema.virtual("userDetails", {
+//   ref: "User",
+//   localField: "userId",
+//   foreignField: "_id",
+//   justOne: true
+// });
 
 module.exports = mongoose.model("UserWallet", userWalletSchema);

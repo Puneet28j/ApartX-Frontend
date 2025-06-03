@@ -1,21 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
-const { addWallet } = require("../controllers/walletController");
+const upload = multer({ dest: "uploads/qr/" });
+const {
+  addWallet,
+  getUserWallets,
+  updateWallet,
+  toggleWalletStatus,
+  updateWalletBalance,
+  getTotalWalletBalance,
+  getUserPassbook,
+  getAllPassbooks
+} = require("../controllers/walletController");
 
-// Multer setup
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/qr/"),
-  filename: (req, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
-  }
-});
 
-const upload = multer({ storage });
+const { verifyToken } = require("../middlewares/authMiddleware");
 
-// Use 'screenshot' here to match frontend & Postman field name
-router.post("/wallet/add", upload.single("screenshot"), addWallet);
+router.post("/wallet", verifyToken, upload.single("qrImage"), addWallet);
+router.get("/wallet", verifyToken, getUserWallets);
+router.put("/wallet/:walletId", verifyToken, upload.single("qrImage"), updateWallet);
+router.patch("/wallet/:walletId/toggle", verifyToken, toggleWalletStatus);
+router.put("/wallet/:walletId/balance", verifyToken, updateWalletBalance);
+router.get("/wallets/total", verifyToken, getTotalWalletBalance);
+router.get("/passbook", verifyToken, getUserPassbook);
+router.get("/admin/passbooks", verifyToken, getAllPassbooks);
+
+
 
 module.exports = router;

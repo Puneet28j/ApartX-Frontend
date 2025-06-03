@@ -65,8 +65,7 @@ const userWallets = [
     isDefault: false,
   },
 ];
-
-const API_URL = "/api/auth"; //localhost:5000/api/auth
+const API_URL = "/api"; //localhost:5000/api
 const IMAGE_BASE = "https://apart-x.pro";
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -156,7 +155,7 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture - make sure the URL is correct
       if (data.profilePic) {
-        const baseUrl = API_URL.split("/api/auth")[0]; // Get base URL without /api/auth
+        const baseUrl = API_URL.split("/api")[0]; // Get base URL without /api
         const imageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
           : `${IMAGE_BASE}/${data.profilePic}`;
@@ -326,7 +325,7 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture update
       if (data.profilePic) {
-        const baseUrl = API_URL.split("/api/auth")[0];
+        const baseUrl = API_URL.split("/api")[0];
         const newImageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
           : `${baseUrl}/${data.profilePic}`;

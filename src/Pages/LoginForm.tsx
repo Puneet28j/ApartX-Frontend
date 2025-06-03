@@ -7,7 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
-const API_URL = "/api/auth";
+const API_URL = "/api";
 
 const LoginForm = () => {
   const navigate = useNavigate();
