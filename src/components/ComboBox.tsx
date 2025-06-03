@@ -100,9 +100,9 @@ const Combobox: React.FC<ComboboxProps> = ({
                 No crypto found.
               </div>
             ) : (
-              wallets.map((wallet) => (
+              wallets.map((wallet, index) => (
                 <div
-                  key={wallet.value}
+                  key={index}
                   onClick={() => handleSelect(wallet)}
                   className="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] cursor-pointer text-white hover:text-black transition-colors"
                 >

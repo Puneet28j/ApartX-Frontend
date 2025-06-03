@@ -23,8 +23,9 @@ import { default as FoxImage, default as MetaMask } from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import Combobox from "./ComboBox";
 import { Separator } from "./ui/separator";
+import { toast } from "sonner";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:5000/api";
 
 const wallets = [
   { value: "binance", label: "Binance", icon: Binance },
@@ -62,24 +63,53 @@ const DrawerComponent: React.FC = () => {
   };
 
   const handleOpenDialog = async () => {
-    if (!walletID || !walletType) return alert("Fill all required fields");
-
-    const formData = new FormData();
-    formData.append("walletID", walletID);
-    formData.append("walletType", walletType);
-    if (qrImage) formData.append("screenshot", qrImage); // match backend field name
-
     try {
-      await axios.post(`${API_URL}/wallet/add`, formData, {
+      if (!walletID || !walletType) {
+        toast.error("Wallet ID and type are required");
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("walletID", walletID);
+      formData.append("walletType", walletType);
+      if (qrImage) {
+        formData.append("qrImage", qrImage);
+      }
+      formData.append("balance", "0"); // Default balance
+
+      const response = await axios.post(`${API_URL}/wallet`, formData, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
 
-      setOpenDrawer(false);
-      setTimeout(() => setOpenDialog(true), 200);
-    } catch (err) {
-      alert("Failed to add wallet");
+      if (response.data) {
+        setOpenDrawer(false);
+        setTimeout(() => setOpenDialog(true), 200);
+        // Reset form
+        setWalletID("");
+        setWalletType("");
+        setQrImage(null);
+        setImagePreview(null);
+      }
+    } catch (error: any) {
+      console.error("Error adding wallet:", error);
+      if (axios.isAxiosError(error)) {
+        const errorMessage =
+          error.response?.data?.message || "Failed to add wallet";
+        toast.error(errorMessage);
+
+        if (error.response?.status === 401) {
+          toast.error("Please login again");
+        }
+      }
     }
   };
 

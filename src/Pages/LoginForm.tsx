@@ -7,7 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:5000/api";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -28,8 +28,7 @@ const LoginForm = () => {
       const formattedMobile = phoneNumber.startsWith("+")
         ? phoneNumber
         : `+${phoneNumber}`;
-
-      const deviceId = window.navigator.userAgent; // or a UUID from storage
+      const deviceId = window.navigator.userAgent;
 
       const response = await axios.post(`${API_URL}/login`, {
         mobile: formattedMobile,
@@ -39,23 +38,15 @@ const LoginForm = () => {
 
       const data = response.data;
 
-      // Save token to localStorage
+      // Save token and role to localStorage
       localStorage.setItem("token", data.token);
-      // localStorage.setItem("userId", data.userId);      // <-- Add this
-      // localStorage.setItem("deviceId", deviceId);
-
-      // if (data.requireMpin) {
-      //   toast.info("Please set MPIN to continue");
-      //   navigate("/set-mpin");
-      // } else {
-      //   toast.success("Login successful");
+      localStorage.setItem("role", data.role);
 
       if (data.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/main-screen");
       }
-      // }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {

@@ -12,9 +12,10 @@ export interface TransactionData {
   id: string;
   username: string;
   time: string;
-  type: TransactionType;
+  type: string;
   amount: number;
-  walletImage: string;
+  walletType: string;
+  // walletImage: string;
 }
 
 const tagColors: Record<TransactionType, string> = {
@@ -30,39 +31,51 @@ const amountColors = {
   negative: "bg-red-600",
 };
 
-const TransactionCard: React.FC<TransactionData> = ({
-  username,
-  time,
-  type,
-  amount,
-  walletImage,
+interface TransactionCardProps {
+  transaction: {
+    id: string;
+
+    username: string;
+    time: string;
+    type: string;
+    amount: number;
+    walletType: string;
+  };
+}
+
+export const TransactionCard: React.FC<TransactionCardProps> = ({
+  transaction,
 }) => {
-  const isPositive = amount >= 0;
-  const tagColor = tagColors[type];
+  const walletImage = transaction.walletType || "";
+
+  const isPositive = transaction.amount >= 0;
+  const tagColor = tagColors[transaction.type as TransactionType];
   const amountColor = isPositive
     ? amountColors.positive
     : amountColors.negative;
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-transparent border-b border-white/10">
+    <div className="flex items-center justify-between p-4 bg-[#171717] rounded-lg mb-3">
       {/* Left Side */}
       <div className="flex items-center gap-3">
-        <img
-          src={walletImage}
-          alt="avatar"
-          className="w-11 h-11 rounded-full"
-        />
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-800">
+          <img
+            src={walletImage}
+            alt={`${transaction.walletType} wallet`}
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="text-white text-sm">
-          <p className="font-semibold">{username}</p>
+          <p className="font-semibold">{transaction.username}</p>
           <div className="mt-1 flex items-center gap-2 text-xs text-gray-300">
             <div className="flex items-center gap-1">
               <Calendar size={14} />
-              <span>{time}</span>
+              <span>{transaction.time}</span>
             </div>
             <span
               className={`px-2 py-[2px] min-w-[70px] flex items-center justify-center rounded-full  ${tagColor}`}
             >
-              {type}
+              {transaction.type}
             </span>
           </div>
         </div>
@@ -73,7 +86,7 @@ const TransactionCard: React.FC<TransactionData> = ({
         <span
           className={`text-white font-medium px-3 text-[16px] py-1 rounded-[10px] leading-[24px] ${amountColor}`}
         >
-          {isPositive ? `${amount}` : amount}
+          {isPositive ? `${transaction.amount}` : transaction.amount}
         </span>
       </div>
     </div>

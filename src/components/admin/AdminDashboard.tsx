@@ -228,10 +228,7 @@ const Dashboard = () => {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    onClick={() => navigate("/login-register")}
-                    variant="destructive"
-                  >
+                  <Button onClick={() => handleLogout()} variant="destructive">
                     Logout
                   </Button>
                 </div>
@@ -258,6 +255,12 @@ const Dashboard = () => {
     if (window.innerWidth < 768) {
       setIsMobileMenuOpen(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login-register");
   };
 
   return (

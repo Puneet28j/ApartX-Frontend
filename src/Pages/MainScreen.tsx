@@ -155,7 +155,7 @@ const MainScreen = () => {
                 <br /> Apart-x
               </h3>
               <button
-                onClick={() => navigate("/about-pdf")}
+                onClick={() => navigate("/pdf-viewer")}
                 className="text-white bg-red-600 rounded-full px-3 py-1.5 text-[14px] sm:text-[16px] font-semibold
     hover:bg-red-700 transition-colors duration-200 shadow-lg hover:shadow-xl w-fit"
               >

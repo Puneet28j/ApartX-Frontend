@@ -1,21 +1,22 @@
 // File: src/pages/SendCurrency.tsx
 
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import "react-phone-input-2/lib/style.css";
+import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, User2Icon } from "lucide-react";
 import { useRef, useState } from "react";
-import { Separator } from "@/components/ui/separator";
+import "react-phone-input-2/lib/style.css";
+import { useNavigate } from "react-router-dom";
 import USDTLOGO from "../assets/usdt logo.svg";
 // import Combobox from "@/components/ComboBox";
-import Binance from "../assets/3495812.svg";
-import MetaMask from "../assets/fox.svg";
-import CoinBase from "../assets/Coinbase.svg";
-import TrustWallet from "../assets/TrustWallet.svg";
-import axios from "axios";
 import Combobox from "@/components/ComboBox";
+import axios from "axios";
+import { toast } from "sonner";
+import Binance from "../assets/3495812.svg";
+import CoinBase from "../assets/Coinbase.svg";
+import MetaMask from "../assets/fox.svg";
+import TrustWallet from "../assets/TrustWallet.svg";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:5000/api";
 
 const wallets2 = [
   { value: "binance", label: "Binance", icon: Binance },
@@ -32,6 +33,7 @@ const SendCurrency = () => {
   const [showWalletIDInput, setShowWalletIDInput] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const backnavigation = () => {
@@ -55,40 +57,53 @@ const SendCurrency = () => {
   };
 
   const handleSubmit = async () => {
-    if (!amount || !walletID || !selectedWallet) return;
+    if (!amount || !selectedWallet || !walletID) {
+      toast.error("Please fill all required fields");
+      return;
+    }
 
+    setIsSubmitting(true);
     const token = localStorage.getItem("token");
+
     if (!token) {
-      alert("Please login first.");
+      toast.error("Please login first");
       navigate("/login-register");
       return;
     }
 
     const formData = new FormData();
     formData.append("amount", amount);
-    formData.append("walletType", selectedWallet);
+    formData.append("wallet", selectedWallet);
     formData.append("walletID", walletID);
+
     if (screenshot) {
       formData.append("screenshot", screenshot);
     }
 
     try {
-      const response = await axios.post(
-        `${API_URL}/wallet/transfer`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${API_URL}/send-currency`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      console.log("Transfer success:", response.data);
-      navigate("/transfer-receipt");
+      if (response.data) {
+        toast.success("Transfer request submitted successfully");
+        navigate("/transfer-receipt", {
+          state: {
+            amount: amount,
+            walletType: selectedWallet,
+            walletID: walletID,
+            transactionId: response.data.data._id,
+          },
+        });
+      }
     } catch (error: any) {
-      console.error("Transfer failed:", error.response?.data || error.message);
-      alert("Transfer failed. Please try again.");
+      console.error("Transfer failed:", error);
+      toast.error(error.response?.data?.message || "Transfer failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -202,11 +217,11 @@ const SendCurrency = () => {
             </Button>
 
             <Button
-              disabled={!walletID}
+              disabled={isSubmitting || !walletID || !amount || !selectedWallet}
               className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
               onClick={handleSubmit}
             >
-              Pay Now
+              {isSubmitting ? "Processing..." : "Pay Now"}
             </Button>
           </div>
         </div>

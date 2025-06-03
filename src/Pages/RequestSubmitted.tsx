@@ -1,13 +1,68 @@
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, CircleCheck } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Binance from "../assets/3495812.svg";
+import CoinBase from "../assets/Coinbase.svg";
+import MetaMask from "../assets/fox.svg";
+import Line from "../assets/Line 3 (1).svg";
 import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import TransferCard from "../assets/Subtract.svg";
-import { useNavigate } from "react-router-dom";
-import Line from "../assets/Line 3 (1).svg";
-import { Button } from "@/components/ui/button";
-import foxImage from "../assets/fox.svg";
+import TrustWallet from "../assets/TrustWallet.svg";
+
+const API_URL = "http://localhost:5000/api";
 
 const RequestSubmitted = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { amount, walletType } = location.state || {};
+  const [walletAddress, setWalletAddress] = useState("");
+
+  // Helper function to get wallet logo
+  const getWalletLogo = (type: string) => {
+    switch (type?.toLowerCase()) {
+      case "binance":
+        return Binance;
+      case "metamask":
+        return MetaMask;
+      case "coinbase":
+        return CoinBase;
+      case "trustwallet":
+        return TrustWallet;
+      default:
+        return undefined;
+    }
+  };
+
+  // Add useEffect to fetch wallet address when component mounts
+  useEffect(() => {
+    const fetchWalletAddress = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await axios.get(`${API_URL}/wallet`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Find the matching wallet by type
+        const selectedWallet = response.data.wallets.find(
+          (w: any) => w.walletType.toLowerCase() === walletType?.toLowerCase()
+        );
+
+        if (selectedWallet) {
+          setWalletAddress(selectedWallet.walletID);
+        }
+      } catch (error) {
+        console.error("Error fetching wallet address:", error);
+      }
+    };
+
+    if (walletType) {
+      fetchWalletAddress();
+    }
+  }, [walletType]);
 
   return (
     <div
@@ -72,7 +127,7 @@ const RequestSubmitted = () => {
                   Total Transfer
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-red-400">
-                  4000
+                  {amount || 0}
                 </p>
               </div>
             </div>
@@ -81,14 +136,22 @@ const RequestSubmitted = () => {
             <div className="flex-[0.45] flex flex-col  justify-center">
               <div className="text-center w-full">In wallet</div>
               <div className="bg-black w-[160px] mb-2 items-center rounded-lg justify-evenly h-[50px] mx-auto flex">
-                <img className="h-[50px] w-[50px]" src={foxImage} alt="" />
-                <div className="text-white text-[12px]">Metamask</div>
+                <img
+                  className="h-[50px] w-[50px]"
+                  src={getWalletLogo(walletType)}
+                  alt={walletType || ""}
+                />
+                <div className="text-white text-[12px]">
+                  {walletType
+                    ? walletType.charAt(0).toUpperCase() + walletType.slice(1)
+                    : ""}
+                </div>
               </div>
               <p className="text-black text-[10px] sm:text-xs font-semibold mb-1">
                 Transfer Destination
               </p>
               <div className="bg-red-200 rounded-md px-2 py-1 text-black text-[10px] sm:text-xs break-words">
-                Eaz5487568cvguytoxxxj
+                {walletAddress || "No wallet address found"}
               </div>
               <Button
                 onClick={() => navigate("/main-screen")}

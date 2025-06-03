@@ -1,105 +1,83 @@
 import { useNavigate } from "react-router-dom";
 import { Home, ArrowLeft, BookText } from "lucide-react";
-import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
-import TransactionList from "@/components/TransactionList";
-import type { TransactionData } from "@/components/TransactionCard";
-import FoxImage from "../assets/fox.svg";
-import ReferAndEarn from "../assets/ReferAndEarn.svg";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import TransactionList from "@/components/TransactionList";
+import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
+import ReferAndEarn from "../assets/ReferAndEarn.svg";
+import BinanceImage from "../assets/3495812.svg";
+import MetamaskImage from "../assets/fox.svg";
+import CoinbaseImage from "../assets/Coinbase.svg";
+import TrustWalletImage from "../assets/TrustWallet.svg";
 
-const mockTransactions: TransactionData[] = [
-  {
-    id: "1",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Income",
-    amount: 120,
-    walletImage: FoxImage,
-  },
-  {
-    id: "2",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Withdraw",
-    amount: -500,
-    walletImage: FoxImage,
-  },
-  {
-    id: "3",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Paid",
-    amount: -20,
-    walletImage: FoxImage,
-  },
-  {
-    id: "4",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Income",
-    amount: 240,
-    walletImage: FoxImage,
-  },
-  {
-    id: "50",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Referral",
-    amount: 240,
-    walletImage: FoxImage,
-  },
-  {
-    id: "5",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Deposit",
-    amount: 5000,
-    walletImage: FoxImage,
-  },
-  {
-    id: "6",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Income",
-    amount: 120,
-    walletImage: FoxImage,
-  },
-  {
-    id: "7",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Withdraw",
-    amount: -500,
-    walletImage: FoxImage,
-  },
-  {
-    id: "8",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Paid",
-    amount: -20,
-    walletImage: FoxImage,
-  },
-  {
-    id: "9",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Income",
-    amount: 240,
-    walletImage: FoxImage,
-  },
-  {
-    id: "10",
-    username: "Eaz5487568cvguytoxxxj",
-    time: "Yesterday at 16:34",
-    type: "Deposit",
-    amount: 5000,
-    walletImage: FoxImage,
-  },
-];
+interface TransactionData {
+  id: string;
+  username: string;
+  time: string;
+  type: string;
+  amount: number;
+  walletType: string;
+  // walletImage: string;
+}
+
+const API_URL = "http://localhost:5000/api";
+
+const walletTypeImages: Record<string, string> = {
+  binance: BinanceImage,
+  metamask: MetamaskImage,
+  coinbase: CoinbaseImage,
+  trustwallet: TrustWalletImage,
+};
 
 const Passbook = () => {
   const navigate = useNavigate();
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchPassbookData = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login");
+        return;
+      }
+
+      const response = await axios.get(`${API_URL}/passbook`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const formattedTransactions: TransactionData[] =
+        response.data.transactions.map((tx: any) => {
+          const walletType = tx.walletType?.toLowerCase() || "binance";
+          return {
+            id: tx._id,
+            username: tx.userId?.walletID || "Unknown",
+            time: new Date(tx.createdAt).toLocaleString(),
+            type: tx.type,
+            amount: tx.amount,
+            walletType,
+            walletImage: walletTypeImages[walletType] || BinanceImage,
+          };
+        });
+
+      setTransactions(formattedTransactions);
+    } catch (error) {
+      console.error("Error fetching passbook:", error);
+      toast.error("Failed to load transactions");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPassbookData();
+  }, []);
 
   return (
     <div className="relative flex flex-col h-screen max-h-screen bg-black text-white">
@@ -121,15 +99,43 @@ const Passbook = () => {
           <ArrowLeft size={20} className="h-8 w-8 text-white" />
         </button>
       </div>
-      <div className="text-[24px] z-10 mt-[80px] ml-3">Transactions</div>
+
+      {/* Header with refresh button */}
+      <div className="text-[24px] z-10 mt-[80px] ml-3 flex justify-between items-center pr-4">
+        <span>Transactions</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={fetchPassbookData}
+          disabled={isLoading}
+          className="text-white hover:text-gray-200"
+        >
+          {isLoading ? "Loading..." : "Refresh"}
+        </Button>
+      </div>
 
       {/* Scrollable Content */}
       <div className="relative z-20 flex-1 mt-[20px] overflow-y-auto px-2 pb-32">
-        <TransactionList transactions={mockTransactions} />
+        {isLoading ? (
+          <div className="space-y-4 p-4">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="h-20 bg-gray-800/50 animate-pulse rounded-lg"
+              />
+            ))}
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <p>No transactions found</p>
+          </div>
+        ) : (
+          <TransactionList transactions={transactions} />
+        )}
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-[#171717] py-4   flex justify-around items-center z-30 rounded-t-xl shadow-inner">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-[#171717] py-4 flex justify-around items-center z-30 rounded-t-xl shadow-inner">
         <Button
           className="flex gap-2 items-center text-white"
           onClick={() => navigate("/main-screen")}

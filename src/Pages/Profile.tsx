@@ -65,8 +65,8 @@ const userWallets = [
     isDefault: false,
   },
 ];
-const API_URL = "/api"; //localhost:5000/api
-const IMAGE_BASE = "https://apart-x.pro";
+const API_URL = "http://localhost:5000/api"; //localhost:5000/api
+const IMAGE_BASE = "https://apart-x.pro"; // Remove any trailing slashes
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
@@ -155,27 +155,22 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture - make sure the URL is correct
       if (data.profilePic) {
-        const baseUrl = API_URL.split("/api")[0]; // Get base URL without /api
         const imageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
-          : `${IMAGE_BASE}/${data.profilePic}`;
-        // Combine base URL with profile pic path
+          : `${IMAGE_BASE}${data.profilePic}`; // data.profilePic should already start with /
 
-        console.log("Image URL construction:", {
-          baseUrl,
-          profilePic: data.profilePic,
-          finalUrl: imageUrl,
-        });
+        console.log("Constructed image URL:", imageUrl);
 
+        // Test image loading
         const img = new Image();
         img.onload = () => {
-          console.log("Image loaded successfully");
+          console.log("Image loaded successfully:", imageUrl);
           setPreview(imageUrl);
         };
         img.onerror = (e) => {
-          console.error("Failed to load image:", {
+          console.error("Image load failed:", {
+            url: imageUrl,
             error: e,
-            attemptedUrl: imageUrl,
           });
           setPreview("");
         };

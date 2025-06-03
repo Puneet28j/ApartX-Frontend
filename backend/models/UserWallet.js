@@ -5,7 +5,7 @@ const userWalletSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true   // ✅ now required
+      required: true, // ✅ now required
     },
     walletID: {
       type: String,
@@ -15,7 +15,7 @@ const userWalletSchema = new mongoose.Schema(
     walletType: {
       type: String,
       required: true,
-      enum: ["binance", "metamask", "coinbase", "trustWallet"],
+      enum: ["binance", "metamask", "coinbase", "trustwallet"],
       lowercase: true,
       trim: true,
     },
@@ -29,13 +29,13 @@ const userWalletSchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
   }
 );
 

@@ -1,13 +1,33 @@
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, CircleCheck } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Binance from "../assets/3495812.svg";
+import CoinBase from "../assets/Coinbase.svg";
+import MetaMask from "../assets/fox.svg";
+import Line from "../assets/Line 3 (1).svg";
 import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import TransferCard from "../assets/Subtract.svg";
-import { useNavigate } from "react-router-dom";
-import Line from "../assets/Line 3 (1).svg";
-import { Button } from "@/components/ui/button";
-import foxImage from "../assets/fox.svg";
+import TrustWallet from "../assets/TrustWallet.svg";
 
 const TransferReceipt = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { amount, walletType, walletID, transactionId } = location.state || {};
+
+  const getWalletLogo = (type: string) => {
+    switch (type?.toLowerCase()) {
+      case "binance":
+        return Binance;
+      case "metamask":
+        return MetaMask;
+      case "coinbase":
+        return CoinBase;
+      case "trustwallet":
+        return TrustWallet;
+      default:
+        return undefined;
+    }
+  };
 
   return (
     <div
@@ -67,14 +87,14 @@ const TransferReceipt = () => {
                 <p className="text-[10px] sm:text-xs text-black">
                   Your transfer has been successfully done.
                 </p>
-                <p className="text-[14px] sm:text-xs font-bold  text-black">
-                  Transaction Id :6tr2yg3xyt463xb3x3
+                <p className="text-[14px] sm:text-xs font-bold text-black">
+                  Transaction Id: {transactionId || "N/A"}
                 </p>
                 <p className="mt-1 text-base sm:text-base font-bold text-black">
                   Total Transfer
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
-                  4000
+                  {amount || 0}
                 </p>
               </div>
             </div>
@@ -83,14 +103,22 @@ const TransferReceipt = () => {
             <div className="flex-[0.45] flex flex-col  justify-center">
               <div className="text-center w-full">In wallet</div>
               <div className="bg-black w-[160px] mb-2 items-center rounded-lg justify-evenly h-[50px] mx-auto flex">
-                <img className="h-[50px] w-[50px]" src={foxImage} alt="" />
-                <div className="text-white text-[12px]">Metamask</div>
+                <img
+                  className="h-[50px] w-[50px]"
+                  src={getWalletLogo(walletType)}
+                  alt={walletType || ""}
+                />
+                <div className="text-white text-[12px]">
+                  {walletType
+                    ? walletType.charAt(0).toUpperCase() + walletType.slice(1)
+                    : ""}
+                </div>
               </div>
               <p className="text-black text-[10px] sm:text-xs font-semibold mb-1">
                 Transfer Destination
               </p>
               <div className="bg-red-200 rounded-md px-2 py-1 text-black text-[10px] sm:text-xs break-words">
-                Eaz5487568cvguytoxxxj
+                {walletID || "No wallet address"}
               </div>
               <Button
                 onClick={() => navigate("/main-screen")}

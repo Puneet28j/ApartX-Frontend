@@ -2,6 +2,8 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import inviteearn from "../assets/InviteEarn.svg";
 import CopyButton from "../components/CopyButton";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const referredFriends = Array(5).fill({
   mobile: "9456789658",
@@ -9,10 +11,53 @@ const referredFriends = Array(5).fill({
   date: "05-May-2025",
 });
 
+const API_URL = "http://localhost:5000/api"; // Adjust this to your API base URL
 const InviteAndEarn = () => {
   const navigate = useNavigate();
-  const referralCode = "VU5AXIJT";
+  const [referralCode, setReferralCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchReferralCode = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          toast.error("Please login again");
+          navigate("/login-register");
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/me`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login-register");
+            toast.error("Session expired. Please login again.");
+            return;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setReferralCode(data.referralCode || "N/A");
+      } catch (error) {
+        console.error("Error fetching referral code:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReferralCode();
+  }, []);
+  console.log("Referral Code:", referralCode);
   // Method 1: Get current domain dynamically
   const getCurrentDomain = () => {
     const protocol = window.location.protocol; // http: or https:
@@ -22,6 +67,9 @@ const InviteAndEarn = () => {
   };
 
   const referralLink = `${getCurrentDomain()}/register?ref=${referralCode}`;
+  if (isLoading) {
+    return <div className="text-white text-center mt-4">Loading...</div>;
+  }
 
   return (
     <div className="relative flex flex-col h-screen max-h-screen bg-black text-white overflow-hidden">

@@ -12,7 +12,10 @@ exports.verifyToken = async (req, res, next) => {
 
     // ✅ Step 2: Extract and verify token
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "default_secret"
+    );
 
     // ✅ Step 3: Fetch user and attach to request
     const user = await User.findById(decoded.userId).select("-password");

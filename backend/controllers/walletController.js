@@ -1,31 +1,34 @@
 const UserWallet = require("../models/UserWallet");
 const WalletTransaction = require("../models/WalletTransaction");
 
-
 exports.addWallet = async (req, res) => {
   try {
     const { walletID, walletType, balance } = req.body;
     const userId = req.user._id;
 
     if (!walletID || !walletType) {
-      return res.status(400).json({ message: "walletID and walletType are required" });
+      return res
+        .status(400)
+        .json({ message: "walletID and walletType are required" });
     }
 
     const qrImagePath = req.file ? req.file.path : null;
 
-  const newWallet = new UserWallet({
-  walletID,
-  walletType,
-  userId,
-  qrImage: qrImagePath,
-  balance: balance || 0, // Default 0
-});
+    const newWallet = new UserWallet({
+      walletID,
+      walletType,
+      userId,
+      qrImage: qrImagePath,
+      balance: balance || 0, // Default 0
+    });
 
     await newWallet.save();
 
     return res.status(201).json({ message: "Wallet added", wallet: newWallet });
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };
 
@@ -35,7 +38,9 @@ exports.getUserWallets = async (req, res) => {
     const wallets = await UserWallet.find({ userId });
     res.status(200).json({ wallets });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching wallets", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching wallets", error: err.message });
   }
 };
 
@@ -60,7 +65,9 @@ exports.updateWallet = async (req, res) => {
 
     res.status(200).json({ message: "Wallet updated", wallet });
   } catch (err) {
-    res.status(500).json({ message: "Error updating wallet", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error updating wallet", error: err.message });
   }
 };
 
@@ -68,7 +75,10 @@ exports.toggleWalletStatus = async (req, res) => {
   try {
     const { walletId } = req.params;
 
-    const wallet = await UserWallet.findOne({ _id: walletId, userId: req.user._id });
+    const wallet = await UserWallet.findOne({
+      _id: walletId,
+      userId: req.user._id,
+    });
 
     if (!wallet) {
       return res.status(404).json({ message: "Wallet not found" });
@@ -79,10 +89,11 @@ exports.toggleWalletStatus = async (req, res) => {
 
     res.status(200).json({ message: "Wallet status toggled", wallet });
   } catch (err) {
-    res.status(500).json({ message: "Error toggling wallet status", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error toggling wallet status", error: err.message });
   }
 };
-
 
 exports.updateWalletBalance = async (req, res) => {
   try {
@@ -93,7 +104,10 @@ exports.updateWalletBalance = async (req, res) => {
       return res.status(400).json({ message: "Amount must be a number" });
     }
 
-    const wallet = await UserWallet.findOne({ _id: walletId, userId: req.user._id });
+    const wallet = await UserWallet.findOne({
+      _id: walletId,
+      userId: req.user._id,
+    });
 
     if (!wallet) {
       return res.status(404).json({ message: "Wallet not found" });
@@ -104,10 +118,11 @@ exports.updateWalletBalance = async (req, res) => {
 
     res.status(200).json({ message: "Balance updated", wallet });
   } catch (err) {
-    res.status(500).json({ message: "Error updating balance", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error updating balance", error: err.message });
   }
 };
-
 
 exports.getTotalWalletBalance = async (req, res) => {
   try {
@@ -118,22 +133,26 @@ exports.getTotalWalletBalance = async (req, res) => {
 
     res.status(200).json({ totalBalance: total });
   } catch (err) {
-    res.status(500).json({ message: "Error calculating total balance", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error calculating total balance", error: err.message });
   }
 };
 
 exports.getUserPassbook = async (req, res) => {
   try {
     const userId = req.user._id;
-    const transactions = await WalletTransaction.find({ userId })
-      .sort({ createdAt: -1 });
+    const transactions = await WalletTransaction.find({ userId }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({ transactions });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching passbook", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching passbook", error: err.message });
   }
 };
-
 
 exports.getAllPassbooks = async (req, res) => {
   try {
@@ -146,6 +165,8 @@ exports.getAllPassbooks = async (req, res) => {
 
     res.status(200).json({ data });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching all passbooks", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching all passbooks", error: err.message });
   }
 };

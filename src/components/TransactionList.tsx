@@ -12,12 +12,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
       {transactions.map((tx) => (
         <TransactionCard
           key={tx.id}
-          walletImage={tx.walletImage}
-          username={tx.username}
-          time={tx.time}
-          type={tx.type}
-          amount={tx.amount}
-          id={tx.id}
+          transaction={{
+            id: tx.id,
+            username: tx.username,
+            time: tx.time,
+            type: tx.type,
+            amount: tx.amount,
+            walletType: tx.walletType,
+          }}
         />
       ))}
     </div>

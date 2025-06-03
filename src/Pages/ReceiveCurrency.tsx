@@ -1,29 +1,86 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User2Icon } from "lucide-react";
-import { useState } from "react";
-import "react-phone-input-2/lib/style.css";
+import axios from "axios";
+import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import USDTLOGO from "../assets/usdt logo.svg";
+
+const API_URL = "http://localhost:5000/api";
+const IMAGE_BASE = "http://localhost:5000";
 
 const ReceiveCurrency = () => {
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
-  const [showWalletIDInput, setShowWalletIDInput] = useState<boolean>(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const backnavigation = () => {
-    if (showWalletIDInput) {
-      setShowWalletIDInput(false);
-    } else {
-      navigate(-1);
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login-register");
+          return;
+        }
+
+        const response = await axios.get(`${API_URL}/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
+        // Handle profile picture URL
+        const userData = response.data;
+        if (userData.profilePic) {
+          userData.profilePic = userData.profilePic.startsWith("http")
+            ? userData.profilePic
+            : `${IMAGE_BASE}/${userData.profilePic}`;
+        }
+
+        setUserData(userData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          toast.error("Please login again");
+          navigate("/login-register");
+        } else {
+          toast.error("Failed to load user data");
+        }
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+
+  const handleContinue = () => {
+    if (!amount || parseFloat(amount) <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
     }
+
+    navigate("/receive-final", {
+      state: { amount: parseFloat(amount) },
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">Loading...</div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] py-6 overflow-y-auto overflow-x-hidden px-3">
       {/* Top Back Button + Line */}
       <div className="flex flex-col gap-2 mb-6">
         <button
-          onClick={backnavigation}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-white text-sm"
         >
           <ArrowLeft size={20} className="h-8 w-8 m-1 text-white" />
@@ -47,13 +104,38 @@ const ReceiveCurrency = () => {
         <div className="mt-10 flex justify-center">
           <div className="w-full max-w-[350px] pb-2 border-1 relative border-white rounded-[20px] flex justify-center">
             <div className="flex flex-col items-center w-full">
-              <User2Icon className="text-white h-[80px] w-[80px] rounded-full border-2 border-white mt-2" />
+              {userData?.profilePic ? (
+                <img
+                  src={userData.profilePic}
+                  alt="Profile"
+                  className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 object-cover"
+                  onError={(e) => {
+                    console.error("Image load error:", e);
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null; // Prevent infinite loop
+                    setUserData((prev: any) => ({
+                      ...prev,
+                      profilePic: undefined,
+                    }));
+                  }}
+                />
+              ) : (
+                <div className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 bg-gradient-to-br from-[#6552FE] to-[#8B5CF6] flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">
+                    {userData?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </span>
+                </div>
+              )}
               <div className="text-white text-[20px] text-center mt-2">
-                John
+                {userData?.name || "User"}
               </div>
               <div className="mt-4 w-full flex justify-center">
                 <div className="bg-black w-[160px] mb-2 items-center rounded-lg gap-4 justify-center h-[60px] mx-auto flex">
-                  <img className="h-[50px] w-[50px]" src={USDTLOGO} alt="" />
+                  <img
+                    className="h-[50px] w-[50px]"
+                    src={USDTLOGO}
+                    alt="USDT"
+                  />
                   <div className="text-white text-[20px]">USDT</div>
                 </div>
               </div>
@@ -72,11 +154,7 @@ const ReceiveCurrency = () => {
           <Button
             className="w-full h-12 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[16px]"
             disabled={!amount || parseFloat(amount) <= 0}
-            onClick={() =>
-              navigate("/receive-final", {
-                state: { amount }, // <-- pass state
-              })
-            }
+            onClick={handleContinue}
           >
             Continue
           </Button>

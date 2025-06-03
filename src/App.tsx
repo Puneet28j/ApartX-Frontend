@@ -33,20 +33,36 @@ import InvestmentPlanFinal from "./Pages/InvestmentPlanFinal";
 import EnterOtp from "./Pages/EnterOtp";
 import ForgetPassword from "./Pages/ForgetPassword";
 import PDFViewer from "./Pages/PDFViewer";
+import { AdminRoute, UserRoute } from "./components/ProtectedRoutes";
 
 const App = () => {
   return (
     <Router>
       <Toaster position="top-center" richColors />
       <Routes>
+        {/* Admin Routes - No MobileLayout */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/:tab" element={<Dashboard />} />
+        </Route>
+
+        {/* Public Routes */}
+        <Route
+          path="/splash"
+          element={
+            <MobileLayout>
+              <SplashScreen />
+            </MobileLayout>
+          }
+        />
         <Route
           path="/onboarding-1"
           element={
             <MobileLayout>
               <Onboarding
                 mainLogo={OnBoardingOneLogo}
-                text="Trusted by millions of people, part of one part"
                 smallLogo={OnBoardingOneSlider}
+                text="Welcome to our App"
                 to="/onboarding-2"
               />
             </MobileLayout>
@@ -58,8 +74,8 @@ const App = () => {
             <MobileLayout>
               <Onboarding
                 mainLogo={OnboardingTwoLogo}
-                text="Spend money to generate, passive income"
                 smallLogo={OnboardingTwoSlider}
+                text="Discover the features"
                 to="/onboarding-3"
               />
             </MobileLayout>
@@ -71,15 +87,15 @@ const App = () => {
             <MobileLayout>
               <Onboarding
                 mainLogo={OnboardingThreeLogo}
-                text="Receive Money From Anywhere In The World"
                 smallLogo={OnBoardingOneSlider}
-                to="/getStarted"
+                text="Get started with us"
+                to="/get-started"
               />
             </MobileLayout>
           }
         />
         <Route
-          path="/getStarted"
+          path="/get-started"
           element={
             <MobileLayout>
               <GetStarted />
@@ -91,6 +107,14 @@ const App = () => {
           element={
             <MobileLayout>
               <LoginForm />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <MobileLayout>
+              <RegistrationOne />
             </MobileLayout>
           }
         />
@@ -110,143 +134,137 @@ const App = () => {
             </MobileLayout>
           }
         />
-        <Route
-          path="/register"
-          element={
-            <MobileLayout>
-              <RegistrationOne />
-            </MobileLayout>
-          }
-        />
 
-        <Route
-          path="/main-screen"
-          element={
-            <MobileLayout>
-              <MainScreen />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <MobileLayout>
-              <ProfileScreen />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/transfer-receipt"
-          element={
-            <MobileLayout>
-              <TransferReceipt />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/select-wallet-send"
-          element={
-            <MobileLayout>
-              <SendCurrency />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/select-wallet-receive"
-          element={
-            <MobileLayout>
-              <ReceiveCurrency />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/receive-final"
-          element={
-            <MobileLayout>
-              <ReceiveFinal />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/request-submitted"
-          element={
-            <MobileLayout>
-              <RequestSubmitted />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/passbook"
-          element={
-            <MobileLayout>
-              <Passbook />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/invite-and-earn"
-          element={
-            <MobileLayout>
-              <InviteAndEarn />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/investment-plan"
-          element={
-            <MobileLayout>
-              <InvestmentPlan />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/investment-plan-final"
-          element={
-            <MobileLayout>
-              <InvestmentPlanFinal />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/portfolio"
-          element={
-            <MobileLayout>
-              <Portfolio />
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/set-mpin"
-          element={
-            <MobileLayout>
-              <Setmpin />
-            </MobileLayout>
-          }
-        />
-
-        {/* Admin Dashboard Route - No MobileLayout wrapper */}
-        <Route path="/admin" element={<Dashboard />}>
-          <Route path=":tab" element={<Dashboard />} />
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        {/* Protected User Routes */}
+        <Route element={<UserRoute />}>
+          <Route
+            path="/main-screen"
+            element={
+              <MobileLayout>
+                <MainScreen />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <MobileLayout>
+                <ProfileScreen />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/transfer-receipt"
+            element={
+              <MobileLayout>
+                <TransferReceipt />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/select-wallet-send"
+            element={
+              <MobileLayout>
+                <SendCurrency />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/select-wallet-receive"
+            element={
+              <MobileLayout>
+                <ReceiveCurrency />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/receive-final"
+            element={
+              <MobileLayout>
+                <ReceiveFinal />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/request-submitted"
+            element={
+              <MobileLayout>
+                <RequestSubmitted />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/passbook"
+            element={
+              <MobileLayout>
+                <Passbook />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/invite-and-earn"
+            element={
+              <MobileLayout>
+                <InviteAndEarn />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/investment-plan"
+            element={
+              <MobileLayout>
+                <InvestmentPlan />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/investment-plan-final"
+            element={
+              <MobileLayout>
+                <InvestmentPlanFinal />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/portfolio"
+            element={
+              <MobileLayout>
+                <Portfolio />
+              </MobileLayout>
+            }
+          />
+          <Route
+            path="/set-mpin"
+            element={
+              <MobileLayout>
+                <Setmpin />
+              </MobileLayout>
+            }
+          />
         </Route>
-
-        {/* Default route */}
         <Route
-          index
-          element={
-            <MobileLayout>
-              <SplashScreen />
-            </MobileLayout>
-          }
-        />
-
-        {/* Redirect root to admin dashboard */}
-        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route
-          path="/about-pdf"
+          path="/pdf-viewer"
           element={
             <MobileLayout>
               <PDFViewer />
+            </MobileLayout>
+          }
+        />
+
+        {/* Default Routes */}
+        <Route
+          path="/"
+          element={
+            <MobileLayout>
+              <Navigate to="/splash" replace />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <MobileLayout>
+              <Navigate to="/login-register" replace />
             </MobileLayout>
           }
         />
