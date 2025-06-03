@@ -66,7 +66,6 @@ const userWallets = [
   },
 ];
 const API_URL = "http://localhost:5000/api"; //localhost:5000/api
-const IMAGE_BASE = "https://apart-x.pro";
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
@@ -234,26 +233,29 @@ const ProfileScreen: React.FC = () => {
   //   }
   // };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (e.g., max 5MB)
+      // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Image size should be less than 5MB");
         return;
       }
 
-      // Check file type
+      // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
         return;
       }
 
-      setImage(file);
-      // Clean up previous preview URL to prevent memory leaks
+      // Clean up previous preview URL
       if (preview && preview.startsWith("blob:")) {
         URL.revokeObjectURL(preview);
       }
+
+      setImage(file);
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -279,22 +281,10 @@ const ProfileScreen: React.FC = () => {
       }
 
       const formData = new FormData();
-
-      // Only append if values have changed
       if (name !== initialName) formData.append("name", name);
       if (email !== initialEmail) formData.append("email", email);
       if (mobile !== initialMobile) formData.append("mobile", mobile);
       if (image) formData.append("profilePic", image);
-
-      // Debug log - add this to see what's being sent
-      console.log("Sending data:", {
-        name: name !== initialName ? name : "unchanged",
-        email: email !== initialEmail ? email : "unchanged",
-        mobile: mobile !== initialMobile ? mobile : "unchanged",
-        hasImage: !!image,
-        imageSize: image?.size,
-        imageType: image?.type,
-      });
 
       const response = await fetch(`${API_URL}/update-profile`, {
         method: "PUT",
@@ -304,15 +294,12 @@ const ProfileScreen: React.FC = () => {
         body: formData,
       });
 
-      // Better response handling
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server response:", response.status, errorText);
-        throw new Error(`Server error: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update profile");
       }
 
       const data = await response.json();
-      console.log("Update response:", data); // Debug log
 
       // Update state with returned data
       setName(data.name || name);
@@ -322,31 +309,19 @@ const ProfileScreen: React.FC = () => {
       setInitialEmail(data.email || email);
       setInitialMobile(data.mobile || mobile);
 
-      // Handle profile picture update
+      // Update profile picture
       if (data.profilePic) {
-        const baseUrl = API_URL.split("/api")[0];
-        const newImageUrl = data.profilePic.startsWith("http")
-          ? data.profilePic
-          : `${IMAGE_BASE}${data.profilePic}`;
-
-        console.log("New profile image:", {
-          baseUrl,
-          profilePic: data.profilePic,
-          finalUrl: newImageUrl,
-        });
-
         if (preview && preview.startsWith("blob:")) {
           URL.revokeObjectURL(preview);
         }
-
-        setPreview(newImageUrl);
+        setPreview(data.profilePic);
       }
 
-      // Reset edit states and image
+      // Reset states
+      setImage(null);
       setIsEditingName(false);
       setIsEditingEmail(false);
       setIsEditingMobile(false);
-      setImage(null); // This is important - clear the file input
 
       toast.success("Profile updated successfully");
     } catch (error) {

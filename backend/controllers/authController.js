@@ -4,6 +4,7 @@ const ReferralTree = require("../models/ReferralTree");
 const jwt = require("jsonwebtoken");
 const sharp = require("sharp");
 const fs = require("fs");
+const path = require("path");
 
 // Generate new referral code based on mobile
 const generateReferralCode = (mobile) => {
@@ -163,31 +164,73 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, email, mobile } = req.body;
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user fields if provided
     if (name) user.name = name;
     if (email) user.email = email;
     if (mobile) user.mobile = mobile;
 
+    // Handle profile picture upload
     if (req.file) {
-      const outputPath = `/uploads/profile_pic/resized-${req.file.filename}`;
-      await sharp(req.file.path).resize(300, 300).toFile(outputPath);
-      fs.unlinkSync(req.file.path);
-      user.profilePic = `${outputPath}`;
+      try {
+        const outputPath = path.join(
+          __dirname,
+          "../uploads/profile_pic",
+          `resized-${req.file.filename}`
+        );
+        const publicPath = `/uploads/profile_pic/resized-${req.file.filename}`;
+
+        // Delete old profile picture if exists
+        if (user.profilePic) {
+          const oldPath = path.join(__dirname, "..", user.profilePic);
+          if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+          }
+        }
+
+        // Resize and save new image
+        await sharp(req.file.path)
+          .resize(300, 300, {
+            fit: "cover",
+            position: "center",
+          })
+          .toFile(outputPath);
+
+        // Delete original uploaded file
+        fs.unlinkSync(req.file.path);
+
+        // Update user profile pic path
+        user.profilePic = publicPath;
+      } catch (error) {
+        console.error("Image processing error:", error);
+        return res.status(500).json({ message: "Error processing image" });
+      }
     }
 
     await user.save();
 
+    // Construct the full URL for the profile picture
+    const profilePicUrl = user.profilePic
+      ? `${req.protocol}://${req.get("host")}${user.profilePic}`
+      : null;
+
     res.status(200).json({
-      message: "Profile updated",
-      profilePic: user.profilePic,
+      message: "Profile updated successfully",
       name: user.name,
       email: user.email,
       mobile: user.mobile,
+      profilePic: profilePicUrl,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Something went wrong" });
+    console.error("Update profile error:", err);
+    res.status(500).json({
+      message: "Failed to update profile",
+      error: err.message,
+    });
   }
 };
 
