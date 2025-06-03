@@ -116,13 +116,16 @@ const Portfolio = () => {
       <div className="text-[24px] z-10 mt-[20px] ml-3">Portfolio</div>
 
       {/* Column Headers */}
-      <div className="relative z-20 grid grid-cols-3 px-4 py-3 bg-gray-800 rounded-t-lg mt-4 mx-2">
+      <div className="relative z-20 grid grid-cols-4 px-4 py-3 bg-gray-800 rounded-t-lg mt-4 mx-2">
         <div className="text-gray-300 font-medium text-sm">Plan</div>
         <div className="text-gray-300 font-medium text-sm text-center">
           Invest Date
         </div>
         <div className="text-gray-300 font-medium text-sm text-right">
           Amount
+        </div>
+        <div className="text-gray-300 font-medium text-sm text-right">
+          Action
         </div>
       </div>
 
