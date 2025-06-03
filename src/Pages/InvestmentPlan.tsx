@@ -1,78 +1,67 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import SelectComponent from "@/components/Select";
 import USDTLOGO from "../assets/usdt logo.svg";
+import { investmentService } from "@/services/investmentService";
 
-type Tariff = {
-  value: string;
-  label: string;
-  rate: string;
-  duration: string;
+// Define the Plan interface
+interface Plan {
+  _id: string;
+  name: string;
   minAmount: number;
   maxAmount: number;
-};
-
-const tariffs: Tariff[] = [
-  {
-    value: "gold",
-    label: "GOLD",
-    rate: "1.5%",
-    duration: "Day",
-    minAmount: 50,
-    maxAmount: 500,
-  },
-  {
-    value: "diamond",
-    label: "Diamond",
-    rate: "2%",
-    duration: "Day",
-    minAmount: 501,
-    maxAmount: 5000,
-  },
-  {
-    value: "platinum",
-    label: "Platinum",
-    rate: "3%",
-    duration: "Day",
-    minAmount: 5001,
-    maxAmount: 25000,
-  },
-  {
-    value: "master",
-    label: "Master",
-    rate: "5%",
-    duration: "Day",
-    minAmount: 25000,
-    maxAmount: 100000,
-  },
-];
+  isActive: boolean;
+  roi: number;
+  durationDays: number;
+  // Add any other properties as needed
+}
 
 const InvestmentPlan = () => {
   const navigate = useNavigate();
-  const [selectedTariff, setSelectedTariff] = useState<Tariff>(tariffs[0]);
-  const [amount, setAmount] = useState<number>(selectedTariff.minAmount);
+  const [loading, setLoading] = useState(true);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [amount, setAmount] = useState<number>(0);
   const [error, setError] = useState<string>("");
-  // const [isLoading, setIsLoading] = useState(false);
 
-  // Validate the amount based on tariff limits
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const plans = await investmentService.fetchPlans();
+      setPlans(plans.filter((plan: Plan) => plan.isActive));
+      if (plans.length > 0) {
+        setSelectedPlan(plans[0]);
+        setAmount(plans[0].minAmount);
+      }
+      setLoading(false);
+    } catch (error: any) {
+      toast.error("Failed to fetch investment plans");
+      setLoading(false);
+    }
+  };
+
   const validateAmount = (
     value: number,
-    tariff: Tariff = selectedTariff
+    plan: Plan = selectedPlan!
   ): boolean => {
-    if (value < tariff.minAmount) {
+    if (!plan) return false;
+
+    if (value < plan.minAmount) {
       setError(
-        `Amount must be at least ${tariff.minAmount.toLocaleString()} USD`
+        `Amount must be at least ${plan.minAmount.toLocaleString()} USD`
       );
       return false;
     }
 
-    if (tariff.value !== "master" && value > tariff.maxAmount) {
-      setError(
-        `Amount must not exceed ${tariff.maxAmount.toLocaleString()} USD`
-      );
+    if (value > plan.maxAmount) {
+      setError(`Amount must not exceed ${plan.maxAmount.toLocaleString()} USD`);
       return false;
     }
 
@@ -80,47 +69,81 @@ const InvestmentPlan = () => {
     return true;
   };
 
-  // Handle tariff change
-  const handleTariffChange = (tariff: Tariff): void => {
-    setSelectedTariff(tariff);
-    setAmount(tariff.minAmount);
+  const handlePlanChange = (plan: any): void => {
+    setSelectedPlan(plan);
+    setAmount(plan.minAmount);
     setError("");
   };
 
-  // Handle amount change
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const inputVal = e.target.value;
 
     if (inputVal === "") {
       setAmount(0);
       setError(
-        `Amount must be at least ${selectedTariff.minAmount.toLocaleString()} USD`
+        `Amount must be at least ${selectedPlan?.minAmount.toLocaleString()} USD`
       );
       return;
     }
 
     const val = Number(inputVal);
-    if (isNaN(val)) {
-      return;
-    }
+    if (isNaN(val)) return;
 
     setAmount(val);
     validateAmount(val);
   };
 
   const handleInvestment = async () => {
-    if (!validateAmount(amount)) {
+    if (!selectedPlan || !validateAmount(amount)) {
+      toast.error("Please select a plan and enter a valid amount");
       return;
     }
 
-    // Instead of processing here, pass the data to final component
-    navigate("/investment-plan-final", {
-      state: {
-        selectedTariff,
-        amount,
-      },
-    });
+    try {
+      setLoading(true);
+      console.log("Attempting investment:", {
+        planId: selectedPlan._id,
+        amount: amount,
+      });
+
+      const result = await investmentService.createInvestment(
+        selectedPlan._id,
+        amount
+      );
+
+      console.log("Investment result:", result);
+      toast.success("Investment created successfully!");
+
+      // Wait a bit before navigating
+      setTimeout(() => navigate("/main-screen"), 1500);
+    } catch (error: any) {
+      console.error("Investment error:", error);
+      if (error.message.includes("login")) {
+        toast.error("Session expired. Please login again");
+        setTimeout(() => navigate("/login"), 1500);
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  if (plans.length === 0) {
+    return (
+      <div className="text-center text-white">
+        No active investment plans available
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] px-4 pt-6 pb-28 relative">
@@ -144,7 +167,7 @@ const InvestmentPlan = () => {
         </p>
       </div>
 
-      {/* Select Currency */}
+      {/* Currency Section */}
       <div className="bg-[#3A3232] py-4 px-8 rounded-2xl h-[142px] mb-5">
         <p className="text-white font-semibold">Supported Currency</p>
         <div className="flex justify-center items-center h-full">
@@ -155,17 +178,17 @@ const InvestmentPlan = () => {
         </div>
       </div>
 
-      {/* Tariff */}
+      {/* Plan Selection */}
       <div className="bg-[#3A3232] p-4 rounded-2xl h-[142px] mb-5">
-        <p className="text-white font-semibold mb-2">Tariff</p>
+        <p className="text-white font-semibold mb-2">Investment Plan</p>
         <SelectComponent
-          TariffList={tariffs}
-          selectedTariff={selectedTariff}
-          setSelectedTariff={handleTariffChange}
+          plans={plans}
+          selectedPlan={selectedPlan!}
+          onPlanChange={handlePlanChange}
         />
       </div>
 
-      {/* Deposit Amount */}
+      {/* Amount Input */}
       <div className="bg-[#3A3232] h-auto p-4 rounded-2xl">
         <p className="text-white font-semibold mb-2">Deposit Amount</p>
         <div
@@ -177,8 +200,8 @@ const InvestmentPlan = () => {
             type="number"
             value={amount === 0 ? "" : amount}
             onChange={handleAmountChange}
-            className="bg-transparent text-white outline-none flex-1 placeholder:text-white"
-            placeholder={`Min. ${selectedTariff.minAmount.toLocaleString()}`}
+            className="bg-transparent text-white outline-none flex-1"
+            placeholder={`Min. ${selectedPlan?.minAmount.toLocaleString()}`}
           />
           <span className="text-white font-semibold">USD</span>
         </div>
@@ -191,31 +214,27 @@ const InvestmentPlan = () => {
           <span>
             Min. Amount:{" "}
             <span className="text-green-500 font-semibold">
-              {selectedTariff.minAmount.toLocaleString()}
+              {selectedPlan?.minAmount.toLocaleString()}
             </span>
           </span>
           <span>
             Max. Amount:{" "}
             <span className="text-green-500 font-semibold">
-              {selectedTariff.value === "master"
-                ? `${selectedTariff.minAmount.toLocaleString()}+`
-                : selectedTariff.maxAmount.toLocaleString()}
+              {selectedPlan?.maxAmount.toLocaleString()}
             </span>
           </span>
         </div>
       </div>
 
-      {/* Continue Button */}
+      {/* Submit Button */}
       <div className="absolute bottom-4 left-0 right-0 px-4">
         <Button
           className={`w-full text-white text-base py-6 rounded-2xl ${
-            error ||
-            amount < selectedTariff.minAmount ||
-            amount > selectedTariff.maxAmount
+            error || !selectedPlan || amount < selectedPlan.minAmount
               ? "bg-gray-500 cursor-not-allowed"
               : "bg-[#7553FF]"
           }`}
-          disabled={!!error || amount < selectedTariff.minAmount}
+          disabled={!!error || !selectedPlan || amount < selectedPlan.minAmount}
           onClick={handleInvestment}
         >
           Continue

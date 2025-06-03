@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { renderDashboard } from "@/Pages/admin/Dashboard";
 import { renderDashBoardTabs } from "@/Pages/admin/DashboardTabs";
 import { InvestorsList } from "@/Pages/admin/Investors";
-import { renderPlans } from "@/Pages/admin/Plans";
+import Plans from "@/Pages/admin/Plans";
 import { renderReferralsHistory } from "@/Pages/admin/ReferralsHistory";
 
 // import { renderSettings } from "@/Pages/admin/Settings";
@@ -206,7 +206,7 @@ const Dashboard = () => {
       case "Investors":
         return <InvestorsList />;
       case "Plans":
-        return renderPlans();
+        return <Plans />;
       case "ReferralsHistory":
         return renderReferralsHistory();
       // case "Settings":

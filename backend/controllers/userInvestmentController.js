@@ -31,11 +31,13 @@ exports.investInPlan = async (req, res) => {
       dailyEarning,
       totalDays,
       startDate,
-      endDate
+      endDate,
     });
 
     await newInvestment.save();
-    res.status(201).json({ message: "Investment successful", investment: newInvestment });
+    res
+      .status(201)
+      .json({ message: "Investment successful", investment: newInvestment });
   } catch (err) {
     res.status(500).json({ message: "Investment error", error: err.message });
   }
@@ -51,6 +53,8 @@ exports.getAllInvestments = async (req, res) => {
 
     res.status(200).json({ investments });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching investments", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching investments", error: err.message });
   }
 };

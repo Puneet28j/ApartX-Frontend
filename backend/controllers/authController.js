@@ -80,7 +80,9 @@ exports.loginUser = async (req, res) => {
     const { mobile, password, deviceId } = req.body;
 
     if (!mobile || !password || !deviceId) {
-      return res.status(400).json({ message: "Mobile, password, and deviceId are required" });
+      return res
+        .status(400)
+        .json({ message: "Mobile, password, and deviceId are required" });
     }
 
     const user = await User.findOne({ mobile });
@@ -115,11 +117,10 @@ exports.loginUser = async (req, res) => {
       message: "Login successful",
       token,
       role: user.role,
-      userId: user._id,           // ✅ Add this
-      deviceId: user.deviceId,    // ✅ Optional: helpful for debug
+      userId: user._id, // ✅ Add this
+      deviceId: user.deviceId, // ✅ Optional: helpful for debug
       redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
     });
-
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: "Server error" });
@@ -150,7 +151,7 @@ exports.setMpin = async (req, res) => {
       message: "MPIN set successfully. You can now login.",
       token,
       role: user.role,
-      redirectTo: user.role === "admin" ? "/admin" : "/main-screen"
+      redirectTo: user.role === "admin" ? "/admin" : "/main-screen",
     });
   } catch (err) {
     console.error(err);
@@ -169,10 +170,10 @@ exports.updateProfile = async (req, res) => {
     if (mobile) user.mobile = mobile;
 
     if (req.file) {
-      const outputPath = `uploads/profile_pic/resized-${req.file.filename}`;
+      const outputPath = `/uploads/profile_pic/resized-${req.file.filename}`;
       await sharp(req.file.path).resize(300, 300).toFile(outputPath);
       fs.unlinkSync(req.file.path);
-      user.profilePic = `/${outputPath}`;
+      user.profilePic = `${outputPath}`;
     }
 
     await user.save();
@@ -190,13 +191,14 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
 exports.forgotPassword = async (req, res) => {
   try {
     const { mobile, newPassword } = req.body;
 
     if (!mobile || !newPassword) {
-      return res.status(400).json({ message: "Mobile and new password required" });
+      return res
+        .status(400)
+        .json({ message: "Mobile and new password required" });
     }
 
     const user = await User.findOne({ mobile });
@@ -212,48 +214,49 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-
-
-
 exports.getInvestorCount = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }).select("name mobile email createdAt");
+    const users = await User.find({ role: "user" }).select(
+      "name mobile email createdAt"
+    );
 
     res.status(200).json({
       totalUsers: users.length,
-      users
+      users,
     });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching users", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: err.message });
   }
 };
-
 
 const UserWallet = require("../models/UserWallet");
 
 exports.getAllUserWallets = async (req, res) => {
   try {
-    const wallets = await UserWallet.find()
-  .populate("userId", "name mobile email"); // ✅ short user details
+    const wallets = await UserWallet.find().populate(
+      "userId",
+      "name mobile email"
+    ); // ✅ short user details
 
-
-  const data = wallets.map(w => ({
-  name: w.userId?.name || "N/A",
-  mobile: w.userId?.mobile || "N/A",
-  email: w.userId?.email || "N/A",
-  walletID: w.walletID,
-  walletType: w.walletType,
-  balance: w.balance
-}));
-
+    const data = wallets.map((w) => ({
+      name: w.userId?.name || "N/A",
+      mobile: w.userId?.mobile || "N/A",
+      email: w.userId?.email || "N/A",
+      walletID: w.walletID,
+      walletType: w.walletType,
+      balance: w.balance,
+    }));
 
     res.status(200).json({ users: data });
   } catch (err) {
     console.error("Wallet Fetch Error:", err);
-    res.status(500).json({ message: "Error fetching wallets", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching wallets", error: err.message });
   }
 };
-
 
 exports.getMyWallet = async (req, res) => {
   try {
@@ -261,8 +264,8 @@ exports.getMyWallet = async (req, res) => {
 
     const wallet = await UserWallet.findOne({ userId });
     if (!wallet) {
-      return res.status(404).json({ 
-        message: "You haven't created a wallet yet. Please create one." 
+      return res.status(404).json({
+        message: "You haven't created a wallet yet. Please create one.",
       });
     }
 
@@ -271,15 +274,15 @@ exports.getMyWallet = async (req, res) => {
       walletType: wallet.walletType,
       balance: wallet.balance,
       createdAt: wallet.createdAt,
-      updatedAt: wallet.updatedAt
+      updatedAt: wallet.updatedAt,
     });
   } catch (err) {
     console.error("My Wallet Error:", err);
-    res.status(500).json({ message: "Error fetching wallet", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching wallet", error: err.message });
   }
 };
-
-
 
 exports.changePassword = async (req, res) => {
   try {
@@ -289,7 +292,8 @@ exports.changePassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Old password is incorrect" });
+    if (!isMatch)
+      return res.status(401).json({ message: "Old password is incorrect" });
 
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
@@ -300,7 +304,6 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
-
 
 const nodemailer = require("nodemailer");
 
@@ -321,13 +324,13 @@ exports.sendOtpForReset = async (req, res) => {
 
     // ✅ SMTP Webmail Configuration
     const transporter = nodemailer.createTransport({
-      host: "mail.hostinger.com",         // replace with your mail server (e.g., smtp.zoho.com)
-      port: 587,                            // or 465 if using SSL
-      secure: false,                        // true if port 465
+      host: "mail.hostinger.com", // replace with your mail server (e.g., smtp.zoho.com)
+      port: 587, // or 465 if using SSL
+      secure: false, // true if port 465
       auth: {
-        user: "ankit@angadyadav.in",     // your webmail email
-        pass: "1y0XWO$y]S"         // your webmail password
-      }
+        user: "ankit@angadyadav.in", // your webmail email
+        pass: "1y0XWO$y]S", // your webmail password
+      },
     });
 
     await transporter.sendMail({
@@ -336,16 +339,17 @@ exports.sendOtpForReset = async (req, res) => {
       subject: "Your OTP for Password Reset",
       html: `<p>Hello ${user.name || "User"},</p>
              <p>Your OTP is <b>${otp}</b>. It is valid for 10 minutes.</p>
-             <p>If you did not request this, please ignore this email.</p>`
+             <p>If you did not request this, please ignore this email.</p>`,
     });
 
-    return res.status(200).json({ message: "OTP sent to your registered email." });
+    return res
+      .status(200)
+      .json({ message: "OTP sent to your registered email." });
   } catch (err) {
     console.error("OTP Mail Error:", err);
     res.status(500).json({ message: "Failed to send OTP email" });
   }
 };
-
 
 exports.verifyOtpAndResetPassword = async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,42 +13,63 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 
 interface Plan {
+  _id: string;
   name: string;
-  minInvestment: string;
-  maxInvestment: string;
-  roi: string;
-  duration: string;
-  status: "Active" | "Inactive";
+  minAmount: number;
+  maxAmount: number;
+  roi: number;
+  durationDays: number;
+  isActive: boolean;
 }
 
 interface PlanDialogProps {
   plan?: Plan | null;
   isEdit?: boolean;
+  onSuccess?: () => void;
 }
-
+const API_URL = "http://localhost:5000/api";
 // Replace CreatePlanDialog with this new component
-const PlanDialog = ({ plan = null, isEdit = false }: PlanDialogProps) => {
+const PlanDialog = ({
+  plan = null,
+  isEdit = false,
+  onSuccess,
+}: PlanDialogProps) => {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: plan?.name || "",
-    minInvestment: plan?.minInvestment?.replace(/,/g, "") || "",
-    maxInvestment: plan?.maxInvestment?.replace(/,/g, "") || "",
-    roi: plan?.roi?.replace("%", "") || "",
-    duration: plan?.duration || "",
+    minAmount: plan?.minAmount || "",
+    maxAmount: plan?.maxAmount || "",
+    roi: plan?.roi || "",
+    durationDays: plan?.durationDays || "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    if (isEdit) {
-      console.log("Editing plan:", formData);
-    } else {
-      console.log("Creating plan:", formData);
+    setLoading(true);
+    try {
+      if (isEdit && plan?._id) {
+        await axios.put(`${API_URL}/plans/${plan._id}`, formData);
+        toast.success("Plan updated successfully");
+      } else {
+        await axios.post(`${API_URL}/plans`, formData);
+        toast.success("Plan created successfully");
+      }
+      setOpen(false);
+      if (onSuccess) onSuccess();
+    } catch (error: any) {
+      toast.error(
+        "Error: " + (error.response?.data?.message || "Failed to save plan")
+      );
+    } finally {
+      setLoading(false);
     }
-    setOpen(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,30 +118,32 @@ const PlanDialog = ({ plan = null, isEdit = false }: PlanDialogProps) => {
                 placeholder="Enter plan name"
                 value={formData.name}
                 onChange={handleChange}
-                className="col-span-3"
+                required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="minInvestment">Min Investment ($)</Label>
+                <Label htmlFor="minAmount">Min Amount ($)</Label>
                 <Input
-                  id="minInvestment"
-                  name="minInvestment"
+                  id="minAmount"
+                  name="minAmount"
                   type="number"
                   placeholder="0.00"
-                  value={formData.minInvestment}
+                  value={formData.minAmount}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="maxInvestment">Max Investment ($)</Label>
+                <Label htmlFor="maxAmount">Max Amount ($)</Label>
                 <Input
-                  id="maxInvestment"
-                  name="maxInvestment"
+                  id="maxAmount"
+                  name="maxAmount"
                   type="number"
                   placeholder="0.00"
-                  value={formData.maxInvestment}
+                  value={formData.maxAmount}
                   onChange={handleChange}
+                  required
                 />
               </div>
             </div>
@@ -134,16 +157,19 @@ const PlanDialog = ({ plan = null, isEdit = false }: PlanDialogProps) => {
                   placeholder="0"
                   value={formData.roi}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="duration">Duration</Label>
+                <Label htmlFor="durationDays">Duration (Days)</Label>
                 <Input
-                  id="duration"
-                  name="duration"
-                  placeholder="e.g., N/A"
-                  value={formData.duration}
+                  id="durationDays"
+                  name="durationDays"
+                  type="number"
+                  placeholder="e.g., 30"
+                  value={formData.durationDays}
                   onChange={handleChange}
+                  // required
                 />
               </div>
             </div>
@@ -153,11 +179,16 @@ const PlanDialog = ({ plan = null, isEdit = false }: PlanDialogProps) => {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              disabled={loading}
             >
               Cancel
             </Button>
-            <Button type="submit">
-              {isEdit ? "Save Changes" : "Create Plan"}
+            <Button type="submit" disabled={loading}>
+              {loading
+                ? "Processing..."
+                : isEdit
+                ? "Save Changes"
+                : "Create Plan"}
             </Button>
           </DialogFooter>
         </form>
@@ -166,112 +197,204 @@ const PlanDialog = ({ plan = null, isEdit = false }: PlanDialogProps) => {
   );
 };
 
-const plans: Plan[] = [
-  {
-    name: "Basic Plan",
-    minInvestment: "100",
-    maxInvestment: "1,000",
-    roi: "5%",
-    duration: "N/A",
-    status: "Active",
-  },
-  {
-    name: "Gold Plan",
-    minInvestment: "1,000",
-    maxInvestment: "10,000",
-    roi: "8%",
-    duration: "N/A",
-    status: "Active",
-  },
-  {
-    name: "Platinum Plan",
-    minInvestment: "10,000",
-    maxInvestment: "50,000",
-    roi: "12%",
-    duration: "N/A",
-    status: "Active",
-  },
-  {
-    name: "Diamond Plan",
-    minInvestment: "50,000",
-    maxInvestment: "100,000",
-    roi: "15%",
-    duration: "N/A",
-    status: "Inactive",
-  },
-];
-export const renderPlans = () => (
-  <div className="space-y-2 p-4 md:p-6">
-    {/* Header Section - Stack on mobile */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 className="text-xl sm:text-2xl font-bold">Investment Plans</h2>
-      <PlanDialog />
-    </div>
+export const Plans = () => {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-    {/* Cards Grid - Single column on mobile, two columns on tablet and up */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-      {plans.map((plan, index) => (
-        <Card key={index} className="w-full">
-          <CardHeader className="p-4 md:p-6">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between items-start sm:items-center">
-              <CardTitle className="text-base sm:text-lg">
-                {plan.name}
-              </CardTitle>
-              <Badge
-                variant={plan.status === "Active" ? "default" : "secondary"}
-                className="text-xs"
-              >
-                {plan.status}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0 space-y-4">
-            {/* Plan Details Grid */}
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
-              <div className="space-y-1">
-                <div className="text-xs md:text-sm text-gray-500">
-                  Min Investment
-                </div>
-                <div className="text-sm md:text-base font-semibold">
-                  ${plan.minInvestment}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs md:text-sm text-gray-500">
-                  Max Investment
-                </div>
-                <div className="text-sm md:text-base font-semibold">
-                  ${plan.maxInvestment}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs md:text-sm text-gray-500">ROI</div>
-                <div className="text-sm md:text-base font-semibold text-green-600">
-                  {plan.roi}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs md:text-sm text-gray-500">Duration</div>
-                <div className="text-sm md:text-base font-semibold">
-                  {plan.duration}
-                </div>
-              </div>
-            </div>
+  const fetchPlans = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/plans`);
+      setPlans(response.data.plans);
+    } catch (error: any) {
+      toast.error(
+        "Error fetching plans: " +
+          (error.response?.data?.message || "Failed to load plans")
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            {/* Action Buttons - Full width on mobile */}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <PlanDialog plan={plan} isEdit={true} />
-              <Button
-                size="sm"
-                variant={plan.status === "Active" ? "destructive" : "default"}
-                className="w-full sm:w-auto text-xs md:text-sm"
-              >
-                {plan.status === "Active" ? "Deactivate" : "Activate"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+  const handleToggleStatus = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token"); // Get auth token
+      await axios.patch(
+        `${API_URL}/plans/${id}/toggle`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      fetchPlans(); // Refresh plans after toggle
+      toast.success("Plan status updated successfully");
+    } catch (error: any) {
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized: Please login again");
+      } else if (error.response?.status === 403) {
+        toast.error("Access denied: Admin privileges required");
+      } else {
+        toast.error(
+          "Error updating plan status: " +
+            (error.response?.data?.message || "Failed to update status")
+        );
+      }
+    }
+  };
+
+  const handleDeletePlan = async (id: string) => {
+    setIsDeleting(true);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_URL}/plans/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Plan deleted successfully");
+      fetchPlans();
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized: Please login again");
+      } else if (error.response?.status === 403) {
+        toast.error("Access denied: Admin privileges required");
+      } else {
+        toast.error(
+          "Error deleting plan: " +
+            (error.response?.data?.message || "Failed to delete plan")
+        );
+      }
+    } finally {
+      setIsDeleting(false);
+      setDeletingId(null);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  return (
+    <div className="space-y-2 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold">Investment Plans</h2>
+        <PlanDialog onSuccess={fetchPlans} />
+      </div>
+
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {plans.map((plan) => (
+            <Card key={plan._id} className="w-full">
+              <CardHeader className="p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between items-start sm:items-center">
+                  <CardTitle className="text-base sm:text-lg">
+                    {plan.name}
+                  </CardTitle>
+                  <Badge
+                    variant={plan.isActive ? "default" : "secondary"}
+                    className="text-xs"
+                  >
+                    {plan.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6 pt-0 space-y-4">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-1">
+                    <div className="text-xs md:text-sm text-gray-500">
+                      Min Amount
+                    </div>
+                    <div className="text-sm md:text-base font-semibold">
+                      ${plan.minAmount.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs md:text-sm text-gray-500">
+                      Max Amount
+                    </div>
+                    <div className="text-sm md:text-base font-semibold">
+                      ${plan.maxAmount.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs md:text-sm text-gray-500">ROI</div>
+                    <div className="text-sm md:text-base font-semibold text-green-600">
+                      {plan.roi}%
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs md:text-sm text-gray-500">
+                      Duration
+                    </div>
+                    <div className="text-sm md:text-base font-semibold">
+                      {plan.durationDays} Days
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <PlanDialog
+                    plan={plan}
+                    isEdit={true}
+                    onSuccess={fetchPlans}
+                  />
+                  <Button
+                    size="sm"
+                    variant={plan.isActive ? "destructive" : "default"}
+                    className="w-full sm:w-auto text-xs md:text-sm"
+                    onClick={async () => {
+                      setTogglingId(plan._id);
+                      await handleToggleStatus(plan._id);
+                      setTogglingId(null);
+                    }}
+                    disabled={togglingId === plan._id}
+                  >
+                    {togglingId === plan._id
+                      ? "Updating..."
+                      : plan.isActive
+                      ? "Deactivate"
+                      : "Activate"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="w-full sm:w-auto text-xs md:text-sm"
+                    onClick={() => {
+                      setDeletingId(plan._id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <DeleteConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setDeletingId(null);
+        }}
+        onConfirm={() => deletingId && handleDeletePlan(deletingId)}
+        loading={isDeleting}
+      />
     </div>
-  </div>
-);
+  );
+};
+
+export const renderPlans = Plans;
+
+export default Plans;

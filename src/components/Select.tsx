@@ -1,11 +1,12 @@
-type Tariff = {
-  duration: string;
-  label: string;
-  value: string;
-  rate: string;
+interface Plan {
+  _id: string;
+  name: string;
   minAmount: number;
   maxAmount: number;
-};
+  roi: number;
+  durationDays: number;
+  isActive: boolean;
+}
 
 import {
   Select,
@@ -15,37 +16,39 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 
+interface SelectComponentProps {
+  plans: Plan[];
+  selectedPlan: Plan;
+  onPlanChange: (plan: Plan) => void;
+}
+
 const SelectComponent = ({
-  TariffList,
-  selectedTariff,
-  setSelectedTariff,
-}: {
-  TariffList: Tariff[];
-  selectedTariff: Tariff;
-  setSelectedTariff: (tariff: Tariff) => void;
-}) => {
+  plans,
+  selectedPlan,
+  onPlanChange,
+}: SelectComponentProps) => {
   return (
     <Select
-      value={selectedTariff.value}
+      value={selectedPlan._id}
       onValueChange={(val) => {
-        const selected = TariffList.find((t) => t.value === val);
-        if (selected) setSelectedTariff(selected);
+        const selected = plans.find((p) => p._id === val);
+        if (selected) onPlanChange(selected);
       }}
     >
       <SelectTrigger className="w-full px-4 py-6 border border-white rounded-xl bg-transparent text-white">
         <div className="flex justify-between items-center w-full">
-          <span className="font-semibold">{selectedTariff.label}</span>
+          <span className="font-semibold">{selectedPlan.name}</span>
           <span className="text-sm text-gray-300">
-            {selectedTariff.rate} / {selectedTariff.duration}
+            {selectedPlan.roi}% / Day
           </span>
         </div>
       </SelectTrigger>
 
-      <SelectContent className="bg-[#1F1F1F] text-white border w-full ">
+      <SelectContent className="bg-[#1F1F1F] text-white border w-full">
         <SelectGroup>
-          {TariffList.map((tariff) => (
-            <SelectItem key={tariff.value} value={tariff.value} className="p-2">
-              {[tariff.label, `${tariff.rate} / ${tariff.duration}`]}
+          {plans.map((plan) => (
+            <SelectItem key={plan._id} value={plan._id} className="p-2">
+              {[plan.name, `${plan.roi}% / Day`]}
             </SelectItem>
           ))}
         </SelectGroup>
