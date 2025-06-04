@@ -88,6 +88,17 @@ exports.updateSendStatus = async (req, res) => {
         let normalizedWalletType = depositRequest.wallet.toLowerCase();
         if (normalizedWalletType === "trustwallet") {
           normalizedWalletType = "trustwallet";
+        } else if (normalizedWalletType === "binance") {
+          normalizedWalletType = "binance";
+        } else if (normalizedWalletType === "metamask") {
+          normalizedWalletType = "metamask";
+        } else if (normalizedWalletType === "coinbase") {
+          normalizedWalletType = "coinbase";
+        } else {
+          return res.status(400).json({
+            message: "Invalid wallet type",
+            details: "Supported wallets are TrustWallet and Binance",
+          });
         }
 
         // Find or create user wallet
