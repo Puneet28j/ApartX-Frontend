@@ -66,7 +66,7 @@ const userWallets = [
     isDefault: false,
   },
 ];
-const API_URL = "/api"; //localhost:5000/api
+const API_URL = "http://localhost:5000/api"; //localhost:5000/api
 const ProfileScreen: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();

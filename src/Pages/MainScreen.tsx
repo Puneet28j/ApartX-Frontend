@@ -12,9 +12,69 @@ import ReceiveDollar from "../assets/Recive Dollar.svg";
 import ReferAndEarn from "../assets/ReferAndEarn.svg";
 import SendDollar from "../assets/Send Dollar.svg";
 import usdtblack from "../assets/UsdtBlack.svg";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
+const API_URL = "http://localhost:5000/api"; // Replace with your actual API URL
 const MainScreen = () => {
   const navigate = useNavigate();
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch wallet balance on component mount
+  useEffect(() => {
+    getWalletBalance();
+  }, []);
+
+  const getWalletBalance = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found, redirecting to login");
+        navigate("/login-register");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/wallets/total`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 401) {
+        throw new Error("401");
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // Log the entire response to see its structure
+      console.log("Full API Response:", data);
+
+      // Check if data exists and has the expected structure
+      if (data && typeof data.totalBalance !== "undefined") {
+        setWalletBalance(data.totalBalance);
+      } else {
+        console.error("Invalid data structure received:", data);
+        toast.error("Invalid balance data received");
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching wallet balance:", error);
+      toast.error("Failed to load wallet balance");
+      setIsLoading(false);
+
+      if (error instanceof Error && error.message === "401") {
+        localStorage.removeItem("token");
+        navigate("/login-register");
+      }
+    }
+  };
 
   const currencyConfig = [{ label: "USDT", value: "$ 0.00", icon: USDTLogo }];
 
@@ -55,7 +115,7 @@ const MainScreen = () => {
               />
               {/* </span> */}
               <span className="text-2xl md:text-3xl font-bold mt-2">
-                5000.00
+                {isLoading ? "Loading..." : `$ ${walletBalance}`}
               </span>
             </div>
             <div className="flex flex-col gap-4">
