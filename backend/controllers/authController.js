@@ -48,7 +48,7 @@ exports.registerUser = async (req, res) => {
       referralCode: newReferralCode,
       referredBy: referrerCode,
       name,
-      email: `${mobile.replace(/\D/g, "")}-${Date.now()}@demo.com`,
+      email,
       profilePic,
       role: "user",
     });
