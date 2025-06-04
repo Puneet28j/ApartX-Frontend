@@ -19,7 +19,7 @@ interface SendCurrencyData {
   createdAt: string;
 }
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 // Create axios instance with default config
 const axiosInstance = axios.create({

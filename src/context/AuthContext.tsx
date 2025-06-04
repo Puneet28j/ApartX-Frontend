@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const response = await axios.get("http://localhost:5000/api/me", {
+      const response = await axios.get("/api/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
