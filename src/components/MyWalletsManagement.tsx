@@ -25,8 +25,6 @@ interface WalletData {
   qrImage?: string;
 }
 
-const API_URL = "/api";
-
 export const MyWalletsManagement = () => {
   const navigate = useNavigate();
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -47,7 +45,7 @@ export const MyWalletsManagement = () => {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/wallet`, {
+      const response = await axios.get(`${import.meta.env.VITE_URL}/wallet`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -112,7 +110,7 @@ export const MyWalletsManagement = () => {
         .filter((wallet) => wallet.isActive && wallet.id !== walletId)
         .map((wallet) =>
           axios.patch(
-            `${API_URL}/wallet/${wallet.id}/toggle`,
+            `${import.meta.env.VITE_URL}/wallet/${wallet.id}/toggle`,
             {},
             {
               headers: { Authorization: `Bearer ${token}` },
@@ -126,7 +124,7 @@ export const MyWalletsManagement = () => {
       const targetWallet = userWallets.find((w) => w.id === walletId);
       if (!targetWallet?.isActive) {
         await axios.patch(
-          `${API_URL}/wallet/${walletId}/toggle`,
+          `${import.meta.env.VITE_URL}/wallet/${walletId}/toggle`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },

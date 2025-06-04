@@ -15,7 +15,6 @@ import usdtblack from "../assets/UsdtBlack.svg";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const API_URL = "/api"; // Replace with your actual API URL
 const MainScreen = () => {
   const navigate = useNavigate();
   const [walletBalance, setWalletBalance] = useState(0);
@@ -36,13 +35,16 @@ const MainScreen = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/wallets/total`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_URL}/wallets/total`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.status === 401) {
         throw new Error("401");

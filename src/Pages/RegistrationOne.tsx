@@ -8,8 +8,6 @@ import { ArrowLeft } from "lucide-react"; // Optional: lucide icon
 import { toast } from "sonner";
 import axios from "axios";
 
-const API_URL = "/api";
-
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -39,13 +37,16 @@ const Register = () => {
       const formattedMobile = phone.startsWith("+") ? phone : `+${phone}`;
       const deviceId = Math.random().toString(36).substring(7);
 
-      const response = await axios.post(`${API_URL}/register`, {
-        mobile: formattedMobile,
-        email,
-        password,
-        referralCode: referralId,
-        deviceId,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_URL}/register`,
+        {
+          mobile: formattedMobile,
+          email,
+          password,
+          referralCode: referralId,
+          deviceId,
+        }
+      );
 
       if (response.status === 201) {
         localStorage.setItem("deviceId", deviceId);

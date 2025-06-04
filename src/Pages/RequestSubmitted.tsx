@@ -11,8 +11,6 @@ import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import TransferCard from "../assets/Subtract.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 
-const API_URL = "/api";
-
 const RequestSubmitted = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +38,7 @@ const RequestSubmitted = () => {
     const fetchWalletAddress = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`${API_URL}/wallet`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL}/wallet`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

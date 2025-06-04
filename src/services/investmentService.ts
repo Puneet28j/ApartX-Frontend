@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const API_URL = "/api";
-
 interface CreateInvestmentResponse {
   message: string;
   investment: {
@@ -21,7 +19,7 @@ interface CreateInvestmentResponse {
 export const investmentService = {
   async fetchPlans() {
     try {
-      const response = await axios.get(`${API_URL}/plans`);
+      const response = await axios.get(`${import.meta.env.VITE_URL}/plans`);
       return response.data.plans;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Failed to fetch plans");
@@ -39,7 +37,7 @@ export const investmentService = {
 
     try {
       const response = await axios.post<CreateInvestmentResponse>(
-        `${API_URL}/invest`,
+        `${import.meta.env.VITE_URL}/invest`,
         {
           planId,
           amount: Number(amount),

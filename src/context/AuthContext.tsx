@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const response = await axios.get("/api/me", {
+      const response = await axios.get(`${import.meta.env.VITE_URL}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

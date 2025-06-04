@@ -6,9 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import USDTLOGO from "../assets/usdt logo.svg";
 
-const API_URL = "/api";
-const IMAGE_BASE = "/";
-
 const ReceiveCurrency = () => {
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
@@ -25,7 +22,7 @@ const ReceiveCurrency = () => {
           return;
         }
 
-        const response = await axios.get(`${API_URL}/me`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL}/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -36,9 +33,10 @@ const ReceiveCurrency = () => {
         // Handle profile picture URL
         const userData = response.data;
         if (userData.profilePic) {
-          userData.profilePic = userData.profilePic.startsWith("http")
-            ? userData.profilePic
-            : `${IMAGE_BASE}/${userData.profilePic}`;
+          userData.profilePic = `${import.meta.env.VITE_URL.slice(
+            0,
+            import.meta.env.VITE_URL.length - 3
+          )}/${userData.profilePic}`;
         }
 
         setUserData(userData);

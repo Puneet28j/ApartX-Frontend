@@ -27,30 +27,6 @@ const TransferReceipt = () => {
   const location = useLocation();
   const { amount, walletType, walletID, transactionId } = location.state || {};
 
-  // useEffect(() => {
-  //   const fetchTransactionDetails = async () => {
-  //     if (!transactionId) return;
-
-  //     try {
-  //       const token = localStorage.getItem("token");
-  //       const response = await axios.get(
-  //         `${API_URL}/send-currency/${transactionId}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-  //       setDetails(response.data.data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch transaction details:", error);
-  //       toast.error("Failed to load transaction details");
-  //     }
-  //   };
-
-  //   fetchTransactionDetails();
-  // }, [transactionId]);
-
   const getWalletLogo = (type: string) => {
     switch (type?.toLowerCase()) {
       case "binance":

@@ -16,14 +16,13 @@ exports.registerUser = async (req, res) => {
     console.log("📥 Incoming registration body:", req.body);
 
     const {
-  mobile,
-  password,
-  referralCode: referrerCode,
-  name,
-  email,
-  profilePic,
-} = req.body;
-
+      mobile,
+      password,
+      referralCode: referrerCode,
+      name,
+      email,
+      profilePic,
+    } = req.body;
 
     if (!mobile || !password || !referrerCode) {
       return res.status(400).json({
@@ -46,16 +45,15 @@ exports.registerUser = async (req, res) => {
     const newReferralCode = generateReferralCode(mobile);
 
     const user = new User({
-  mobile,
-  password: hashedPassword,
-  referralCode: newReferralCode,
-  referredBy: referrerCode,
-  name,
-  email, // ✅ now saving actual email from frontend
-  profilePic,
-  role: "user",
-});
-
+      mobile,
+      password: hashedPassword,
+      referralCode: newReferralCode,
+      referredBy: referrerCode,
+      name,
+      email, // ✅ now saving actual email from frontend
+      profilePic,
+      role: "user",
+    });
 
     await user.save();
 

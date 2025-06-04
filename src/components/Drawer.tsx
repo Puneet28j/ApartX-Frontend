@@ -25,8 +25,6 @@ import Combobox from "./ComboBox";
 import { Separator } from "./ui/separator";
 import { toast } from "sonner";
 
-const API_URL = "/api";
-
 const wallets = [
   { value: "binance", label: "Binance", icon: Binance },
   { value: "metamask", label: "MetaMask", icon: MetaMask },
@@ -83,12 +81,16 @@ const DrawerComponent: React.FC = () => {
       }
       formData.append("balance", "0"); // Default balance
 
-      const response = await axios.post(`${API_URL}/wallet`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_URL}/wallet`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (response.data) {
         setOpenDrawer(false);

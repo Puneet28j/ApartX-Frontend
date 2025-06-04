@@ -5,8 +5,6 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const API_URL = "/api";
-
 const Setmpin = () => {
   const navigate = useNavigate();
   const [mpin, setMpin] = useState(["", "", "", ""]);
@@ -50,11 +48,14 @@ const Setmpin = () => {
           return;
         }
 
-        const response = await axios.post(`${API_URL}/set-mpin`, {
-          userId,
-          mpin: pin,
-          deviceId,
-        });
+        const response = await axios.post(
+          `${import.meta.env.VITE_URL}/set-mpin`,
+          {
+            userId,
+            mpin: pin,
+            deviceId,
+          }
+        );
 
         if (response.status === 200) {
           toast.success("MPIN set successfully!");

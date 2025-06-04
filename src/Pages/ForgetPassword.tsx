@@ -5,8 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 
-const API_URL = "/api";
-
 const ForgetPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -22,7 +20,7 @@ const ForgetPassword = () => {
       }
 
       // Send request to get OTP
-      await axios.post(`${API_URL}/forgot-password`, {
+      await axios.post(`${import.meta.env.VITE_URL}/forgot-password`, {
         email: email.trim(),
       });
 

@@ -33,7 +33,6 @@ interface PlanDialogProps {
   isEdit?: boolean;
   onSuccess?: () => void;
 }
-const API_URL = "/api";
 // Replace CreatePlanDialog with this new component
 const PlanDialog = ({
   plan = null,
@@ -55,10 +54,13 @@ const PlanDialog = ({
     setLoading(true);
     try {
       if (isEdit && plan?._id) {
-        await axios.put(`${API_URL}/plans/${plan._id}`, formData);
+        await axios.put(
+          `${import.meta.env.VITE_URL}/plans/${plan._id}`,
+          formData
+        );
         toast.success("Plan updated successfully");
       } else {
-        await axios.post(`${API_URL}/plans`, formData);
+        await axios.post(`${import.meta.env.VITE_URL}/plans`, formData);
         toast.success("Plan created successfully");
       }
       setOpen(false);
@@ -207,7 +209,7 @@ export const Plans = () => {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get(`${API_URL}/plans`);
+      const response = await axios.get(`${import.meta.env.VITE_URL}/plans`);
       setPlans(response.data.plans);
     } catch (error: any) {
       toast.error(
@@ -223,7 +225,7 @@ export const Plans = () => {
     try {
       const token = localStorage.getItem("token"); // Get auth token
       await axios.patch(
-        `${API_URL}/plans/${id}/toggle`,
+        `${import.meta.env.VITE_URL}/plans/${id}/toggle`,
         {},
         {
           headers: {
@@ -252,7 +254,7 @@ export const Plans = () => {
     setIsDeleting(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/plans/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_URL}/plans/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

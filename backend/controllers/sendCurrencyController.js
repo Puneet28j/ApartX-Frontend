@@ -3,6 +3,7 @@ const UserWallet = require("../models/UserWallet");
 const User = require("../models/User");
 const ReferralTree = require("../models/ReferralTree");
 const { logTransaction } = require("../utils/transactionLogger");
+const WalletTransaction = require("../models/WalletTransaction");
 
 exports.createSendCurrency = async (req, res) => {
   try {
@@ -83,33 +84,56 @@ exports.updateSendStatus = async (req, res) => {
     // If status is approved, handle the deposit
     if (status === "Approved") {
       try {
+        // Normalize wallet type to match enum values
+        let normalizedWalletType = depositRequest.wallet.toLowerCase();
+        if (normalizedWalletType === "trustwallet") {
+          normalizedWalletType = "trustwallet";
+        }
+
         // Find or create user wallet
         let userWallet = await UserWallet.findOne({
           userId: depositRequest.userId,
-          walletType: depositRequest.wallet,
+          walletType: normalizedWalletType,
         });
 
         if (!userWallet) {
           userWallet = new UserWallet({
             userId: depositRequest.userId,
-            walletType: depositRequest.wallet,
+            walletType: normalizedWalletType,
+            walletID: depositRequest.walletID,
             balance: 0,
           });
         }
 
-        // Update wallet balance
-        userWallet.balance += parseFloat(depositRequest.amount);
+        // Update wallet balance - ensure amount is a number
+        const amount = parseFloat(depositRequest.amount);
+        if (isNaN(amount)) {
+          throw new Error("Invalid amount value");
+        }
+
+        // Calculate new balance
+        const previousBalance = userWallet.balance;
+        userWallet.balance += amount;
+        const newBalance = userWallet.balance;
+
         await userWallet.save();
 
-        // Log the transaction
-        await logTransaction({
+        // Create wallet transaction record
+        const walletTransaction = new WalletTransaction({
           userId: depositRequest.userId,
-          type: "deposit",
-          amount: depositRequest.amount,
-          walletType: depositRequest.wallet,
-          status: "completed",
-          reference: depositRequest._id,
+          type: "Deposit", // ✅ Use capitalized "Deposit" to match enum
+          amount: amount,
+          balanceAfter: newBalance, // ✅ Provide required balanceAfter field
+          walletID: depositRequest.walletID,
+          description: `Deposit approved - ${depositRequest.wallet} wallet`,
         });
+
+        await walletTransaction.save();
+
+        console.log(
+          "Wallet transaction created successfully:",
+          walletTransaction
+        );
       } catch (walletError) {
         console.error("Wallet update error:", walletError);
         return res.status(500).json({

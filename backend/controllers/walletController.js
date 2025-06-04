@@ -170,3 +170,38 @@ exports.getAllPassbooks = async (req, res) => {
       .json({ message: "Error fetching all passbooks", error: err.message });
   }
 };
+
+exports.getAdminWallets = async (req, res) => {
+  try {
+    // Find all wallets that belong to admin users
+    const wallets = await UserWallet.find()
+      .populate({
+        path: "userId",
+        select: "name email role",
+        match: { role: "admin" },
+      })
+      .exec();
+
+    // Filter out wallets where userId is null (in case the user was deleted)
+    const adminWallets = wallets.filter((wallet) => wallet.userId !== null);
+
+    // Format the response
+    const formattedWallets = adminWallets.map((wallet) => ({
+      _id: wallet._id,
+      walletType: wallet.walletType,
+      walletID: wallet.walletID,
+      balance: wallet.balance,
+      qrImage: wallet.qrImage,
+      adminName: wallet.userId.name,
+      adminEmail: wallet.userId.email,
+    }));
+
+    res.status(200).json({ wallets: formattedWallets });
+  } catch (err) {
+    console.error("Error fetching admin wallets:", err);
+    res.status(500).json({
+      message: "Error fetching admin wallets",
+      error: err.message,
+    });
+  }
+};

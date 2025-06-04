@@ -8,8 +8,6 @@ import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 
-const API_URL = "/api";
-
 const LoginForm = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -32,11 +30,12 @@ const LoginForm = () => {
         : `+${phoneNumber}`;
       const deviceId = window.navigator.userAgent;
 
-      const response = await axios.post(`${API_URL}/login`, {
+      const response = await axios.post(`${import.meta.env.VITE_URL}/login`, {
         mobile: formattedMobile,
         password: password,
         deviceId: deviceId,
       });
+      console.log("Login response:", response);
 
       const data = response.data;
 

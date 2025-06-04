@@ -1,7 +1,5 @@
 import axios, { AxiosError } from "axios";
 
-const API_URL = "/api";
-
 interface SendCurrencyResponse {
   message: string;
   data: {
@@ -24,7 +22,7 @@ export const sendCurrencyService = {
       }
 
       const response = await axios.post<SendCurrencyResponse>(
-        `${API_URL}/send-currency`,
+        `${import.meta.env.VITE_URL}/send-currency`,
         formData,
         {
           headers: {
@@ -58,11 +56,12 @@ export const sendCurrencyService = {
       }
 
       const response = await axios.put(
-        `${API_URL}/send-currency/${id}`,
+        `${import.meta.env.VITE_URL}/send-currency/${id}`,
         { status, remark },
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -78,6 +77,29 @@ export const sendCurrencyService = {
         );
       }
       throw new Error("An unexpected error occurred");
+    }
+  },
+
+  async getAdminWallets() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Please login again");
+      }
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_URL}/admin/wallets`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data.wallets;
+    } catch (error) {
+      console.error("Error fetching admin wallets:", error);
+      throw error;
     }
   },
 };

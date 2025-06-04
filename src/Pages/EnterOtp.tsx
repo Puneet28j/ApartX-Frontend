@@ -12,8 +12,6 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
-const API_URL = "/api/auth"; // Adjust this to your actual API endpoint
-
 const EnterOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,7 +29,7 @@ const EnterOtp = () => {
       }
 
       // Verify OTP
-      await axios.post(`${API_URL}/verify-otp`, {
+      await axios.post(`${import.meta.env.VITE_URL}/verify-otp`, {
         email,
         otp,
         type: from, // Send type to differentiate between different OTP purposes
@@ -54,7 +52,7 @@ const EnterOtp = () => {
   const handleResendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/resend-otp`, {
+      await axios.post(`${import.meta.env.VITE_URL}/resend-otp`, {
         email,
         type: from,
       });

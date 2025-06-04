@@ -11,7 +11,6 @@ const referredFriends = Array(5).fill({
   date: "05-May-2025",
 });
 
-const API_URL = "/api"; // Adjust this to your API base URL
 const InviteAndEarn = () => {
   const navigate = useNavigate();
   const [referralCode, setReferralCode] = useState("");
@@ -27,7 +26,7 @@ const InviteAndEarn = () => {
           return;
         }
 
-        const response = await fetch(`${API_URL}/me`, {
+        const response = await fetch(`${import.meta.env.VITE_URL}/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

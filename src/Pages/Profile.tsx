@@ -66,7 +66,6 @@ const userWallets = [
     isDefault: false,
   },
 ];
-const API_URL = "/api"; //localhost:5000/api
 const ProfileScreen: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -131,7 +130,7 @@ const ProfileScreen: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/me`, {
+      const response = await fetch(`${import.meta.env.VITE_URL}/me`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -164,7 +163,7 @@ const ProfileScreen: React.FC = () => {
 
       // Handle profile picture - make sure the URL is correct
       if (data.profilePic) {
-        const baseUrl = API_URL.split("/api")[0]; // Get base URL without /api
+        const baseUrl = import.meta.env.VITE_URL.split("/api")[0]; // Get base URL without /api
         const imageUrl = data.profilePic.startsWith("http")
           ? data.profilePic
           : `${baseUrl}${data.profilePic}`;
@@ -286,13 +285,16 @@ const ProfileScreen: React.FC = () => {
       if (mobile !== initialMobile) formData.append("mobile", mobile);
       if (image) formData.append("profilePic", image);
 
-      const response = await fetch(`${API_URL}/update-profile`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_URL}/update-profile`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();

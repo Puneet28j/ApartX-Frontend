@@ -19,11 +19,9 @@ interface SendCurrencyData {
   createdAt: string;
 }
 
-const API_URL = "/api";
-
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: import.meta.env.VITE_URL,
   headers: {
     "Content-Type": "application/json",
   },

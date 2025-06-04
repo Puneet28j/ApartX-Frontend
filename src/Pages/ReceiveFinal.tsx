@@ -12,8 +12,6 @@ import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 
-const API_URL = "/api";
-
 const getWalletLogo = (type: string) => {
   switch (type.toLowerCase()) {
     case "binance":
@@ -41,7 +39,7 @@ const ReceiveFinal = () => {
     const fetchUserWallets = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`${API_URL}/wallet`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL}/wallet`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -90,7 +88,7 @@ const ReceiveFinal = () => {
       }
 
       const response = await axios.post(
-        `${API_URL}/receive`,
+        `${import.meta.env.VITE_URL}/receive`,
         {
           amount: parseFloat(amount),
           wallet: walletType,

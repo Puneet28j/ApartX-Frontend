@@ -16,12 +16,13 @@ import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import { sendCurrencyService } from "@/services/sendCurrencyService";
 
-const wallets2 = [
-  { value: "binance", label: "Binance", icon: Binance },
-  { value: "metamask", label: "MetaMask", icon: MetaMask },
-  { value: "coinbase", label: "CoinBase", icon: CoinBase },
-  { value: "trustWallet", label: "Trust Wallet", icon: TrustWallet },
-];
+type AdminWallet = {
+  value: string;
+  label: string;
+  icon: string;
+  balance: number;
+  adminName: string;
+};
 
 const SendCurrency = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const SendCurrency = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [adminWallets, setAdminWallets] = useState<AdminWallet[]>([]);
+  const [isLoadingWallets, setIsLoadingWallets] = useState(false);
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
@@ -76,13 +79,19 @@ const SendCurrency = () => {
     }
   };
 
+  // Update the handleSubmit function
   const handleSubmit = async () => {
     if (!validateFirstStep() || !validateSecondStep()) return;
 
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append("amount", amount);
-    formData.append("wallet", selectedWallet);
+
+    // Get the wallet TYPE (label) instead of wallet ID
+    const walletType =
+      adminWallets.find((w) => w.value === selectedWallet)?.label || "";
+    formData.append("wallet", walletType); // Use wallet type here
+
     formData.append("walletID", walletID);
 
     if (screenshot) {
@@ -91,12 +100,14 @@ const SendCurrency = () => {
 
     try {
       const response = await sendCurrencyService.createSendRequest(formData);
-
+      const selectedWalletData = adminWallets.find(
+        (w) => w.value === selectedWallet
+      );
       toast.success("Transfer request submitted successfully");
       navigate("/transfer-receipt", {
         state: {
           amount: amount,
-          walletType: selectedWallet,
+          walletType: selectedWalletData?.label || "",
           walletID: walletID,
           transactionId: response.data._id,
         },
@@ -130,6 +141,47 @@ const SendCurrency = () => {
       setPreview(URL.createObjectURL(file));
     }
   };
+
+  const fetchAdminWallets = async () => {
+    try {
+      setIsLoadingWallets(true);
+      const wallets = await sendCurrencyService.getAdminWallets();
+
+      const formattedWallets = wallets.map((wallet: any) => ({
+        value: wallet.walletID,
+        label: wallet.walletType,
+        icon: getWalletIcon(wallet.walletType),
+        balance: wallet.balance,
+        adminName: wallet.adminName,
+      }));
+
+      setAdminWallets(formattedWallets);
+    } catch (error) {
+      console.error("Error fetching admin wallets:", error);
+      toast.error("Failed to fetch admin wallets");
+    } finally {
+      setIsLoadingWallets(false);
+    }
+  };
+
+  const getWalletIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "binance":
+        return Binance;
+      case "metamask":
+        return MetaMask;
+      case "coinbase":
+        return CoinBase;
+      case "trustwallet":
+        return TrustWallet;
+      default:
+        return TrustWallet;
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminWallets();
+  }, []);
 
   // Cleanup preview URL on component unmount
   useEffect(() => {
@@ -186,16 +238,30 @@ const SendCurrency = () => {
               />
               <div className="mt-4 w-full flex flex-col justify-center">
                 <div className="text-white text-center">Select wallet</div>
-                <Combobox
-                  placeholder="Select wallet"
-                  wallets={wallets2}
-                  onChange={(value) => setSelectedWallet(value)}
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setShowWalletIDInput(false);
-                    }
-                  }}
-                />
+                {isLoadingWallets ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                  </div>
+                ) : (
+                  <Combobox
+                    placeholder="Select wallet"
+                    wallets={adminWallets}
+                    onChange={(value) => {
+                      setSelectedWallet(value);
+                      const selectedWallet = adminWallets.find(
+                        (w) => w.value === value
+                      );
+                      if (selectedWallet) {
+                        setWalletID(selectedWallet.value);
+                      }
+                    }}
+                    onOpenChange={(open) => {
+                      if (!open) {
+                        setShowWalletIDInput(false);
+                      }
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -210,6 +276,7 @@ const SendCurrency = () => {
               value={walletID}
               onChange={(e) => setWalletID(e.target.value)}
               type="text"
+              readOnly
               placeholder="Enter wallet Id"
               className="h-10 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
             />

@@ -22,8 +22,6 @@ interface TransactionData {
   // walletImage: string;
 }
 
-const API_URL = "/api";
-
 const walletTypeImages: Record<string, string> = {
   binance: BinanceImage,
   metamask: MetamaskImage,
@@ -46,7 +44,7 @@ const Passbook = () => {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/passbook`, {
+      const response = await axios.get(`${import.meta.env.VITE_URL}/passbook`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

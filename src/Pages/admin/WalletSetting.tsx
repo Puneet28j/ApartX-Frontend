@@ -1,4 +1,3 @@
-import Qrlogo from "@/assets/qrnew.svg"; // Example QR code image
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -11,80 +10,96 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, LucideDelete, Plus } from "lucide-react";
-import { useState } from "react";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import axios from "axios";
+import { Check, Copy, LucideDelete, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Add these types at the top of the file
 type WalletData = {
-  label: string;
-  value: string;
-  icon: string;
-  walletId: string;
-  qrCode?: string; // URL for the QR code image
+  _id: string;
+  walletID: string;
+  walletType: string;
+  balance: number;
+  isActive: boolean;
+  qrImage?: string;
+  userId: string;
 };
 
-// Updated wallet data structure
-const walletStats: WalletData[] = [
-  {
-    label: "Memecoin",
-    value: "$107,884.21",
-    icon: "🪙",
-    walletId: "0x1234d34x43454r5678",
-    qrCode: Qrlogo,
-  },
-  {
-    label: "Bitcoin",
-    value: "$45,678.90",
-    icon: "₿",
-    walletId: "0x5678d34x43454r5678",
-    qrCode: Qrlogo, // Example QR code URL
-  },
-  {
-    label: "Ethereum",
-    value: "$3,456.78",
-    icon: "Ξ",
-    walletId: "0x9abc1234d34x43454r5678",
-    qrCode: Qrlogo, // Example QR code URL
-  },
-  {
-    label: "Litecoin",
-    value: "$123.45",
-    icon: "Ł",
-    walletId: "0xdefg1234d34x43454r5678",
-    qrCode: Qrlogo, // Example QR code URL
-  },
-  {
-    label: "Ripple",
-    value: "$67.89",
-    icon: "XRP",
-    walletId: "0xhijk1234d34x43454r5678",
-    qrCode: Qrlogo, // Example QR code URL
-  },
-];
-
 // Add Wallet Dialog Component
-const AddWalletDialog = () => {
+const AddWalletDialog = ({ onWalletAdd }: { onWalletAdd: () => void }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    walletId: "",
+    walletID: "",
+    walletType: "",
+    balance: "0",
     qrCode: "",
   });
   const [previewUrl, setPreviewUrl] = useState<string>("");
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle wallet addition here
-    console.log(formData);
-    setOpen(false);
+
+    if (!formData.walletID || !formData.walletType) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append("walletID", formData.walletID);
+      formDataToSend.append("walletType", formData.walletType);
+      formDataToSend.append("balance", formData.balance);
+      if (previewUrl) {
+        const response = await fetch(previewUrl);
+        const blob = await response.blob();
+        formDataToSend.append("qrImage", blob, "qr-code.png");
+      }
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_URL}/wallet`,
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        toast.success("Wallet added successfully!");
+        onWalletAdd(); // Refresh the wallet list
+        setOpen(false);
+        // Reset form
+        setFormData({
+          walletID: "",
+          walletType: "",
+          balance: "0",
+          qrCode: "",
+        });
+        setPreviewUrl("");
+      }
+    } catch (error) {
+      console.error("Error adding wallet:", error);
+      toast.error("Failed to add wallet");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,22 +132,33 @@ const AddWalletDialog = () => {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="name">Wallet Name</Label>
-            <Input
+            {/* <Input
               id="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
               placeholder="Enter wallet name"
+            /> */}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="walletType">Wallet Type</Label>
+            <Input
+              id="walletType"
+              value={formData.walletType}
+              onChange={(e) =>
+                setFormData({ ...formData, walletType: e.target.value })
+              }
+              placeholder="Enter wallet type"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="walletId">Wallet Address</Label>
+            <Label htmlFor="walletID">Wallet Address</Label>
             <Input
-              id="walletId"
-              value={formData.walletId}
+              id="walletID"
+              value={formData.walletID}
               onChange={(e) =>
-                setFormData({ ...formData, walletId: e.target.value })
+                setFormData({ ...formData, walletID: e.target.value })
               }
               placeholder="Enter wallet address"
             />
@@ -169,7 +195,9 @@ const AddWalletDialog = () => {
             >
               Cancel
             </Button>
-            <Button type="submit">Add Wallet</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Wallet"}
+            </Button>
           </div>
         </form>
       </DialogContent>
@@ -184,6 +212,37 @@ export const WalletSetting = () => {
     [key: string]: boolean;
   }>({});
 
+  const [wallets, setWallets] = useState<WalletData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchWallets = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
+      const response = await axios.get(`${import.meta.env.VITE_URL}/wallet`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setWallets(response.data.wallets);
+    } catch (error) {
+      console.error("Error fetching wallets:", error);
+      toast.error("Failed to fetch wallets");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWallets();
+  }, []);
+
   const handleCopy = async (walletId: string) => {
     try {
       await navigator.clipboard.writeText(walletId);
@@ -194,6 +253,28 @@ export const WalletSetting = () => {
       }, 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
+    }
+  };
+
+  const handleDeleteWallet = async (walletId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
+      await axios.delete(`${import.meta.env.VITE_URL}/wallet/${walletId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      toast.success("Wallet deleted successfully!");
+      fetchWallets(); // Refresh the wallet list
+    } catch (error) {
+      console.error("Error deleting wallet:", error);
+      toast.error("Failed to delete wallet");
     }
   };
 
@@ -209,95 +290,114 @@ export const WalletSetting = () => {
             Manage your crypto wallets and settings
           </p>
         </div>
-        <AddWalletDialog />
+        <AddWalletDialog onWalletAdd={fetchWallets} />
       </div>
 
       {/* Updated wallet cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {walletStats.map((wallet, index) => (
-          <Card
-            key={index}
-            className="border-0 shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl">{wallet.icon}</div>
-                  <div>
-                    <h3 className="font-medium text-base text-gray-600">
-                      {wallet.label}
-                    </h3>
-                    <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
-                      {wallet.value}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Wallet Details with QR Code */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
-                  <div className="space-y-1">
-                    <span className="text-sm text-gray-500">Wallet ID</span>
-                    <div className="flex items-center gap-2 bg-white p-2 rounded border border-gray-100">
-                      <span className="text-sm font-medium truncate">
-                        {wallet.walletId}
-                      </span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "h-6 w-6 p-0 ml-auto shrink-0 transition-all",
-                                copiedWallets[wallet.walletId] &&
-                                  "text-green-500"
-                              )}
-                              onClick={() => handleCopy(wallet.walletId)}
-                            >
-                              {copiedWallets[wallet.walletId] ? (
-                                <Check className="h-3 w-3" />
-                              ) : (
-                                <Copy className="h-3 w-3" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {copiedWallets[wallet.walletId]
-                                ? "Copied!"
-                                : "Copy"}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-40">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          {wallets.map((wallet) => (
+            <Card
+              key={wallet._id}
+              className="border-0 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">
+                      {wallet.walletType === "Bitcoin"
+                        ? "₿"
+                        : wallet.walletType === "Ethereum"
+                        ? "Ξ"
+                        : wallet.walletType === "Litecoin"
+                        ? "Ł"
+                        : "🪙"}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-base text-gray-600">
+                        {wallet.walletType}
+                      </h3>
+                      <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
+                        ${wallet.balance.toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {wallet.qrCode && (
-                  <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                    <div className="relative w-full aspect-square max-w-[150px]">
-                      <img
-                        src={wallet.qrCode}
-                        alt={`${wallet.label} QR Code`}
-                        className="w-full h-full object-contain rounded-lg"
-                      />
+                {/* Wallet Details with QR Code */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
+                    <div className="space-y-1">
+                      <span className="text-sm text-gray-500">Wallet ID</span>
+                      <div className="flex items-center gap-2 bg-white p-2 rounded border border-gray-100">
+                        <span className="text-sm font-medium truncate">
+                          {wallet.walletID}
+                        </span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={cn(
+                                  "h-6 w-6 p-0 ml-auto shrink-0 transition-all",
+                                  copiedWallets[wallet.walletID] &&
+                                    "text-green-500"
+                                )}
+                                onClick={() => handleCopy(wallet.walletID)}
+                              >
+                                {copiedWallets[wallet.walletID] ? (
+                                  <Check className="h-3 w-3" />
+                                ) : (
+                                  <Copy className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {copiedWallets[wallet.walletID]
+                                  ? "Copied!"
+                                  : "Copy"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Transfer Button */}
-              <Button className="w-full h-9 font-medium bg-red-600 hover:bg-red-700">
-                <LucideDelete className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  {wallet.qrImage && (
+                    <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                      <div className="relative w-full aspect-square max-w-[150px]">
+                        <img
+                          src={`${import.meta.env.VITE_URL.slice(0, -4)}/${
+                            wallet.qrImage
+                          }`}
+                          alt={`${wallet.walletType} QR Code`}
+                          className="w-full h-full object-contain rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Transfer Button */}
+                <Button
+                  className="w-full h-9 font-medium bg-red-600 hover:bg-red-700"
+                  onClick={() => handleDeleteWallet(wallet._id)}
+                >
+                  <LucideDelete className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
