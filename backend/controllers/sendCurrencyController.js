@@ -10,7 +10,9 @@ exports.createSendCurrency = async (req, res) => {
     const screenshotFile = req.file;
 
     if (!amount || !wallet || !walletID || !screenshotFile) {
-      return res.status(400).json({ message: "All fields including screenshot are required." });
+      return res
+        .status(400)
+        .json({ message: "All fields including screenshot are required." });
     }
 
     const newSend = new SendCurrency({
@@ -28,7 +30,6 @@ exports.createSendCurrency = async (req, res) => {
   }
 };
 
-
 exports.getAllSendRequests = async (req, res) => {
   try {
     const requests = await SendCurrency.find()
@@ -37,107 +38,112 @@ exports.getAllSendRequests = async (req, res) => {
 
     res.status(200).json({ data: requests });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching requests", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching requests", error: err.message });
   }
 };
-
 
 exports.updateSendStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, remark } = req.body;
 
-    if (!["Approved", "Disapproved"].includes(status)) {
+    // Validate input
+    if (!id) {
+      return res.status(400).json({ message: "Deposit ID is required" });
+    }
+
+    if (!status || !["Approved", "Disapproved", "Pending"].includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
-const request = await SendCurrency.findById(id).populate("userId");
-if (!request) {
-  return res.status(404).json({ message: "Send request not found" });
-}
 
-if (!request.userId) {
-  return res.status(400).json({ message: "Invalid user in this request" });
-}
+    // Find the deposit request
+    const depositRequest = await SendCurrency.findById(id);
 
+    if (!depositRequest) {
+      return res.status(404).json({ message: "Deposit request not found" });
+    }
 
-    // ✅ Step 1: Update status & remark
-    request.status = status;
-    request.remark = remark;
-    await request.save();
-
-    // ✅ Step 2: On Approval → Add Amount to User Wallet
-    if (status === "Approved") {
-      let userWallet = await UserWallet.findOne({ userId: request.userId._id });
-      if (userWallet) {
-        userWallet.balance += request.amount;
-        await userWallet.save();
-      } else {
-        userWallet = new UserWallet({
-          userId: request.userId._id,
-          walletID: "default",
-          walletType: "deposit",
-          balance: request.amount
-        });
-        await userWallet.save();
-      }
-await logTransaction({
-  userId: request.userId._id,
-  type: "Deposit",
-  amount: request.amount,
-  walletID: request.walletID,
-  balanceAfter: userWallet.balance,
-  description: "Deposit approved by admin"
-});
-
-console.log("Request Object:", request);
-console.log("Request.userId:", request.userId);
-
-      // ✅ Step 3: If it's user's first deposit ≥ ₹250 → Trigger Referral Bonuses
-      const totalDeposits = await SendCurrency.countDocuments({
-        userId: request.userId._id,
-        status: "Approved"
+    // Verify user exists
+    const user = await User.findById(depositRequest.userId);
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid user in this request",
+        details: "Associated user account not found",
       });
+    }
 
-      if (totalDeposits === 1 && request.amount >= 250) {
-        const tree = await ReferralTree.findOne({ userId: request.userId._id });
-        if (tree) {
-          const path = tree.path.reverse(); // Closest upline first
-          const percentages = [3, 1]; // 3% → 1st referrer, 1% → next
+    // Update the deposit request
+    depositRequest.status = status;
+    if (remark) {
+      depositRequest.remark = remark;
+    }
 
-          for (let i = 0; i < path.length && i < percentages.length; i++) {
-            const refUserId = path[i];
-            const bonus = parseFloat(((request.amount * percentages[i]) / 100).toFixed(2));
+    // If status is approved, handle the deposit
+    if (status === "Approved") {
+      try {
+        // Find or create user wallet
+        let userWallet = await UserWallet.findOne({
+          userId: depositRequest.userId,
+          walletType: depositRequest.wallet,
+        });
 
-            let wallet = await UserWallet.findOne({ userId: refUserId });
-            if (wallet) {
-              wallet.balance += bonus;
-              await wallet.save();
-            } else {
-              wallet = new UserWallet({
-                userId: refUserId,
-                walletID: "default",
-                walletType: "bonus",
-                balance: bonus
-              });
-              await wallet.save();
-            }
-          }
+        if (!userWallet) {
+          userWallet = new UserWallet({
+            userId: depositRequest.userId,
+            walletType: depositRequest.wallet,
+            balance: 0,
+          });
         }
+
+        // Update wallet balance
+        userWallet.balance += parseFloat(depositRequest.amount);
+        await userWallet.save();
+
+        // Log the transaction
+        await logTransaction({
+          userId: depositRequest.userId,
+          type: "deposit",
+          amount: depositRequest.amount,
+          walletType: depositRequest.wallet,
+          status: "completed",
+          reference: depositRequest._id,
+        });
+      } catch (walletError) {
+        console.error("Wallet update error:", walletError);
+        return res.status(500).json({
+          message: "Failed to process deposit",
+          error: walletError.message,
+        });
       }
     }
 
-    res.status(200).json({ message: "Status updated and processed", data: request });
-  } catch (err) {
-    res.status(500).json({ message: "Update failed", error: err.message });
-  }
-}; 
+    // Save the updated deposit request
+    await depositRequest.save();
 
+    return res.status(200).json({
+      success: true,
+      message: `Deposit ${status.toLowerCase()} successfully`,
+      data: depositRequest,
+    });
+  } catch (err) {
+    console.error("Update status error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update deposit status",
+      error: err.message,
+    });
+  }
+};
 
 exports.getSendRequestById = async (req, res) => {
   try {
     const { id } = req.params;
-    const send = await SendCurrency.findById(id)
-      .populate("userId", "name email mobile");
+    const send = await SendCurrency.findById(id).populate(
+      "userId",
+      "name email mobile"
+    );
 
     if (!send) {
       return res.status(404).json({ message: "Request not found" });
@@ -145,6 +151,8 @@ exports.getSendRequestById = async (req, res) => {
 
     res.status(200).json({ data: send });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching request", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching request", error: err.message });
   }
 };

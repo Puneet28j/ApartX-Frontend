@@ -20,6 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { WalletSetting } from "@/Pages/admin/WalletSetting";
+import { useSendCurrency } from "@/hooks/useSendCurrency";
+import axios from "axios";
+import { toast } from "sonner";
 
 import {
   ArrowDownLeft,
@@ -42,6 +45,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "../ui/input";
 import { PasswordChangeDialog } from "./PasswordChange";
 import { ProfileEditDialog } from "./Profile";
+import { useAuth } from "@/context/AuthContext";
 
 const data = [
   {
@@ -135,8 +139,26 @@ const data = [
   },
 ];
 const Dashboard = () => {
+  const { logout } = useAuth();
+  const handleLogout = () => {
+    try {
+      logout();
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      navigate("/login-register");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Failed to log out");
+    }
+  };
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const {
+    data: sendCurrencyData,
+    loading,
+    updateStatus,
+    refresh,
+  } = useSendCurrency();
 
   const openProfileDialog = () => {
     setIsProfileDialogOpen(true);
@@ -189,6 +211,20 @@ const Dashboard = () => {
     { icon: LogOut, label: "LogOut", id: "LogOut" },
   ];
 
+  const handleStatusUpdate = async (
+    id: string,
+    status: "Approved" | "Disapproved",
+    remark: string
+  ) => {
+    try {
+      await updateStatus(id, status, remark);
+      toast.success(`Deposit ${status.toLowerCase()} successfully`);
+      refresh(); // Refresh the data after update
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "Dashboard":
@@ -196,7 +232,59 @@ const Dashboard = () => {
       case "WalletSetting":
         return <WalletSetting />; // Use as JSX component
       case "Deposit":
-        return renderDashBoardTabs({ title: "Deposit", data });
+        return renderDashBoardTabs({
+          title: "Deposit",
+          data: Array.isArray(sendCurrencyData)
+            ? sendCurrencyData.map((item) => ({
+                id: item._id,
+                type: "Deposit",
+                plan: "Standard Plan",
+                profileName: item.userId?.name || "Unknown User",
+                mobile: item.userId?.mobile || "N/A",
+                amount: String(item.amount || 0),
+                dateTime: new Date(item.createdAt).toLocaleString(),
+                status: item.status || "Pending",
+                remarks: item.remark || "",
+                screenshot: item.screenshot || "",
+                walletID: item.walletID || "",
+              }))
+            : [],
+          loading,
+          onApprove: async (id) => {
+            try {
+              await updateStatus(id, "Approved", "Deposit approved");
+              toast.success("Deposit approved successfully");
+              await refresh();
+            } catch (error) {
+              console.error("Failed to approve:", error);
+              toast.error("Failed to approve deposit");
+            }
+          },
+          onReject: async (id) => {
+            try {
+              await updateStatus(id, "Disapproved", "Deposit rejected");
+              toast.success("Deposit rejected successfully");
+              await refresh();
+            } catch (error) {
+              console.error("Failed to reject:", error);
+              toast.error("Failed to reject deposit");
+            }
+          },
+          updateRemarks: async (id, remarks) => {
+            try {
+              const currentItem = sendCurrencyData.find(
+                (item) => item._id === String(id)
+              );
+              const currentStatus = currentItem?.status || "Pending";
+              await updateStatus(String(id), currentStatus, remarks);
+              toast.success("Remarks updated successfully");
+              await refresh();
+            } catch (error) {
+              console.error("Failed to update remarks:", error);
+              toast.error("Failed to update remarks");
+            }
+          },
+        });
       case "Withdrawals":
         return renderDashBoardTabs({ title: "Withdrawals", data });
       case "Investments":
@@ -255,12 +343,6 @@ const Dashboard = () => {
     if (window.innerWidth < 768) {
       setIsMobileMenuOpen(false);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/login-register");
   };
 
   return (

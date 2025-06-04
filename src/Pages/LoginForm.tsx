@@ -6,11 +6,13 @@ import { toast } from "sonner";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 const API_URL = "http://localhost:5000/api";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -41,12 +43,7 @@ const LoginForm = () => {
       // Save token and role to localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
-
-      if (data.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/main-screen");
-      }
+      login(data.token, data.role); // This will automatically redirect based on role
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {

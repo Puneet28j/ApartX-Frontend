@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CircleCheck } from "lucide-react";
+// import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+// import axios from "axios";
 import Binance from "../assets/3495812.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import MetaMask from "../assets/fox.svg";
@@ -8,11 +10,46 @@ import Line from "../assets/Line 3 (1).svg";
 import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import TransferCard from "../assets/Subtract.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
+// import { toast } from "sonner";
 
+// interface TransactionDetails {
+//   amount: number;
+//   wallet: string;
+//   walletID: string;
+//   status: string;
+//   screenshot: string;
+//   createdAt: string;
+// }
+// const API_URL = "http://localhost:5000/api";
 const TransferReceipt = () => {
+  // const [details, setDetails] = useState<TransactionDetails | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { amount, walletType, walletID, transactionId } = location.state || {};
+
+  // useEffect(() => {
+  //   const fetchTransactionDetails = async () => {
+  //     if (!transactionId) return;
+
+  //     try {
+  //       const token = localStorage.getItem("token");
+  //       const response = await axios.get(
+  //         `${API_URL}/send-currency/${transactionId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+  //       setDetails(response.data.data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch transaction details:", error);
+  //       toast.error("Failed to load transaction details");
+  //     }
+  //   };
+
+  //   fetchTransactionDetails();
+  // }, [transactionId]);
 
   const getWalletLogo = (type: string) => {
     switch (type?.toLowerCase()) {

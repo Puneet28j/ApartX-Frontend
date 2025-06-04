@@ -1,64 +1,59 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 interface EditableRemarksProps {
   initialValue: string;
   onSave: (value: string) => Promise<void>;
+  isEditing: boolean;
   className?: string;
-  isEditing?: boolean;
 }
 
-const EditableRemarks = ({
+const EditableRemarks: React.FC<EditableRemarksProps> = ({
   initialValue,
   onSave,
+  isEditing,
   className = "",
-  isEditing = false,
-}: EditableRemarksProps) => {
+}) => {
   const [value, setValue] = useState(initialValue);
-  const [isEditable, setIsEditable] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Update isEditable when isEditing prop changes
   useEffect(() => {
-    setIsEditable(isEditing);
-  }, [isEditing]);
+    setValue(initialValue);
+  }, [initialValue]);
 
-  const handleBlur = async () => {
-    if (value !== initialValue) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!value.trim()) return;
+
+    try {
+      setIsSubmitting(true);
       await onSave(value);
-    }
-    setIsEditable(false);
-  };
-
-  const handleKeyDown = async (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      await handleBlur();
-    }
-    if (e.key === "Escape") {
-      setValue(initialValue);
-      setIsEditable(false);
+    } catch (error) {
+      console.error("Failed to save remarks:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (isEditable) {
-    return (
-      <textarea
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        className={`min-h-[60px] p-2 ${className}`}
-        autoFocus
-      />
-    );
+  if (!isEditing) {
+    return <span className={className}>{value || "No remarks"}</span>;
   }
 
   return (
-    <div
-      className={`cursor-text ${className}`}
-      onClick={() => setIsEditable(true)}
-    >
-      {value || "Add remarks..."}
-    </div>
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <Input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Enter remarks"
+        className={className}
+        disabled={isSubmitting}
+      />
+      <Button type="submit" size="sm" disabled={isSubmitting}>
+        Save
+      </Button>
+    </form>
   );
 };
 

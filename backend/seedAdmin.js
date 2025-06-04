@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-require('dotenv').config();
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+require("dotenv").config();
 
-const User = require('./models/User');
+const User = require("./models/User");
 
 const seedAdmin = async () => {
   await mongoose.connect(process.env.MONGO_URI, {
@@ -10,8 +10,8 @@ const seedAdmin = async () => {
     useUnifiedTopology: true,
   });
 
-  const mobile = '9999999999';
-  const password = 'admin123';
+  const mobile = "+919999999999";
+  const password = "admin123";
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const existingAdmin = await User.findOne({ mobile });
@@ -23,10 +23,10 @@ const seedAdmin = async () => {
   const adminUser = new User({
     mobile,
     password: hashedPassword,
-    referralCode: 'ADMINREF9999',
-    name: 'Super Admin',
-    email: 'admin@example.com',
-    role: 'admin',
+    referralCode: "ADMINREF9999",
+    name: "Super Admin",
+    email: "admin@example.com",
+    role: "admin",
   });
 
   await adminUser.save();

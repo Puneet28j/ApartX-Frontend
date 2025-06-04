@@ -27,6 +27,7 @@ import Binance from "../assets/binance.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
+import { useAuth } from "@/context/AuthContext";
 
 // Update QuickActionsProps interface
 interface QuickActionsProps {
@@ -67,6 +68,7 @@ const userWallets = [
 ];
 const API_URL = "http://localhost:5000/api"; //localhost:5000/api
 const ProfileScreen: React.FC = () => {
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -110,7 +112,15 @@ const ProfileScreen: React.FC = () => {
       }
     };
   }, [preview]);
-
+  const handleLogout = (): void => {
+    try {
+      logout();
+      toast.success("Logged out successfully");
+      navigate("/login-register");
+    } catch (error) {
+      toast.error("Error logging out");
+    }
+  };
   const fetchUserProfile = async () => {
     setIsLoading(true);
     try {
@@ -257,16 +267,6 @@ const ProfileScreen: React.FC = () => {
 
       setImage(file);
       setPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleLogout = (): void => {
-    try {
-      // auth.logout();
-      toast.success("Logged out successfully");
-      navigate("/login-register");
-    } catch (error) {
-      toast.error("Error logging out");
     }
   };
 

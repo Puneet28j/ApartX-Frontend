@@ -3,20 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, User2Icon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import "react-phone-input-2/lib/style.css";
 import { useNavigate } from "react-router-dom";
 import USDTLOGO from "../assets/usdt logo.svg";
 // import Combobox from "@/components/ComboBox";
 import Combobox from "@/components/ComboBox";
-import axios from "axios";
 import { toast } from "sonner";
 import Binance from "../assets/3495812.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
-
-const API_URL = "http://localhost:5000/api";
+import { sendCurrencyService } from "@/services/sendCurrencyService";
 
 const wallets2 = [
   { value: "binance", label: "Binance", icon: Binance },
@@ -36,6 +34,10 @@ const SendCurrency = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
   const backnavigation = () => {
     if (showWalletIDInput) {
       setShowWalletIDInput(false);
@@ -44,33 +46,40 @@ const SendCurrency = () => {
     }
   };
 
-  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setScreenshot(file);
-      setPreview(URL.createObjectURL(file));
+  const validateFirstStep = () => {
+    if (!amount || parseFloat(amount) <= 0) {
+      toast.error("Please enter a valid amount");
+      return false;
     }
+    if (!selectedWallet) {
+      toast.error("Please select a wallet");
+      return false;
+    }
+    return true;
   };
 
-  const triggerFileSelect = () => {
-    fileInputRef.current?.click();
+  const validateSecondStep = () => {
+    if (!walletID) {
+      toast.error("Please enter wallet ID");
+      return false;
+    }
+    if (!screenshot) {
+      toast.error("Please upload a screenshot");
+      return false;
+    }
+    return true;
+  };
+
+  const handleContinue = () => {
+    if (validateFirstStep()) {
+      setShowWalletIDInput(true);
+    }
   };
 
   const handleSubmit = async () => {
-    if (!amount || !selectedWallet || !walletID) {
-      toast.error("Please fill all required fields");
-      return;
-    }
+    if (!validateFirstStep() || !validateSecondStep()) return;
 
     setIsSubmitting(true);
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      toast.error("Please login first");
-      navigate("/login-register");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("amount", amount);
     formData.append("wallet", selectedWallet);
@@ -81,31 +90,53 @@ const SendCurrency = () => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/send-currency`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+      const response = await sendCurrencyService.createSendRequest(formData);
+
+      toast.success("Transfer request submitted successfully");
+      navigate("/transfer-receipt", {
+        state: {
+          amount: amount,
+          walletType: selectedWallet,
+          walletID: walletID,
+          transactionId: response.data._id,
         },
       });
-
-      if (response.data) {
-        toast.success("Transfer request submitted successfully");
-        navigate("/transfer-receipt", {
-          state: {
-            amount: amount,
-            walletType: selectedWallet,
-            walletID: walletID,
-            transactionId: response.data.data._id,
-          },
-        });
-      }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Transfer failed:", error);
-      toast.error(error.response?.data?.message || "Transfer failed");
+      toast.error(error instanceof Error ? error.message : "Transfer failed");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size should be less than 5MB");
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please upload an image file");
+        return;
+      }
+
+      setScreenshot(file);
+      // Clean up previous preview URL
+      if (preview) URL.revokeObjectURL(preview);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // Cleanup preview URL on component unmount
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] py-2 overflow-y-auto overflow-x-hidden px-3">
@@ -217,11 +248,18 @@ const SendCurrency = () => {
             </Button>
 
             <Button
-              disabled={isSubmitting || !walletID || !amount || !selectedWallet}
+              disabled={isSubmitting}
               className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
               onClick={handleSubmit}
             >
-              {isSubmitting ? "Processing..." : "Pay Now"}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <span className="loading loading-spinner"></span>
+                  Processing...
+                </div>
+              ) : (
+                "Pay Now"
+              )}
             </Button>
           </div>
         </div>
@@ -230,7 +268,7 @@ const SendCurrency = () => {
           <Button
             className="w-full h-10 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[12px]"
             disabled={!amount || parseFloat(amount) <= 0 || !selectedWallet}
-            onClick={() => setShowWalletIDInput(true)}
+            onClick={handleContinue}
           >
             Continue
           </Button>
