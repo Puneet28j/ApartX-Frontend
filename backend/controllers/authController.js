@@ -13,14 +13,17 @@ const generateReferralCode = (mobile) => {
 
 exports.registerUser = async (req, res) => {
   try {
+    // console.log("📥 Incoming registration body:", req.body);
+
     const {
-      mobile,
-      password,
-      referralCode: referrerCode,
-      name,
-      email,
-      profilePic,
-    } = req.body;
+  mobile,
+  password,
+  referralCode: referrerCode,
+  name,
+  email,
+  profilePic,
+} = req.body;
+
 
     if (!mobile || !password || !referrerCode) {
       return res.status(400).json({
