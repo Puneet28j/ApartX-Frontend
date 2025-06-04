@@ -43,15 +43,16 @@ exports.registerUser = async (req, res) => {
     const newReferralCode = generateReferralCode(mobile);
 
     const user = new User({
-      mobile,
-      password: hashedPassword,
-      referralCode: newReferralCode,
-      referredBy: referrerCode,
-      name,
-      email,
-      profilePic,
-      role: "user",
-    });
+  mobile,
+  password: hashedPassword,
+  referralCode: newReferralCode,
+  referredBy: referrerCode,
+  name,
+  email, // ✅ now saving actual email from frontend
+  profilePic,
+  role: "user",
+});
+
 
     await user.save();
 
