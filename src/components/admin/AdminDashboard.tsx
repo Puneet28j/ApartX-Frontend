@@ -19,11 +19,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { WalletSetting } from "@/Pages/admin/WalletSetting";
 import { useSendCurrency } from "@/hooks/useSendCurrency";
-import axios from "axios";
+import { WalletSetting } from "@/Pages/admin/WalletSetting";
 import { toast } from "sonner";
 
+import { useAuth } from "@/context/AuthContext";
 import {
   ArrowDownLeft,
   ArrowUpDown,
@@ -45,7 +45,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "../ui/input";
 import { PasswordChangeDialog } from "./PasswordChange";
 import { ProfileEditDialog } from "./Profile";
-import { useAuth } from "@/context/AuthContext";
 
 const data = [
   {
@@ -211,19 +210,19 @@ const Dashboard = () => {
     { icon: LogOut, label: "LogOut", id: "LogOut" },
   ];
 
-  const handleStatusUpdate = async (
-    id: string,
-    status: "Approved" | "Disapproved",
-    remark: string
-  ) => {
-    try {
-      await updateStatus(id, status, remark);
-      toast.success(`Deposit ${status.toLowerCase()} successfully`);
-      refresh(); // Refresh the data after update
-    } catch (error) {
-      toast.error("Failed to update status");
-    }
-  };
+  // const handleStatusUpdate = async (
+  //   id: string,
+  //   status: "Approved" | "Disapproved",
+  //   remark: string
+  // ) => {
+  //   try {
+  //     await updateStatus(id, status, remark);
+  //     toast.success(`Deposit ${status.toLowerCase()} successfully`);
+  //     refresh(); // Refresh the data after update
+  //   } catch (error) {
+  //     toast.error("Failed to update status");
+  //   }
+  // };
 
   const renderContent = () => {
     switch (activeTab) {

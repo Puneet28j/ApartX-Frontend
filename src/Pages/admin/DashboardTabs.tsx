@@ -16,7 +16,7 @@ import {
 import { ArrowDownRight, Check, Loader2, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const IMAGE_BASE_LOCALHOST = "http://localhost:5000/uploads/screenshots/";
+// const IMAGE_BASE_LOCALHOST = "http://localhost:5000/uploads/screenshots/";
 const IMAGE_BASE = "https://apart-x.pro/uploads/screenshots/"; // Update this to your production URL
 
 export interface DataTableProps {
@@ -42,7 +42,7 @@ export interface DataTableProps {
   showViewAll?: boolean;
 }
 
-type UpdateRemarksFunction = (id: number, remarks: string) => Promise<void>;
+// type UpdateRemarksFunction = (id: number, remarks: string) => Promise<void>;
 
 const getStatusStyles = (status: string) => {
   switch (status.toLowerCase()) {
@@ -229,7 +229,7 @@ const MobileCard = ({
           {dataColumns.screenshot && (
             <ScreenshotDialog
               title="Screenshot"
-              imageUrl={`${IMAGE_BASE_LOCALHOST}${dataColumns.screenshot}`}
+              imageUrl={`${IMAGE_BASE}${dataColumns.screenshot}`}
               walletAddress={dataColumns.walletID}
             />
           )}
@@ -425,7 +425,7 @@ const DepositComponent = ({
                                 {dataColumns.screenshot && (
                                   <ScreenshotDialog
                                     title="Screenshot"
-                                    imageUrl={`${IMAGE_BASE_LOCALHOST}${dataColumns.screenshot}`}
+                                    imageUrl={`${IMAGE_BASE}${dataColumns.screenshot}`}
                                     walletAddress={dataColumns.walletID}
                                   />
                                 )}
