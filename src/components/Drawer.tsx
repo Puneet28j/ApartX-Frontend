@@ -25,7 +25,7 @@ import Combobox from "./ComboBox";
 import { Separator } from "./ui/separator";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 const wallets = [
   { value: "binance", label: "Binance", icon: Binance },
