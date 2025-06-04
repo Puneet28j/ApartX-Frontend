@@ -13,7 +13,7 @@ const generateReferralCode = (mobile) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    // console.log("📥 Incoming registration body:", req.body);
+    console.log("📥 Incoming registration body:", req.body);
 
     const {
   mobile,
