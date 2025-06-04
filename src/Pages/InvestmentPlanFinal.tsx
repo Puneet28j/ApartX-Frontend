@@ -3,128 +3,54 @@ import { ArrowLeft, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import USDTLogo from "../assets/usdt logo.svg";
+import { investmentService } from "@/services/investmentService";
 
 import { toast } from "sonner";
 
-type Tariff = {
-  value: string;
-  label: string;
-  rate: string;
-  duration: string;
+interface Plan {
+  _id: string;
+  name: string;
   minAmount: number;
   maxAmount: number;
-};
-
-const tariffs: Tariff[] = [
-  {
-    value: "gold",
-    label: "GOLD",
-    rate: "1.5%",
-    duration: "Day",
-    minAmount: 50,
-    maxAmount: 500,
-  },
-  {
-    value: "diamond",
-    label: "Diamond",
-    rate: "2%",
-    duration: "Day",
-    minAmount: 501,
-    maxAmount: 5000,
-  },
-  {
-    value: "platinum",
-    label: "Platinum",
-    rate: "3%",
-    duration: "Day",
-    minAmount: 5001,
-    maxAmount: 25000,
-  },
-  {
-    value: "master",
-    label: "Master",
-    rate: "5%",
-    duration: "Day",
-    minAmount: 25000,
-    maxAmount: 100000,
-  },
-];
+  roi: number;
+  durationDays: number;
+}
 
 const InvestmentPlanFinal = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Get passed data from previous screen
-  const { selectedTariff, amount } = location.state || {
-    selectedTariff: tariffs[0],
-    amount: tariffs[0].minAmount,
+  const { selectedPlan, amount } = location.state as {
+    selectedPlan: Plan;
+    amount: number;
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-
-  // Validate the amount based on tariff limits
-  const validateAmount = (
-    value: number,
-    tariff: Tariff = selectedTariff
-  ): boolean => {
-    if (value < tariff.minAmount) {
-      setError(
-        `Amount must be at least ${tariff.minAmount.toLocaleString()} USD`
-      );
-      return false;
-    }
-
-    if (tariff.value !== "master" && value > tariff.maxAmount) {
-      setError(
-        `Amount must not exceed ${tariff.maxAmount.toLocaleString()} USD`
-      );
-      return false;
-    }
-    if (tariff.value === "master" && value > tariff.maxAmount) {
-      setError(
-        `Amount must not exceed ${tariff.maxAmount.toLocaleString()} USD`
-      );
-      return false;
-    }
-    if (isNaN(value) || value <= 0) {
-      setError("Please enter a valid amount");
-      return false;
-    }
-    if (value % 1 !== 0) {
-      setError("Amount must be a whole number");
-      return false;
-    }
-
-    setError("");
-    return true;
-  };
+  // Validate we have required data
+  if (!selectedPlan || !amount) {
+    navigate("/investment-plan");
+    return null;
+  }
 
   const handleInvestment = async () => {
-    if (!validateAmount(amount)) {
-      return;
-    }
-
     setIsLoading(true);
     try {
-      // Here you would make the actual API call
-      //   const investmentData = {
-      //     planName: selectedTariff.label,
-      //     amount: amount,
-      //     rate: selectedTariff.rate,
-      //     duration: selectedTariff.duration,
-      //   };
+      await investmentService.createInvestment(selectedPlan._id, amount);
 
-      // Uncomment and modify this according to your API
-      // const response = await api.post("/investment/create", investmentData);
-
-      // For now, just show success message
       toast.success("Investment created successfully!");
-      navigate("/profile");
+
+      setTimeout(() => {
+        navigate("/main-screen", { replace: true });
+      }, 1500);
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Failed to create investment"
-      );
+      console.error("Investment error:", error);
+      if (error.message.includes("login")) {
+        toast.error("Session expired. Please login again");
+        setTimeout(() => navigate("/login-register"), 1500);
+      } else {
+        toast.error(error.message || "Failed to create investment");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -152,7 +78,7 @@ const InvestmentPlanFinal = () => {
         {/* Plan Name Box */}
         <div className="absolute -top-3 right-4 bg-[#7553FF] px-4 py-1 rounded-xl">
           <span className="text-white font-medium text-sm">
-            {selectedTariff.label}
+            {selectedPlan.name}
           </span>
         </div>
 
@@ -164,7 +90,9 @@ const InvestmentPlanFinal = () => {
         <div className="bg-green-600 rounded-xl p-4 mb-4 flex justify-between items-center">
           <div className="text-left">
             <div className="text-sm text-green-100">Minimum</div>
-            <div className="text-lg font-bold">{selectedTariff.minAmount}</div>
+            <div className="text-lg font-bold">
+              {selectedPlan.minAmount.toLocaleString()}
+            </div>
           </div>
 
           <div className="bg-black rounded-lg p-3">
@@ -174,7 +102,7 @@ const InvestmentPlanFinal = () => {
           <div className="text-right">
             <div className="text-sm text-green-100">Maximum</div>
             <div className="text-lg font-bold">
-              {selectedTariff.maxAmount.toLocaleString()}
+              {selectedPlan.maxAmount.toLocaleString()}
             </div>
           </div>
         </div>
@@ -203,11 +131,9 @@ const InvestmentPlanFinal = () => {
       <div className="absolute bottom-4 left-0 right-0 px-4">
         <Button
           className={`w-full text-white text-base py-6 rounded-2xl ${
-            error || isLoading
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-[#7553FF]"
+            isLoading ? "bg-gray-500 cursor-not-allowed" : "bg-[#7553FF]"
           }`}
-          disabled={!!error || amount < selectedTariff.minAmount || isLoading}
+          disabled={isLoading}
           onClick={handleInvestment}
         >
           {isLoading ? "Processing..." : "Submit"}

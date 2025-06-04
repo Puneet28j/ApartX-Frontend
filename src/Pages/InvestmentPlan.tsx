@@ -93,40 +93,19 @@ const InvestmentPlan = () => {
     validateAmount(val);
   };
 
-  const handleInvestment = async () => {
+  const handleContinue = () => {
     if (!selectedPlan || !validateAmount(amount)) {
       toast.error("Please select a plan and enter a valid amount");
       return;
     }
 
-    try {
-      setLoading(true);
-      console.log("Attempting investment:", {
-        planId: selectedPlan._id,
-        amount: amount,
-      });
-
-      const result = await investmentService.createInvestment(
-        selectedPlan._id,
-        amount
-      );
-
-      console.log("Investment result:", result);
-      toast.success("Investment created successfully!");
-
-      // Wait a bit before navigating
-      setTimeout(() => navigate("/main-screen"), 1500);
-    } catch (error: any) {
-      console.error("Investment error:", error);
-      if (error.message.includes("login")) {
-        toast.error("Session expired. Please login again");
-        setTimeout(() => navigate("/login"), 1500);
-      } else {
-        toast.error(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to final screen with selected plan and amount
+    navigate("/investment-plan-final", {
+      state: {
+        selectedPlan,
+        amount,
+      },
+    });
   };
 
   if (loading) {
@@ -235,7 +214,7 @@ const InvestmentPlan = () => {
               : "bg-[#7553FF]"
           }`}
           disabled={!!error || !selectedPlan || amount < selectedPlan.minAmount}
-          onClick={handleInvestment}
+          onClick={handleContinue} // Changed from handleInvestment to handleContinue
         >
           Continue
         </Button>
