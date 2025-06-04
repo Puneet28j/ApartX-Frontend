@@ -33,7 +33,7 @@ interface PlanDialogProps {
   isEdit?: boolean;
   onSuccess?: () => void;
 }
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 // Replace CreatePlanDialog with this new component
 const PlanDialog = ({
   plan = null,

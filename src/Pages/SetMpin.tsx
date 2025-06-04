@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 const Setmpin = () => {
   const navigate = useNavigate();

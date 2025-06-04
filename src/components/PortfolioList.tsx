@@ -17,6 +17,7 @@ const PortfolioList = ({
 }) => {
   const handleExit = async (id: string) => {
     try {
+      console.log("User Id:", id);
       // Add your exit logic here
       toast.success("Investment exited successfully");
     } catch (error) {

@@ -22,7 +22,7 @@ interface TransactionData {
   // walletImage: string;
 }
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 const walletTypeImages: Record<string, string> = {
   binance: BinanceImage,

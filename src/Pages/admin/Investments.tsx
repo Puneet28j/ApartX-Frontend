@@ -64,9 +64,9 @@ const recentInvestments = [
 ];
 
 export const Investments = () => {
-  const [investments, setInvestments] =
+  const [investments] =
     useState<Investment[]>(recentInvestments);
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     totalInvested: 125430,
     totalProfit: 15230,
     activeInvestments: 234,

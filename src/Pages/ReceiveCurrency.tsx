@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import USDTLOGO from "../assets/usdt logo.svg";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 const IMAGE_BASE = "http://localhost:5000";
 
 const ReceiveCurrency = () => {

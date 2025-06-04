@@ -11,7 +11,7 @@ import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import TransferCard from "../assets/Subtract.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 const RequestSubmitted = () => {
   const navigate = useNavigate();

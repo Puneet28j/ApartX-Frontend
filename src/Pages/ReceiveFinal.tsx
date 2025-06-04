@@ -12,7 +12,7 @@ import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 const getWalletLogo = (type: string) => {
   switch (type.toLowerCase()) {
