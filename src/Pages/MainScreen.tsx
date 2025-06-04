@@ -15,7 +15,7 @@ import usdtblack from "../assets/UsdtBlack.svg";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:5000/api"; // Replace with your actual API URL
+const API_URL = "/api"; // Replace with your actual API URL
 const MainScreen = () => {
   const navigate = useNavigate();
   const [walletBalance, setWalletBalance] = useState(0);
