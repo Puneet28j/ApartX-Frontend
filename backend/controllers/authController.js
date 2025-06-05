@@ -13,8 +13,6 @@ const generateReferralCode = (mobile) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    console.log("📥 Incoming registration body:", req.body);
-
     const {
       mobile,
       password,
@@ -22,11 +20,12 @@ exports.registerUser = async (req, res) => {
       name,
       email,
       profilePic,
+      role = "user", // default to "user"
     } = req.body;
 
-    if (!mobile || !password || !referrerCode) {
+    if (!mobile || !password) {
       return res.status(400).json({
-        message: "Mobile, password, and referrer code are required.",
+        message: "Mobile and password are required.",
       });
     }
 
@@ -35,12 +34,20 @@ exports.registerUser = async (req, res) => {
       return res.status(409).json({ message: "Mobile already registered." });
     }
 
-    const referrer = await User.findOne({ referralCode: referrerCode });
-    if (!referrer) {
-      return res.status(400).json({ message: "Invalid referral code." });
+    // Only validate referral if not admin
+    let referrer = null;
+    if (role !== "admin") {
+      if (!referrerCode) {
+        return res.status(400).json({ message: "Referral code is required for user registration." });
+      }
+
+      referrer = await User.findOne({ referralCode: referrerCode });
+      if (!referrer) {
+        return res.status(400).json({ message: "Invalid referral code." });
+      }
     }
 
-    // Create new user
+    // Hash password and generate new referral code
     const hashedPassword = await bcrypt.hash(password, 10);
     const newReferralCode = generateReferralCode(mobile);
 
@@ -48,29 +55,31 @@ exports.registerUser = async (req, res) => {
       mobile,
       password: hashedPassword,
       referralCode: newReferralCode,
-      referredBy: referrerCode,
+      referredBy: referrerCode || null,
       name,
-      email, // ✅ now saving actual email from frontend
+      email,
       profilePic,
-      role: "user",
+      role,
     });
 
     await user.save();
 
-    // ✅ Referral Tree Structure Handling
-    const parentTree = await ReferralTree.findOne({ userId: referrer._id });
+    // Build referral tree if not admin
+    if (role !== "admin" && referrer) {
+      const parentTree = await ReferralTree.findOne({ userId: referrer._id });
 
-    const referralTreeEntry = new ReferralTree({
-      userId: user._id,
-      parentId: referrer._id,
-      level: parentTree ? parentTree.level + 1 : 2,
-      path: parentTree ? [...parentTree.path, referrer._id] : [referrer._id],
-    });
+      const referralTreeEntry = new ReferralTree({
+        userId: user._id,
+        parentId: referrer._id,
+        level: parentTree ? parentTree.level + 1 : 2,
+        path: parentTree ? [...parentTree.path, referrer._id] : [referrer._id],
+      });
 
-    await referralTreeEntry.save();
+      await referralTreeEntry.save();
+    }
 
     return res.status(201).json({
-      message: "User registered successfully.",
+      message: `${role} registered successfully.`,
       referralCode: newReferralCode,
     });
   } catch (err) {
@@ -78,6 +87,7 @@ exports.registerUser = async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 };
+
 exports.loginUser = async (req, res) => {
   try {
     const { mobile, password, deviceId } = req.body;
@@ -236,29 +246,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-exports.forgotPassword = async (req, res) => {
-  try {
-    const { mobile, newPassword } = req.body;
-
-    if (!mobile || !newPassword) {
-      return res
-        .status(400)
-        .json({ message: "Mobile and new password required" });
-    }
-
-    const user = await User.findOne({ mobile });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-
-    res.status(200).json({ message: "Password reset successfully" });
-  } catch (err) {
-    console.error("Forgot Password Error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
 exports.getInvestorCount = async (req, res) => {
   try {
     const users = await User.find({ role: "user" }).select(
@@ -328,6 +315,31 @@ exports.getMyWallet = async (req, res) => {
       .json({ message: "Error fetching wallet", error: err.message });
   }
 };
+
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { mobile, newPassword } = req.body;
+
+    if (!mobile || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Mobile and new password required" });
+    }
+
+    const user = await User.findOne({ mobile });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.error("Forgot Password Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 exports.changePassword = async (req, res) => {
   try {
