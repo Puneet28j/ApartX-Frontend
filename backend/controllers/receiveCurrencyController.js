@@ -1,4 +1,7 @@
 const ReceiveCurrency = require("../models/ReceiveCurrency");
+const User = require("../models/User");
+const UserWallet = require("../models/UserWallet");
+const WalletTransaction = require("../models/WalletTransaction");
 
 exports.createReceiveCurrency = async (req, res) => {
   try {
@@ -28,6 +31,7 @@ exports.getAllReceiveRequests = async (req, res) => {
   try {
     const receiveRequests = await ReceiveCurrency.find()
       .populate("userId", "name email mobile")
+      .populate("walletQrImage", "qrImage")
       .sort({ createdAt: -1 });
 
     res.status(200).json({ data: receiveRequests });
@@ -43,23 +47,125 @@ exports.updateReceiveStatus = async (req, res) => {
     const { id } = req.params;
     const { status, remark } = req.body;
 
-    if (!["Approved", "Disapproved"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
+    // Validate input
+    if (!id) {
+      return res.status(400).json({ message: "Deposit ID is required" });
     }
 
-    const updated = await ReceiveCurrency.findByIdAndUpdate(
-      id,
-      { status, remark },
-      { new: true }
-    ).populate("userId", "name email mobile");
-
-    if (!updated) {
-      return res.status(404).json({ message: "Request not found" });
+    if (!status || !["Approved", "Disapproved", "Pending"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
     }
 
-    res.status(200).json({ message: "Status updated", data: updated });
+    // Find the deposit request
+    const withdrawRequest = await ReceiveCurrency.findById(id);
+
+    if (!withdrawRequest) {
+      return res.status(404).json({ message: "Withdraw request not found" });
+    }
+
+    // Verify user exists
+    const user = await User.findById(withdrawRequest.userId);
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid user in this request",
+        details: "Associated user account not found",
+      });
+    }
+
+    // Update the deposit request
+    withdrawRequest.status = status;
+    if (remark) {
+      withdrawRequest.remark = remark;
+    }
+
+    // If status is approved, handle the deposit
+    if (status === "Approved") {
+      try {
+        // Normalize wallet type to match enum values
+        let normalizedWalletType = withdrawRequest.wallet.toLowerCase();
+        if (normalizedWalletType === "trustwallet") {
+          normalizedWalletType = "trustwallet";
+        } else if (normalizedWalletType === "binance") {
+          normalizedWalletType = "binance";
+        } else if (normalizedWalletType === "metamask") {
+          normalizedWalletType = "metamask";
+        } else if (normalizedWalletType === "coinbase") {
+          normalizedWalletType = "coinbase";
+        } else {
+          return res.status(400).json({
+            message: "Invalid wallet type",
+            details: "Supported wallets are TrustWallet and Binance",
+          });
+        }
+
+        // Find or create user wallet
+        let userWallet = await UserWallet.findOne({
+          userId: withdrawRequest.userId,
+          walletType: normalizedWalletType,
+        });
+
+        if (!userWallet) {
+          userWallet = new UserWallet({
+            userId: withdrawRequest.userId,
+            walletType: normalizedWalletType,
+            wallet: withdrawRequest.wallet,
+            balance: 0,
+          });
+        }
+
+        // Update wallet balance - ensure amount is a number
+        const amount = parseFloat(withdrawRequest.amount);
+        if (isNaN(amount)) {
+          throw new Error("Invalid amount value");
+        }
+
+        // Calculate new balance
+        const previousBalance = userWallet.balance;
+        userWallet.balance -= amount;
+        const newBalance = userWallet.balance;
+
+        await userWallet.save();
+
+        // Create wallet transaction record
+        const walletTransaction = new WalletTransaction({
+          userId: withdrawRequest.userId,
+          type: "Withdrawal", // ✅ Use capitalized "Deposit" to match enum
+          amount: amount,
+          balanceAfter: newBalance, // ✅ Provide required balanceAfter field
+          walletID: withdrawRequest.wallet,
+          description: `Deposit approved - ${withdrawRequest.wallet} wallet`,
+        });
+
+        await walletTransaction.save();
+
+        console.log(
+          "Wallet transaction created successfully:",
+          walletTransaction
+        );
+      } catch (walletError) {
+        console.error("Wallet update error:", walletError);
+        return res.status(500).json({
+          message: "Failed to process Withdraw",
+          error: walletError.message,
+        });
+      }
+    }
+
+    // Save the updated deposit request
+    await withdrawRequest.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Withdraw ${status.toLowerCase()} successfully`,
+      data: withdrawRequest,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Update failed", error: err.message });
+    console.error("Update status error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update withdraw status",
+      error: err.message,
+    });
   }
 };
 

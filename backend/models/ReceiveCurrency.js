@@ -3,11 +3,14 @@ const mongoose = require("mongoose");
 const receiveCurrencySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // ✅ This must be correct!
-    required: true,
+    ref: "User",
   },
   amount: { type: Number, required: true },
   wallet: { type: String, required: true },
+  walletQrImage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UserWallet",
+  }, // Can store image URL or base64 string
   status: {
     type: String,
     enum: ["Pending", "Approved", "Disapproved"],

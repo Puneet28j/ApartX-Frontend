@@ -45,6 +45,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "../ui/input";
 import { PasswordChangeDialog } from "./PasswordChange";
 import { ProfileEditDialog } from "./Profile";
+import axios from "axios";
+import axiosInstance from "@/utils/axiosConfig";
 
 const data = [
   {
@@ -152,12 +154,89 @@ const Dashboard = () => {
   };
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [receiveCurrencydata, setReceiveCurrencydata] = useState<any[]>([]);
   const {
     data: sendCurrencyData,
     loading,
     updateStatus,
     refresh,
   } = useSendCurrency();
+
+  useEffect(() => {
+    getReceiveCurrencyData();
+  }, []);
+  console.log("Receive Currency Data:", receiveCurrencydata);
+  const getReceiveCurrencyData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login-register");
+        return;
+      }
+      const response = await axios.get(`${import.meta.env.VITE_URL}/receive`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+      console.log("Response from receive currency API:", response.data);
+      if (response.data) {
+        setReceiveCurrencydata(response.data.data || []);
+        return response.data.receiveCurrency; // Adjust based on your API response structure
+      } else {
+        throw new Error(response.data.message || "Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching receive currency data:", error);
+      toast.error("Failed to fetch receive currency data");
+    }
+  };
+
+  const updateWithdrawalStatus = async (
+    id: string,
+    status: string,
+    remark: string
+  ) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login-register");
+        throw new Error("Authorization token missing");
+      }
+
+      const response = await axiosInstance.put(
+        `${import.meta.env.VITE_URL}/receive/${id}/status`,
+        {
+          status,
+          remark: remark || undefined,
+        }
+      );
+
+      if (response.data) {
+        await getReceiveCurrencyData();
+        return true;
+      }
+
+      throw new Error(response.data.message || "Failed to update status");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error updating status:", errorMessage);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        toast.error("Session expired. Please login again.");
+        navigate("/login-register");
+      } else {
+        toast.error(errorMessage);
+      }
+
+      throw error;
+    }
+  };
 
   const openProfileDialog = () => {
     setIsProfileDialogOpen(true);
@@ -285,7 +364,65 @@ const Dashboard = () => {
           },
         });
       case "Withdrawals":
-        return renderDashBoardTabs({ title: "Withdrawals", data });
+        return renderDashBoardTabs({
+          title: "Withdrawals",
+          data:
+            receiveCurrencydata.length > 0
+              ? receiveCurrencydata.map((item) => ({
+                  id: item._id,
+                  type: "Deposit",
+                  plan: item.wallet || "N/A",
+                  profileName: item.userId?.name || "Unknown User",
+                  mobile: item.userId?.mobile || "N/A",
+                  amount: String(item.amount || 0),
+                  dateTime: new Date(item.createdAt).toLocaleString(),
+                  status: item.status || "Pending",
+                  remarks: item.remark || "",
+                  // screenshot: item.screenshot || "",
+                  // walletID: item.walletID || "",
+                }))
+              : [],
+          loading: false,
+          onApprove: async (id) => {
+            try {
+              await updateWithdrawalStatus(id, "Approved", "Deposit approved");
+              toast.success("Deposit approved successfully");
+              await getReceiveCurrencyData();
+            } catch (error) {
+              console.error("Failed to approve:", error);
+              toast.error("Failed to approve deposit");
+            }
+          },
+          onReject: async (id) => {
+            try {
+              await updateWithdrawalStatus(
+                id,
+                "Disapproved",
+                "Deposit rejected"
+              );
+              toast.success("Deposit rejected successfully");
+              await getReceiveCurrencyData();
+            } catch (error) {
+              console.error("Failed to reject:", error);
+              toast.error("Failed to reject deposit");
+            }
+          },
+          updateRemarks: async (id, remarks) => {
+            try {
+              const currentItem = receiveCurrencydata.find(
+                (item) => item._id === String(id)
+              );
+              const currentStatus = currentItem?.status || "Pending";
+              await updateWithdrawalStatus(String(id), currentStatus, remarks);
+              toast.success("Remarks updated successfully");
+              await getReceiveCurrencyData();
+            } catch (error) {
+              console.error("Failed to update remarks:", error);
+              toast.error("Failed to update remarks");
+            }
+          },
+        });
+
       case "Investments":
         return renderDashBoardTabs({ title: "Investments", data });
       case "Transaction":
