@@ -24,6 +24,16 @@ exports.addWallet = async (req, res) => {
       });
     }
 
+    if (
+      !["binance", "metamask", "coinbase", "trustwallet"].includes(walletType)
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Invalid wallet type. Must be one of: binance, metamask, coinbase, trustwallet.",
+        });
+    }
     const qrImagePath = req.file ? req.file.path : null;
 
     const newWallet = new UserWallet({

@@ -15,7 +15,6 @@ exports.createReceiveCurrency = async (req, res) => {
       amount,
       wallet,
     });
-
     await newReceive.save();
     res
       .status(201)

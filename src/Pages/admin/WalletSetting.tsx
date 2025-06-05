@@ -21,12 +21,16 @@ import axios from "axios";
 import { Check, Copy, LucideDelete, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import Binance from "@/assets/3495812.svg";
+import MetaMask from "@/assets/fox.svg";
+import Coinbase from "@/assets/Coinbase.svg";
+import TrustWallet from "@/assets/TrustWallet.svg";
 
 // Add these types at the top of the file
 type WalletData = {
   _id: string;
   walletID: string;
-  walletType: string;
+  walletType: "binance | metamask | coinbase | trustwallet";
   balance: number;
   isActive: boolean;
   qrImage?: string;
@@ -52,6 +56,26 @@ const AddWalletDialog = ({ onWalletAdd }: { onWalletAdd: () => void }) => {
       return;
     }
 
+    if (formData.balance && isNaN(Number(formData.balance))) {
+      toast.error("Balance must be a valid number");
+      return;
+    }
+
+    if (isSubmitting) {
+      toast.error("Please wait, submission in progress");
+      return;
+    }
+    if (
+      formData.walletType !== "binance" &&
+      formData.walletType !== "metamask" &&
+      formData.walletType !== "coinbase" &&
+      formData.walletType !== "trustwallet"
+    ) {
+      toast.error(
+        "Please select a valid wallet type (binance, metamask, coinbase, trustwallet)"
+      );
+      return;
+    }
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
@@ -273,6 +297,20 @@ export const WalletSetting = () => {
     }
   };
 
+  const getWalletIcon = (walletType: string) => {
+    switch (walletType) {
+      case "binance":
+        return Binance;
+      case "metamask":
+        return MetaMask;
+      case "coinbase":
+        return Coinbase;
+      case "trustwallet":
+        return TrustWallet;
+      default:
+        return null;
+    }
+  };
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* Header with responsive layout */}
@@ -304,13 +342,11 @@ export const WalletSetting = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-3">
                     <div className="text-2xl">
-                      {wallet.walletType === "Bitcoin"
-                        ? "₿"
-                        : wallet.walletType === "Ethereum"
-                        ? "Ξ"
-                        : wallet.walletType === "Litecoin"
-                        ? "Ł"
-                        : "🪙"}
+                      <img
+                        src={getWalletIcon(wallet.walletType) || ""}
+                        alt={`${wallet.walletType} icon`}
+                        className="h-8 w-8"
+                      />
                     </div>
                     <div>
                       <h3 className="font-medium text-base text-gray-600">

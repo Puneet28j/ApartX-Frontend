@@ -66,12 +66,11 @@ const ReceiveCurrency = () => {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">Loading...</div>
-    );
-  }
-  console.log(userData.profilePic, "User Profile Picture URL");
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-full">Loading...</div>
+  //   );
+  // }
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] py-6 overflow-y-auto overflow-x-hidden px-3">
       {/* Top Back Button + Line */}
