@@ -190,10 +190,6 @@ const MainScreen = () => {
               src={profilePic}
               className="rounded-full w-12 h-12 object-cover border-2 border-white cursor-pointer"
               alt="Profile"
-              onError={(e) => {
-                console.error("Image failed to display");
-                setProfilePic(null);
-              }}
             />
           ) : (
             <User2Icon

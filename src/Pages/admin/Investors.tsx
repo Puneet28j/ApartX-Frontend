@@ -101,18 +101,23 @@ export const InvestorsList = () => {
     }
   };
 
-  const handleStatusChange = (
-    index: number,
-    newStatus: "Active" | "Inactive"
-  ) => {
-    const updatedInvestors = [...investorsList];
-    updatedInvestors[index] = {
-      ...updatedInvestors[index],
-      status: newStatus,
-    };
-    setInvestorsList(updatedInvestors);
-    // Add API call here
-  };
+  // const handleStatusChange = (
+  //   index: number,
+  //   newStatus: "Active" | "Inactive"
+  // ) => {
+  //   const updatedInvestors = [...investorsList];
+  //   updatedInvestors[index] = {
+  //     ...updatedInvestors[index],
+  //     status: newStatus,
+  //   };
+  //   setInvestorsList(updatedInvestors);
+  //   // Add API call here
+  // };
+  isLoading && (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-lg font-semibold text-gray-700">Loading...</div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 p-4 md:p-6">
