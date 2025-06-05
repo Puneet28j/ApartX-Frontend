@@ -16,9 +16,12 @@ const userSchema = new mongoose.Schema({
     unique: true, // this user's own code
   },
   referredBy: {
-    type: String,
-    required: true, // code of the person who referred them
+  type: String,
+  required: function () {
+    return this.role !== "admin";
   },
+},
+
   name: String,
   email: {
     type: String,
