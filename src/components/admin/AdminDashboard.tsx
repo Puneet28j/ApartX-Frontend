@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useReceiveCurrency, useSendCurrency } from "@/hooks/useSendCurrency";
+import { useSendCurrency } from "@/hooks/useSendCurrency";
 import { WalletSetting } from "@/Pages/admin/WalletSetting";
 import { toast } from "sonner";
 
@@ -159,11 +159,6 @@ const Dashboard = () => {
     refresh,
   } = useSendCurrency();
 
-  const {
-    wallets: receiveCurrencyData,
-    loading: receiveLoading,
-    updateStatus: receiveStatusUpdate,
-  } = useReceiveCurrency();
   const openProfileDialog = () => {
     setIsProfileDialogOpen(true);
   };
@@ -241,8 +236,8 @@ const Dashboard = () => {
           data: Array.isArray(sendCurrencyData)
             ? sendCurrencyData.map((item) => ({
                 id: item._id,
-                type: item.wallet,
-                plan: "Standard Plan",
+                type: "Deposit",
+                plan: item.wallet || "N/A",
                 profileName: item.userId?.name || "Unknown User",
                 mobile: item.userId?.mobile || "N/A",
                 amount: String(item.amount || 0),
@@ -290,63 +285,7 @@ const Dashboard = () => {
           },
         });
       case "Withdrawals":
-        return renderDashBoardTabs({
-          title: "Withdrawals",
-          data: Array.isArray(receiveCurrencyData)
-            ? receiveCurrencyData.map((item) => ({
-                id: item._id,
-                type: item.wallet,
-                plan: "Standard Plan",
-                profileName: item.userId?.name || "Unknown User",
-                mobile: item.userId?.mobile || "N/A",
-                amount: String(item.amount || 0),
-                dateTime: new Date(item.createdAt).toLocaleString(),
-                status: item.status || "Pending",
-                remarks: item.remark || "",
-                qrCode: item.qrCode || "",
-                walletID: item.walletID || "",
-              }))
-            : [],
-          loading: receiveLoading,
-          onApprove: async (id) => {
-            try {
-              await receiveStatusUpdate(id, "Approved", "Withdrawal approved");
-              toast.success("Withdrawal approved successfully");
-              await refresh();
-            } catch (error) {
-              console.error("Failed to approve:", error);
-              toast.error("Failed to approve withdrawal");
-            }
-          },
-          onReject: async (id) => {
-            try {
-              await receiveStatusUpdate(
-                id,
-                "Disapproved",
-                "Withdrawal rejected"
-              );
-              toast.success("Withdrawal rejected successfully");
-              await refresh();
-            } catch (error) {
-              console.error("Failed to reject:", error);
-              toast.error("Failed to reject withdrawal");
-            }
-          },
-          updateRemarks: async (id, remarks) => {
-            try {
-              const currentItem = receiveCurrencyData.find(
-                (item) => item._id === String(id)
-              );
-              const currentStatus = currentItem?.status || "Pending";
-              await receiveStatusUpdate(String(id), currentStatus, remarks);
-              toast.success("Remarks updated successfully");
-              await refresh();
-            } catch (error) {
-              console.error("Failed to update remarks:", error);
-              toast.error("Failed to update remarks");
-            }
-          },
-        });
+        return renderDashBoardTabs({ title: "Withdrawals", data });
       case "Investments":
         return renderDashBoardTabs({ title: "Investments", data });
       case "Transaction":

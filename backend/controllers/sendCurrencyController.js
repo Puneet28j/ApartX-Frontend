@@ -15,6 +15,27 @@ exports.createSendCurrency = async (req, res) => {
         .status(400)
         .json({ message: "All fields including screenshot are required." });
     }
+    // Validate amount
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Invalid amount provided." });
+    }
+    // check the user wallet balance of isactive wallet
+    const userWallet = await UserWallet.findOne({
+      userId: req.user?._id,
+      walletType: wallet.toLowerCase(),
+      isActive: true,
+    });
+    if (!userWallet) {
+      return res.status(400).json({
+        message: `No active wallet found for type ${wallet}. Please add a wallet first.`,
+      });
+    }
+    if (userWallet.balance < parsedAmount) {
+      return res.status(400).json({
+        message: "Insufficient balance in your active wallet.",
+      });
+    }
 
     const newSend = new SendCurrency({
       userId: req.user?._id,

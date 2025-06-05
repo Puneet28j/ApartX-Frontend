@@ -32,8 +32,6 @@ export interface DataTableProps {
     status: string;
     remarks: string;
     screenshot?: string;
-    qrCode?: string;
-
     walletID?: string;
   }[];
   loading?: boolean;
@@ -228,7 +226,6 @@ const MobileCard = ({
               </Button>
             </>
           )}
-
           {dataColumns.screenshot && (
             <ScreenshotDialog
               title="Screenshot"
@@ -252,7 +249,6 @@ const DepositComponent = ({
 }: DataTableProps) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [editingRemarkId, setEditingRemarkId] = useState<number | null>(null);
-  console.log(data, "data in DepositComponent");
 
   useEffect(() => {
     const handleResize = () => {

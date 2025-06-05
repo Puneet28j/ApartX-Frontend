@@ -26,17 +26,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp/;
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowedTypes.test(ext)) cb(null, true);
-    else cb(new Error("Only image files are allowed (jpg, jpeg, png, webp)"));
-  },
+
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 // ✅ ROUTES (prefix already set to `/api` in main app)
-router.post("/send-currency", auth, upload.single("screenshot"), createSendCurrency);
+router.post(
+  "/send-currency",
+  auth,
+  upload.single("screenshot"),
+  createSendCurrency
+);
 router.get("/send-currency", auth, isAdmin, getAllSendRequests);
 router.get("/send-currency/:id", auth, isAdmin, getSendRequestById);
 router.put("/send-currency/:id", auth, isAdmin, updateSendStatus); // ✅ Corrected

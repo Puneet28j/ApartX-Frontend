@@ -83,14 +83,6 @@ const SendCurrency = () => {
     fetchUserData();
   }, [navigate]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-      </div>
-    );
-  }
-
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
   };
@@ -157,6 +149,15 @@ const SendCurrency = () => {
       const selectedWalletData = adminWallets.find(
         (w) => w.value === selectedWallet
       );
+      if (!selectedWalletData) {
+        throw new Error("Selected wallet not found");
+      }
+      // Check if the response contains the expected data
+      if (!response || !response.data || !response.data._id) {
+        throw new Error("Invalid response from server");
+      }
+      const walletID = response.data.walletID || selectedWalletData.value;
+      // Navigate to the transfer receipt page with the necessary data
       toast.success("Transfer request submitted successfully");
       navigate("/transfer-receipt", {
         state: {
@@ -262,191 +263,204 @@ const SendCurrency = () => {
 
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] py-2 overflow-y-auto overflow-x-hidden px-3">
-      <div className="flex flex-col gap-1 mb-3">
-        <button
-          onClick={backnavigation}
-          className="flex items-center gap-2 text-white text-sm"
-        >
-          <ArrowLeft size={20} className="h-8 w-8 m-1 text-white" />
-        </button>
-        <div className="border-t border-white border-4 w-full" />
-      </div>
-
-      <div className="flex flex-col gap-1 w-full flex-grow">
-        <div className="flex-none text-start">
-          <h2 className="mt-1 font-medium text-[#F7F7F7] text-[22px] leading-tight">
-            Enter Amount
-          </h2>
-          <p className="text-[#F7F7F7] text-sm mt-1">
-            Enter amount of crypto currency to send.
-          </p>
-        </div>
-
-        <div className="mt-1 flex justify-center">
-          <div className="w-full max-w-[350px] pb-2 border-1 relative border-white rounded-[20px] flex justify-center">
-            <div className="flex flex-col items-center w-full">
-              {userData?.profilePic ? (
-                <img
-                  src={userData.profilePic}
-                  alt="Profile"
-                  className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 object-cover"
-                />
-              ) : (
-                <User2Icon className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2" />
-              )}
-              <div className="text-white text-[15px] text-center mt-2">
-                {userData?.name || "User Name"}
-              </div>
-              <div className="mt-2 w-full flex justify-center">
-                <div className="bg-black w-[160px]  items-center rounded-lg gap-4 justify-center h-[50px] mx-auto flex">
-                  <img
-                    className="h-[40px] w-[40px]"
-                    src={USDTLOGO}
-                    alt="USDT"
-                  />
-                  <div className="text-white text-[15px]">USDT</div>
-                </div>
-              </div>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="h-10 mb-2 bg-transparent rounded-none px-4 border-b-1 border-b-white border-t-0 border-l-0 border-r-0 w-[250px] mt-1 text-white focus:outline-none text-xl text-center placeholder:text-xl mx-auto"
-                placeholder="Enter amount"
-              />
-              <div className="mt-4 w-full flex flex-col justify-center">
-                <div className="text-white text-center">Select wallet</div>
-                {isLoadingWallets ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                  </div>
-                ) : (
-                  <Combobox
-                    placeholder="Select wallet"
-                    wallets={adminWallets}
-                    onChange={(value) => {
-                      setSelectedWallet(value);
-                      const selectedWallet = adminWallets.find(
-                        (w) => w.value === value
-                      );
-                      if (selectedWallet) {
-                        setWalletID(selectedWallet.value);
-                      }
-                    }}
-                    onOpenChange={(open) => {
-                      if (!open) {
-                        setShowWalletIDInput(false);
-                      }
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {showWalletIDInput ? (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col">
-            <label className="text-white font-medium text-sm">Wallet ID</label>
-            <input
-              value={walletID}
-              onChange={(e) => setWalletID(e.target.value)}
-              type="text"
-              readOnly
-              placeholder="Enter wallet Id"
-              className="h-10 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
-            />
-          </div>
-
-          <div className="flex items-center justify-center gap-1">
-            <Separator className="w-1/4" />
-            <span className="text-white">OR</span>
-            <Separator className="w-1/4" />
-          </div>
-
-          {/* QR Code Display Section */}
-          <div className="flex flex-col items-center gap-2">
-            {getSelectedWalletQR() ? (
-              <div className="flex flex-col items-center">
-                <p className="text-white text-sm mb-2">Scan QR Code to Pay</p>
-                <img
-                  src={getSelectedWalletQR()!}
-                  alt="Wallet QR Code"
-                  className="w-48 h-48 border-2 border-white rounded-lg bg-white p-2"
-                  onError={(e) => {
-                    console.error(
-                      "QR image failed to load:",
-                      getSelectedWalletQR()
-                    );
-                    // Hide the image if it fails to load
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="w-48 h-48 border-2 border-white rounded-lg flex items-center justify-center">
-                <p className="text-white text-sm text-center">
-                  QR Code not available
-                </p>
-              </div>
-            )}
-          </div>
-
-          {preview && (
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-white text-sm">Payment Screenshot</p>
-              <img
-                src={preview}
-                alt="Screenshot Preview"
-                className="max-h-48 rounded-lg border border-white"
-              />
-            </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleScreenshotUpload}
-            className="hidden"
-          />
-
-          <div className="flex flex-col gap-2">
-            <Button
-              className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
-              onClick={triggerFileSelect}
-            >
-              Add Screenshot
-            </Button>
-
-            <Button
-              disabled={isSubmitting}
-              className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
-              onClick={handleSubmit}
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-2">
-                  <span className="loading loading-spinner"></span>
-                  Processing...
-                </div>
-              ) : (
-                "Pay Now"
-              )}
-            </Button>
+      {isLoading ? (
+        <div>
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 pt-10">
-          <Button
-            className="w-full h-10 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[12px]"
-            disabled={!amount || parseFloat(amount) <= 0 || !selectedWallet}
-            onClick={handleContinue}
-          >
-            Continue
-          </Button>
-        </div>
+        <>
+          {" "}
+          <div className="flex flex-col gap-1 mb-3">
+            <button
+              onClick={backnavigation}
+              className="flex items-center gap-2 text-white text-sm"
+            >
+              <ArrowLeft size={20} className="h-8 w-8 m-1 text-white" />
+            </button>
+            <div className="border-t border-white border-4 w-full" />
+          </div>
+          <div className="flex flex-col gap-1 w-full flex-grow">
+            <div className="flex-none text-start">
+              <h2 className="mt-1 font-medium text-[#F7F7F7] text-[22px] leading-tight">
+                Enter Amount
+              </h2>
+              <p className="text-[#F7F7F7] text-sm mt-1">
+                Enter amount of crypto currency to send.
+              </p>
+            </div>
+
+            <div className="mt-1 flex justify-center">
+              <div className="w-full max-w-[350px] pb-2 border-1 relative border-white rounded-[20px] flex justify-center">
+                <div className="flex flex-col items-center w-full">
+                  {userData?.profilePic ? (
+                    <img
+                      src={userData.profilePic}
+                      alt="Profile"
+                      className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 object-cover"
+                    />
+                  ) : (
+                    <User2Icon className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2" />
+                  )}
+                  <div className="text-white text-[15px] text-center mt-2">
+                    {userData?.name || "User Name"}
+                  </div>
+                  <div className="mt-2 w-full flex justify-center">
+                    <div className="bg-black w-[160px]  items-center rounded-lg gap-4 justify-center h-[50px] mx-auto flex">
+                      <img
+                        className="h-[40px] w-[40px]"
+                        src={USDTLOGO}
+                        alt="USDT"
+                      />
+                      <div className="text-white text-[15px]">USDT</div>
+                    </div>
+                  </div>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="h-10 mb-2 bg-transparent rounded-none px-4 border-b-1 border-b-white border-t-0 border-l-0 border-r-0 w-[250px] mt-1 text-white focus:outline-none text-xl text-center placeholder:text-xl mx-auto"
+                    placeholder="Enter amount"
+                  />
+                  <div className="mt-4 w-full flex flex-col justify-center">
+                    <div className="text-white text-center">Select wallet</div>
+                    {isLoadingWallets ? (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      </div>
+                    ) : (
+                      <Combobox
+                        placeholder="Select wallet"
+                        wallets={adminWallets}
+                        onChange={(value) => {
+                          setSelectedWallet(value);
+                          const selectedWallet = adminWallets.find(
+                            (w) => w.value === value
+                          );
+                          if (selectedWallet) {
+                            setWalletID(selectedWallet.value);
+                          }
+                        }}
+                        onOpenChange={(open) => {
+                          if (!open) {
+                            setShowWalletIDInput(false);
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {showWalletIDInput ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col">
+                <label className="text-white font-medium text-sm">
+                  Wallet ID
+                </label>
+                <input
+                  value={walletID}
+                  onChange={(e) => setWalletID(e.target.value)}
+                  type="text"
+                  readOnly
+                  placeholder="Enter wallet Id"
+                  className="h-10 px-4 border border-white rounded-xl bg-transparent text-white placeholder:text-[#6B6B6B] outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-center gap-1">
+                <Separator className="w-1/4" />
+                <span className="text-white">OR</span>
+                <Separator className="w-1/4" />
+              </div>
+
+              {/* QR Code Display Section */}
+              <div className="flex flex-col items-center gap-2">
+                {getSelectedWalletQR() ? (
+                  <div className="flex flex-col items-center">
+                    <p className="text-white text-sm mb-2">
+                      Scan QR Code to Pay
+                    </p>
+                    <img
+                      src={getSelectedWalletQR()!}
+                      alt="Wallet QR Code"
+                      className="w-48 h-48 border-2 border-white rounded-lg bg-white p-2"
+                      onError={(e) => {
+                        console.error(
+                          "QR image failed to load:",
+                          getSelectedWalletQR()
+                        );
+                        // Hide the image if it fails to load
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-48 h-48 border-2 border-white rounded-lg flex items-center justify-center">
+                    <p className="text-white text-sm text-center">
+                      QR Code not available
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {preview && (
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-white text-sm">Payment Screenshot</p>
+                  <img
+                    src={preview}
+                    alt="Screenshot Preview"
+                    className="max-h-48 rounded-lg border border-white"
+                  />
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleScreenshotUpload}
+                className="hidden"
+              />
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  className="w-full h-10 hover:bg-slate-500 bg-[#38AD46] text-white font-semibold rounded-[12px]"
+                  onClick={triggerFileSelect}
+                >
+                  Add Screenshot
+                </Button>
+
+                <Button
+                  disabled={isSubmitting}
+                  className="w-full h-10 hover:bg-slate-500 bg-[#6552FE] text-white font-semibold rounded-[12px]"
+                  onClick={handleSubmit}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <span className="loading loading-spinner"></span>
+                      Processing...
+                    </div>
+                  ) : (
+                    "Pay Now"
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 pt-10">
+              <Button
+                className="w-full h-10 bg-[#6552FE] hover:bg-slate-500 text-white font-semibold rounded-[12px]"
+                disabled={!amount || parseFloat(amount) <= 0 || !selectedWallet}
+                onClick={handleContinue}
+              >
+                Continue
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

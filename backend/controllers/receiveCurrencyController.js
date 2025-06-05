@@ -5,7 +5,9 @@ exports.createReceiveCurrency = async (req, res) => {
     const { amount, wallet } = req.body;
 
     if (!amount || !wallet) {
-      return res.status(400).json({ message: "Amount and wallet are required." });
+      return res
+        .status(400)
+        .json({ message: "Amount and wallet are required." });
     }
 
     const newReceive = new ReceiveCurrency({
@@ -15,7 +17,9 @@ exports.createReceiveCurrency = async (req, res) => {
     });
 
     await newReceive.save();
-    res.status(201).json({ message: "Receive request submitted", data: newReceive });
+    res
+      .status(201)
+      .json({ message: "Receive request submitted", data: newReceive });
   } catch (err) {
     res.status(500).json({ message: "Error", error: err.message });
   }
@@ -29,10 +33,11 @@ exports.getAllReceiveRequests = async (req, res) => {
 
     res.status(200).json({ data: receiveRequests });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching requests", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching requests", error: err.message });
   }
 };
-
 
 exports.updateReceiveStatus = async (req, res) => {
   try {
@@ -59,12 +64,13 @@ exports.updateReceiveStatus = async (req, res) => {
   }
 };
 
-
 exports.getReceiveRequestById = async (req, res) => {
   try {
     const { id } = req.params;
-    const receive = await ReceiveCurrency.findById(id)
-      .populate("userId", "name email mobile");
+    const receive = await ReceiveCurrency.findById(id).populate(
+      "userId",
+      "name email mobile"
+    );
 
     if (!receive) {
       return res.status(404).json({ message: "Request not found" });
@@ -72,6 +78,8 @@ exports.getReceiveRequestById = async (req, res) => {
 
     res.status(200).json({ data: receive });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching request", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching request", error: err.message });
   }
 };

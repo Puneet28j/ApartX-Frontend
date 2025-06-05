@@ -18,21 +18,6 @@ interface SendCurrencyData {
   screenshot: string;
   createdAt: string;
 }
-interface ReceiveCurrencyData {
-  _id: string;
-  userId: {
-    name: string;
-    email: string;
-    mobile: string;
-  };
-  amount: number;
-  wallet: string;
-  walletID: string;
-  status: string;
-  remark: string;
-  qrCode: string;
-  createdAt: string;
-}
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
@@ -142,90 +127,4 @@ export const useSendCurrency = () => {
   }, []);
 
   return { data, loading, error, refresh: fetchData, updateStatus };
-};
-
-export const useReceiveCurrency = () => {
-  const [wallets, setWallets] = useState<ReceiveCurrencyData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  const fetchWallets = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Please login again");
-      }
-
-      const response = await axiosInstance.get("/receive");
-
-      if (response.data && Array.isArray(response.data.wallets)) {
-        setWallets(response.data.wallets);
-      } else {
-        throw new Error("Invalid wallet data format");
-      }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message;
-      console.error("Error fetching wallets:", errorMessage);
-
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        toast.error("Session expired. Please login again.");
-        navigate("/login-register");
-      } else {
-        toast.error(errorMessage);
-      }
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateStatus = async (id: string, status: string, remark: string) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Session expired. Please login again.");
-        navigate("/login-register");
-        throw new Error("Authorization token missing");
-      }
-
-      const response = await axiosInstance.put(`/receive/${id}`, {
-        status,
-        remark: remark || undefined,
-      });
-
-      if (response.data.success) {
-        await fetchWallets();
-        return true;
-      }
-
-      throw new Error(response.data.message || "Failed to update status");
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message;
-      console.error("Error updating status:", errorMessage);
-
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        toast.error("Session expired. Please login again.");
-        navigate("/login-register");
-      } else {
-        toast.error(errorMessage);
-      }
-
-      throw error;
-    }
-  };
-
-  useEffect(() => {
-    fetchWallets();
-  }, []);
-
-  return { wallets, loading, error, refresh: fetchWallets, updateStatus };
 };
