@@ -10,7 +10,7 @@ const userInvestmentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   roi: { type: Number, required: true },
   dailyEarning: { type: Number, required: true },
-  totalDays: { type: Number, required: true },
+  totalDays: { type: Number, required: false },
   earnedTillNow: { type: Number, default: 0 },
   startDate: { type: Date, default: Date.now },
   endDate: { type: Date },
