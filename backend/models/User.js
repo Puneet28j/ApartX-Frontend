@@ -24,10 +24,10 @@ const userSchema = new mongoose.Schema({
 
   name: String,
   email: {
-    type: String,
-    sparse: true, // This allows multiple null values
-    default: "", // Default empty string instead of null
-  },
+  type: String,
+  required: true, // ✅ force email to be required
+  unique: true,
+},
   otpCode: { type: String },
 otpExpiry: { type: Date },
   profilePic: String,

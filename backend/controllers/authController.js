@@ -20,12 +20,13 @@ exports.registerUser = async (req, res) => {
       name,
       email,
       profilePic,
-      role = "user", // default to "user"
+      role = "user",
     } = req.body;
 
-    if (!mobile || !password) {
+    // ✅ Validate required fields
+    if (!mobile || !password || !referrerCode || !email) {
       return res.status(400).json({
-        message: "Mobile and password are required.",
+        message: "Mobile, password, referral code, and email are required.",
       });
     }
 
@@ -34,37 +35,34 @@ exports.registerUser = async (req, res) => {
       return res.status(409).json({ message: "Mobile already registered." });
     }
 
-    // Only validate referral if not admin
+    // ✅ Validate referral code for non-admins
     let referrer = null;
     if (role !== "admin") {
-      if (!referrerCode) {
-        return res.status(400).json({ message: "Referral code is required for user registration." });
-      }
-
       referrer = await User.findOne({ referralCode: referrerCode });
       if (!referrer) {
         return res.status(400).json({ message: "Invalid referral code." });
       }
     }
 
-    // Hash password and generate new referral code
+    // ✅ Hash password & generate new referral code
     const hashedPassword = await bcrypt.hash(password, 10);
     const newReferralCode = generateReferralCode(mobile);
 
+    // ✅ Create user without fallback email
     const user = new User({
       mobile,
       password: hashedPassword,
       referralCode: newReferralCode,
-      referredBy: referrerCode || null,
+      referredBy: referrerCode,
       name,
-      email,
+      email, // ✅ save exactly what frontend sent
       profilePic,
       role,
     });
 
     await user.save();
 
-    // Build referral tree if not admin
+    // ✅ Create referral tree for users
     if (role !== "admin" && referrer) {
       const parentTree = await ReferralTree.findOne({ userId: referrer._id });
 
@@ -87,6 +85,7 @@ exports.registerUser = async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 };
+
 
 exports.loginUser = async (req, res) => {
   try {
