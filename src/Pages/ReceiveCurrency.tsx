@@ -33,10 +33,9 @@ const ReceiveCurrency = () => {
         // Handle profile picture URL
         const userData = response.data;
         if (userData.profilePic) {
-          userData.profilePic = `${import.meta.env.VITE_URL.slice(
-            0,
-            import.meta.env.VITE_URL.length - 3
-          )}/${userData.profilePic}`;
+          userData.profilePic = `${import.meta.env.VITE_URL.slice(0, -4)}${
+            userData.profilePic
+          }`;
         }
 
         setUserData(userData);
@@ -72,7 +71,7 @@ const ReceiveCurrency = () => {
       <div className="flex items-center justify-center h-full">Loading...</div>
     );
   }
-
+  console.log(userData.profilePic, "User Profile Picture URL");
   return (
     <div className="flex flex-col h-full w-full bg-[#070707] py-6 overflow-y-auto overflow-x-hidden px-3">
       {/* Top Back Button + Line */}
@@ -107,15 +106,6 @@ const ReceiveCurrency = () => {
                   src={userData.profilePic}
                   alt="Profile"
                   className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 object-cover"
-                  onError={(e) => {
-                    console.error("Image load error:", e);
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null; // Prevent infinite loop
-                    setUserData((prev: any) => ({
-                      ...prev,
-                      profilePic: undefined,
-                    }));
-                  }}
                 />
               ) : (
                 <div className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 bg-gradient-to-br from-[#6552FE] to-[#8B5CF6] flex items-center justify-center">

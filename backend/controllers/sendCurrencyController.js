@@ -84,71 +84,85 @@ exports.updateSendStatus = async (req, res) => {
     // If status is approved, handle the deposit
     if (status === "Approved") {
       try {
-        // Normalize wallet type to match enum values
+        // Normalize wallet type
         let normalizedWalletType = depositRequest.wallet.toLowerCase();
-        if (normalizedWalletType === "trustwallet") {
-          normalizedWalletType = "trustwallet";
-        } else if (normalizedWalletType === "binance") {
-          normalizedWalletType = "binance";
-        } else if (normalizedWalletType === "metamask") {
-          normalizedWalletType = "metamask";
-        } else if (normalizedWalletType === "coinbase") {
-          normalizedWalletType = "coinbase";
-        } else {
+
+        if (
+          !["trustwallet", "binance", "metamask", "coinbase"].includes(
+            normalizedWalletType
+          )
+        ) {
           return res.status(400).json({
             message: "Invalid wallet type",
-            details: "Supported wallets are TrustWallet and Binance",
+            details:
+              "Supported wallets are TrustWallet, Binance, Metamask, and Coinbase",
           });
         }
 
-        // Find or create user wallet
+        // 1. Find User Wallet
         let userWallet = await UserWallet.findOne({
           userId: depositRequest.userId,
           walletType: normalizedWalletType,
+          isActive: true,
         });
 
-        if (!userWallet) {
-          userWallet = new UserWallet({
-            userId: depositRequest.userId,
-            walletType: normalizedWalletType,
-            walletID: depositRequest.walletID,
-            balance: 0,
+        if (!userWallet || userWallet.balance < depositRequest.amount) {
+          return res.status(400).json({
+            message: "Insufficient balance in user wallet",
+          });
+        }
+        // Add to updateSendStatus
+        console.log("Searching for admin wallet:", {
+          normalizedWalletType,
+          adminIds: await User.find({ role: "admin" }).distinct("_id"),
+        });
+        // 2. Find Admin Wallet
+        // Ensure admin wallet exists for the given wallet type
+        const adminWallet = await UserWallet.findOne({
+          walletType: normalizedWalletType,
+          userId: { $in: await User.find({ role: "admin" }).distinct("_id") },
+        });
+
+        if (!adminWallet) {
+          return res.status(500).json({
+            message: "Admin wallet not found for this wallet type",
           });
         }
 
-        // Update wallet balance - ensure amount is a number
         const amount = parseFloat(depositRequest.amount);
-        if (isNaN(amount)) {
-          throw new Error("Invalid amount value");
-        }
+        if (isNaN(amount)) throw new Error("Invalid amount");
 
-        // Calculate new balance
-        const previousBalance = userWallet.balance;
-        userWallet.balance += amount;
-        const newBalance = userWallet.balance;
-
+        // 3. Deduct from user wallet
+        userWallet.balance -= amount;
         await userWallet.save();
 
-        // Create wallet transaction record
-        const walletTransaction = new WalletTransaction({
+        // 4. Add to admin wallet
+        adminWallet.balance += amount;
+        await adminWallet.save();
+
+        // 5. Log user transaction
+        await new WalletTransaction({
           userId: depositRequest.userId,
-          type: "Deposit", // ✅ Use capitalized "Deposit" to match enum
-          amount: amount,
-          balanceAfter: newBalance, // ✅ Provide required balanceAfter field
-          walletID: depositRequest.walletID,
-          description: `Deposit approved - ${depositRequest.wallet} wallet`,
-        });
+          type: "Withdrawal",
+          amount,
+          balanceAfter: userWallet.balance,
+          walletID: userWallet.walletID,
+          description: `Deposit sent to admin (${normalizedWalletType})`,
+        }).save();
 
-        await walletTransaction.save();
-
-        console.log(
-          "Wallet transaction created successfully:",
-          walletTransaction
-        );
+        // 6. Log admin transaction
+        await new WalletTransaction({
+          userId: adminWallet.userId._id,
+          type: "Deposit",
+          amount,
+          balanceAfter: adminWallet.balance,
+          walletID: adminWallet.walletID,
+          description: `Received deposit from user (${depositRequest.userId})`,
+        }).save();
       } catch (walletError) {
-        console.error("Wallet update error:", walletError);
+        console.error("Wallet processing error:", walletError);
         return res.status(500).json({
-          message: "Failed to process deposit",
+          message: "Failed to process transfer between user and admin",
           error: walletError.message,
         });
       }

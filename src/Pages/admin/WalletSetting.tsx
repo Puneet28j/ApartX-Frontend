@@ -203,7 +203,7 @@ export const WalletSetting = () => {
 
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  console.log("Wallets:", wallets);
   const fetchWallets = async () => {
     try {
       setIsLoading(true);
@@ -253,12 +253,18 @@ export const WalletSetting = () => {
         return;
       }
 
-      await axios.delete(`${import.meta.env.VITE_URL}/wallet/${walletId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      const response = await axios.delete(
+        `${import.meta.env.VITE_URL}/deleteWallet/${walletId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Delete response:", response);
+      if (response.status !== 200) {
+        throw new Error("Failed to delete wallet");
+      }
       toast.success("Wallet deleted successfully!");
       fetchWallets(); // Refresh the wallet list
     } catch (error) {

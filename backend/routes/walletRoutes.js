@@ -12,12 +12,14 @@ const {
   getUserPassbook,
   getAllPassbooks,
   getAdminWallets,
+  deleteWallet,
 } = require("../controllers/walletController");
 
 const { verifyToken } = require("../middlewares/authMiddleware");
 
 router.post("/wallet", verifyToken, upload.single("qrImage"), addWallet);
 router.get("/wallet", verifyToken, getUserWallets);
+router.delete("/deleteWallet/:walletId", verifyToken, deleteWallet);
 router.put(
   "/wallet/:walletId",
   verifyToken,

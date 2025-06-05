@@ -32,6 +32,8 @@ export interface DataTableProps {
     status: string;
     remarks: string;
     screenshot?: string;
+    qrCode?: string;
+
     walletID?: string;
   }[];
   loading?: boolean;
@@ -91,10 +93,7 @@ const MobileCard = ({
       setIsProcessing(false);
     }
   };
-  console.log(
-    `${IMAGE_BASE}${dataColumns.screenshot}`,
-    "Image URL in MobileCard"
-  );
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3 shadow-md shadow-gray-100/50 mx-2">
       {/* Header Section */}

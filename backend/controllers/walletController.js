@@ -12,6 +12,18 @@ exports.addWallet = async (req, res) => {
         .json({ message: "walletID and walletType are required" });
     }
 
+    // ✅ Check if a wallet of this type already exists for the user
+    const existingWallet = await UserWallet.findOne({
+      userId,
+      walletType,
+    });
+
+    if (existingWallet) {
+      return res.status(409).json({
+        message: `You already have a ${walletType} wallet`,
+      });
+    }
+
     const qrImagePath = req.file ? req.file.path : null;
 
     const newWallet = new UserWallet({
@@ -19,7 +31,7 @@ exports.addWallet = async (req, res) => {
       walletType,
       userId,
       qrImage: qrImagePath,
-      balance: balance || 0, // Default 0
+      balance: balance || 0,
     });
 
     await newWallet.save();
@@ -204,5 +216,25 @@ exports.getAdminWallets = async (req, res) => {
       message: "Error fetching admin wallets",
       error: err.message,
     });
+  }
+};
+
+exports.deleteWallet = async (req, res) => {
+  try {
+    const { walletId } = req.params;
+    const userId = req.user._id;
+
+    const deletedWallet = await UserWallet.findOneAndDelete({
+      _id: walletId,
+      userId,
+    });
+
+    if (!deletedWallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    res.status(200).json({ message: "Wallet deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
