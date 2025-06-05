@@ -16,15 +16,18 @@ const userSchema = new mongoose.Schema({
     unique: true, // this user's own code
   },
   referredBy: {
-    type: String,
-    required: true, // code of the person who referred them
+  type: String,
+  required: function () {
+    return this.role !== "admin";
   },
+},
+
   name: String,
   email: {
-    type: String,
-    sparse: true, // This allows multiple null values
-    default: "", // Default empty string instead of null
-  },
+  type: String,
+  required: true, // ✅ force email to be required
+  unique: true,
+},
   otpCode: { type: String },
 otpExpiry: { type: Date },
   profilePic: String,
