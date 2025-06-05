@@ -131,17 +131,6 @@ const AddWalletDialog = ({ onWalletAdd }: { onWalletAdd: () => void }) => {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Wallet Name</Label>
-            {/* <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Enter wallet name"
-            /> */}
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="walletType">Wallet Type</Label>
             <Input
               id="walletType"

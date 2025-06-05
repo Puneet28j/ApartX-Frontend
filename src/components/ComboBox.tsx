@@ -76,7 +76,7 @@ const Combobox: React.FC<ComboboxProps> = ({
                 className="h-[55px] w-[55px]"
               />
               <span className="text-white group-hover:text-black">
-                {selectedWallet.label}
+                {selectedWallet.label.toLocaleUpperCase()}
               </span>
             </div>
           ) : (
@@ -112,7 +112,7 @@ const Combobox: React.FC<ComboboxProps> = ({
                     className="h-8 w-8 flex-shrink-0"
                   />
                   <span className="text-md font-medium flex-1">
-                    {wallet.label}
+                    {wallet.label.toLocaleUpperCase()}
                   </span>
                   <Check
                     className={cn(

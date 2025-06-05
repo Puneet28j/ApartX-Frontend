@@ -18,11 +18,15 @@ import { toast } from "sonner";
 const MainScreen = () => {
   const navigate = useNavigate();
   const [walletBalance, setWalletBalance] = useState(0);
+  const [name, setName] = useState("");
+  const [profilePic, setProfilePic] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   // Fetch wallet balance on component mount
   useEffect(() => {
     getWalletBalance();
+    fetchUserProfile();
   }, []);
 
   const getWalletBalance = async () => {
@@ -55,10 +59,8 @@ const MainScreen = () => {
       }
 
       const data = await response.json();
-      // Log the entire response to see its structure
       console.log("Full API Response:", data);
 
-      // Check if data exists and has the expected structure
       if (data && typeof data.totalBalance !== "undefined") {
         setWalletBalance(data.totalBalance);
       } else {
@@ -78,29 +80,133 @@ const MainScreen = () => {
     }
   };
 
+  const fetchUserProfile = async () => {
+    setIsProfileLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login-register");
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_URL}/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login-register");
+          toast.error("Session expired. Please login again.");
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("User profile data:", data); // Debug log
+
+      // Set user name
+      setName(data.name || "User");
+
+      // Handle profile picture
+      if (data.profilePic) {
+        // Remove /api from the base URL to get the correct server URL
+        const baseUrl = import.meta.env.VITE_URL.replace("/api", "");
+
+        // Construct the full image URL
+        let imageUrl;
+        if (data.profilePic.startsWith("http")) {
+          // If it's already a full URL
+          imageUrl = data.profilePic;
+        } else if (data.profilePic.startsWith("/")) {
+          // If it starts with /, just append to baseUrl
+          imageUrl = `${baseUrl}${data.profilePic}`;
+        } else {
+          // If it doesn't start with /, add a /
+          imageUrl = `${baseUrl}/${data.profilePic}`;
+        }
+
+        console.log("Constructed image URL:", imageUrl); // Debug log
+
+        // Test if the image loads
+        const img = new Image();
+        img.onload = () => {
+          console.log("Image loaded successfully");
+          setProfilePic(imageUrl);
+        };
+        img.onerror = (e) => {
+          console.error("Failed to load image:", {
+            error: e,
+            attemptedUrl: imageUrl,
+            originalPath: data.profilePic,
+          });
+          setProfilePic(null);
+        };
+        img.src = imageUrl;
+      } else {
+        setProfilePic(null);
+      }
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+      toast.error("Failed to fetch profile");
+      setName("User"); // Fallback name
+      setProfilePic(null);
+    } finally {
+      setIsProfileLoading(false);
+    }
+  };
+
   const currencyConfig = [{ label: "USDT", value: "$ 0.00", icon: USDTLogo }];
 
   return (
-    <div className="w-full  h-full relative overflow-hidden  bg-[#2D2B2B]">
+    <div className="w-full h-full relative overflow-hidden bg-[#2D2B2B]">
       {/* === Background Images === */}
       <div className="absolute inset-0 z-10">
         <img
           src={Bg}
           alt="Flower Background"
-          className="absolute top-0 left-0 w-full h-full object-cover "
+          className="absolute top-0 left-0 w-full h-full object-cover"
         />
       </div>
 
       {/* === Scrollable Foreground Content === */}
-      <div className="relative z-20 h-full overflow-y-auto pb-20 px-4 ">
+      <div className="relative z-20 h-full overflow-y-auto pb-20 px-4">
         {/* User Greeting */}
         <div className="flex flex-col items-start gap-2 mb-2 mt-4">
-          <User2Icon
-            onClick={() => navigate("/profile")}
-            className="w-12 h-12 rounded-full bg-white border-black border-2"
-          />
-          <h1 className="text-white text-lg font-medium">Hello John</h1>
+          {isProfileLoading ? (
+            // Loading state for profile picture
+            <div className="w-12 h-12 rounded-full bg-gray-300 animate-pulse" />
+          ) : profilePic ? (
+            <img
+              onClick={() => navigate("/profile")}
+              src={profilePic}
+              className="rounded-full w-12 h-12 object-cover border-2 border-white cursor-pointer"
+              alt="Profile"
+              onError={(e) => {
+                console.error("Image failed to display");
+                setProfilePic(null);
+              }}
+            />
+          ) : (
+            <User2Icon
+              onClick={() => navigate("/profile")}
+              className="w-12 h-12 rounded-full bg-white border-black border-2 cursor-pointer"
+            />
+          )}
+
+          <h1 className="text-white text-lg font-medium">
+            {isProfileLoading ? "Loading..." : `Hello ${name}`}
+          </h1>
         </div>
+
         {/* Wallet Card */}
         <div
           className="w-full p-4 rounded-[20px] bg-cover bg-center shadow-md mb-6 text-black"
@@ -109,13 +215,11 @@ const MainScreen = () => {
           <div className="flex justify-between items-start">
             <div className="flex flex-col">
               <span className="text-sm font-medium">Wallet Balance</span>
-              {/* <span> */}
               <img
                 src={usdtblack}
                 alt=""
                 className="h-[20px] fill-black w-[20px]"
               />
-              {/* </span> */}
               <span className="text-2xl md:text-3xl font-bold mt-2">
                 {isLoading ? "Loading..." : `$ ${walletBalance}`}
               </span>
@@ -136,6 +240,7 @@ const MainScreen = () => {
             </div>
           </div>
         </div>
+
         {/* Send / Receive Actions */}
         <div className="bg-[#111111] rounded-2xl py-4 px-4 sm:px-6 flex justify-around items-center mb-6 text-white">
           <div className="flex flex-col items-center gap-1">
@@ -170,6 +275,7 @@ const MainScreen = () => {
             </button>
           </div>
         </div>
+
         {/* Crypto Balances */}
         <div className="text-white mb-4">
           <h2 className="text-lg font-semibold mb-3">Crypto Balance</h2>
@@ -196,8 +302,9 @@ const MainScreen = () => {
             ))}
           </div>
         </div>
+
         {/* Bottom Text and About Button */}
-        <div className="fixed  bottom-12 left-0 right-0 z-20 px-4 max-w-lg mx-auto">
+        <div className="fixed bottom-12 left-0 right-0 z-20 px-4 max-w-lg mx-auto">
           <div className="flex items-center justify-center">
             {/* Phone Image */}
             <div className="w-auto">
@@ -229,7 +336,7 @@ const MainScreen = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-[#171717] py-4  flex justify-around items-center z-30 rounded-t-xl shadow-inner">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-[#171717] py-4 flex justify-around items-center z-30 rounded-t-xl shadow-inner">
         <div className="flex gap-2 items-center text-white">
           <Home className="w-5 h-5" />
           <span className="text-xs mt-1">Home</span>
@@ -243,7 +350,7 @@ const MainScreen = () => {
         </Button>
         <Button
           onClick={() => navigate("/invite-and-earn")}
-          className="flex gap-2 items-center "
+          className="flex gap-2 items-center"
         >
           <img src={ReferAndEarn} alt="Invite & Earn" />
           <span className="text-[10px] text-center text-white leading-tight">

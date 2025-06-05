@@ -91,7 +91,10 @@ const MobileCard = ({
       setIsProcessing(false);
     }
   };
-
+  console.log(
+    `${IMAGE_BASE}${dataColumns.screenshot}`,
+    "Image URL in MobileCard"
+  );
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3 shadow-md shadow-gray-100/50 mx-2">
       {/* Header Section */}
@@ -226,6 +229,7 @@ const MobileCard = ({
               </Button>
             </>
           )}
+
           {dataColumns.screenshot && (
             <ScreenshotDialog
               title="Screenshot"
@@ -249,6 +253,7 @@ const DepositComponent = ({
 }: DataTableProps) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [editingRemarkId, setEditingRemarkId] = useState<number | null>(null);
+  console.log(data, "data in DepositComponent");
 
   useEffect(() => {
     const handleResize = () => {

@@ -6,6 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   userRole: string | null;
   loading: boolean;
+  user: any; // Adjust type as needed
   login: (token: string, role: string) => void;
   logout: () => void;
   checkAuthStatus: () => Promise<void>;
@@ -14,6 +15,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   userRole: null,
+  user: undefined,
   loading: true,
   login: () => {},
   logout: () => {},
@@ -23,14 +25,17 @@ export const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [profilePic, setProfilePic] = useState<string | null>(null); // Optional: Store user profile picture
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const login = (token: string, role: string) => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
+    localStorage.setItem("user", JSON.stringify({ profilePic })); // Store user info if needed
     setIsAuthenticated(true);
     setUserRole(role);
+    setProfilePic(profilePic); // Set profile picture if available
     if (role === "admin") {
       navigate("/admin");
     } else {
@@ -41,6 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("user"); // Clear user info if stored
     setIsAuthenticated(false);
     setUserRole(null);
     navigate("/login-register");
@@ -87,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isAuthenticated,
     userRole,
     loading,
+    user: JSON.parse(localStorage.getItem("user") || "null"), // Retrieve user info if needed
     login,
     logout,
     checkAuthStatus,

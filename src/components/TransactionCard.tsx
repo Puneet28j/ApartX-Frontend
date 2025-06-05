@@ -15,7 +15,7 @@ export interface TransactionData {
   type: string;
   amount: number;
   walletType: string;
-  // walletImage: string;
+  walletImage: string;
 }
 
 const tagColors: Record<TransactionType, string> = {
@@ -40,6 +40,7 @@ interface TransactionCardProps {
     type: string;
     amount: number;
     walletType: string;
+    walletImage: string;
   };
 }
 

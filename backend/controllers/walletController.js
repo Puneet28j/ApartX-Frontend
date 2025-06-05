@@ -37,6 +37,7 @@ exports.getUserWallets = async (req, res) => {
     const userId = req.user._id;
     const wallets = await UserWallet.find({ userId });
     res.status(200).json({ wallets });
+    console.log("User wallets fetched successfully", wallets);
   } catch (err) {
     res
       .status(500)

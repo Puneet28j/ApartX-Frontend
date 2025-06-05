@@ -44,17 +44,62 @@ exports.investInPlan = async (req, res) => {
 };
 
 // Admin: View all user investments
+// exports.getAllInvestments = async (req, res) => {
+//   try {
+//     const investments = await UserInvestment.find()
+//       .populate("userId", "name mobile profilePic")
+//       .populate("planId", "name  createdAt amount")
+//       .sort({ createdAt: -1 });
+
+//     res.status(200).json({ investments });
+//   } catch (err) {
+//     res
+//       .status(500)
+//       .json({ message: "Error fetching investments", error: err.message });
+//   }
+// };
+
+// Admin: View all user investments (grouped by user)
 exports.getAllInvestments = async (req, res) => {
   try {
-    const investments = await UserInvestment.find()
-      .populate("userId", "name email")
-      .populate("planId", "name durationDays")
-      .sort({ createdAt: -1 });
+    const grouped = await UserInvestment.aggregate([
+      {
+        $group: {
+          _id: "$userId",
+          totalInvested: { $sum: "$amount" },
+          joinDate: { $min: "$startDate" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
+        $project: {
+          _id: 0,
+          name: "$user.name",
+          mobile: "$user.mobile",
+          profilePic: "$user.profilePic",
+          totalInvested: 1,
+          joinDate: 1,
+          status: {
+            $cond: [{ $eq: ["$user.role", "user"] }, "Active", "Inactive"],
+          },
+        },
+      },
+      { $sort: { joinDate: -1 } },
+    ]);
 
-    res.status(200).json({ investments });
+    res.status(200).json({ investors: grouped });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching investments", error: err.message });
+    res.status(500).json({
+      message: "Error fetching investments",
+      error: err.message,
+    });
   }
 };

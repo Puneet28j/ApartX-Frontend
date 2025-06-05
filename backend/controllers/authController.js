@@ -118,6 +118,9 @@ exports.loginUser = async (req, res) => {
 
     return res.status(200).json({
       message: "Login successful",
+      profilePic: user.profilePic,
+      name: user.name,
+      email: user.email,
       token,
       role: user.role,
       userId: user._id, // ✅ Add this
@@ -351,6 +354,7 @@ exports.changePassword = async (req, res) => {
 };
 
 const nodemailer = require("nodemailer");
+const { profile } = require("console");
 
 exports.sendOtpForReset = async (req, res) => {
   try {

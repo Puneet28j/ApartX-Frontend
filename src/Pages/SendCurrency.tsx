@@ -20,6 +20,7 @@ type AdminWallet = {
   value: string;
   label: string;
   icon: string;
+  qrImage?: string; // Optional if not always available
   balance: number;
   adminName: string;
 };
@@ -36,6 +37,11 @@ const SendCurrency = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [adminWallets, setAdminWallets] = useState<AdminWallet[]>([]);
   const [isLoadingWallets, setIsLoadingWallets] = useState(false);
+
+  // Add this constant for your API base URL
+  import.meta.env.VITE_URL; // Replace with your actual API URL
+
+  console.log(adminWallets);
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
@@ -107,6 +113,7 @@ const SendCurrency = () => {
       navigate("/transfer-receipt", {
         state: {
           amount: amount,
+          walletQr: selectedWalletData?.icon || "",
           walletType: selectedWalletData?.label || "",
           walletID: walletID,
           transactionId: response.data._id,
@@ -150,6 +157,7 @@ const SendCurrency = () => {
       const formattedWallets = wallets.map((wallet: any) => ({
         value: wallet.walletID,
         label: wallet.walletType,
+        qrImage: wallet.qrImage || "", // Keep the original path from API
         icon: getWalletIcon(wallet.walletType),
         balance: wallet.balance,
         adminName: wallet.adminName,
@@ -177,6 +185,20 @@ const SendCurrency = () => {
       default:
         return TrustWallet;
     }
+  };
+
+  // Function to get the selected wallet's QR image URL
+  const getSelectedWalletQR = () => {
+    const selectedWalletData = adminWallets.find(
+      (w) => w.value === selectedWallet
+    );
+    if (selectedWalletData?.qrImage) {
+      // Convert the file path to a proper URL
+      // Replace backslashes with forward slashes and construct full URL
+      const cleanPath = selectedWalletData.qrImage.replace(/\\/g, "/");
+      return `${import.meta.env.VITE_URL.slice(0, -4)}/${cleanPath}`;
+    }
+    return null;
   };
 
   useEffect(() => {
@@ -288,8 +310,37 @@ const SendCurrency = () => {
             <Separator className="w-1/4" />
           </div>
 
+          {/* QR Code Display Section */}
+          <div className="flex flex-col items-center gap-2">
+            {getSelectedWalletQR() ? (
+              <div className="flex flex-col items-center">
+                <p className="text-white text-sm mb-2">Scan QR Code to Pay</p>
+                <img
+                  src={getSelectedWalletQR()!}
+                  alt="Wallet QR Code"
+                  className="w-48 h-48 border-2 border-white rounded-lg bg-white p-2"
+                  onError={(e) => {
+                    console.error(
+                      "QR image failed to load:",
+                      getSelectedWalletQR()
+                    );
+                    // Hide the image if it fails to load
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-48 h-48 border-2 border-white rounded-lg flex items-center justify-center">
+                <p className="text-white text-sm text-center">
+                  QR Code not available
+                </p>
+              </div>
+            )}
+          </div>
+
           {preview && (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-white text-sm">Payment Screenshot</p>
               <img
                 src={preview}
                 alt="Screenshot Preview"

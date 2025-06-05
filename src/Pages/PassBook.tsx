@@ -19,6 +19,8 @@ interface TransactionData {
   type: string;
   amount: number;
   walletType: string;
+  walletImage: string;
+
   // walletImage: string;
 }
 

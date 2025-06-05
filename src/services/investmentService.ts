@@ -1,3 +1,4 @@
+import type { InvestorsResponse } from "@/Pages/admin/Investors";
 import axios from "axios";
 
 interface CreateInvestmentResponse {
@@ -67,6 +68,30 @@ export const investmentService = {
         error.response?.data?.message ||
           error.response?.data?.error ||
           "Failed to create investment"
+      );
+    }
+  },
+
+  async fetchInvestments(): Promise<InvestorsResponse> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Please login to continue");
+    }
+
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_URL}/investments`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching investments:", error.response?.data);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch investments"
       );
     }
   },

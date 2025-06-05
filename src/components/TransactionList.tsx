@@ -15,6 +15,8 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
           transaction={{
             id: tx.id,
             username: tx.username,
+            walletImage: tx.walletImage,
+
             time: tx.time,
             type: tx.type,
             amount: tx.amount,

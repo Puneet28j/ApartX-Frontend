@@ -38,9 +38,12 @@ const LoginForm = () => {
       console.log("Login response:", response);
 
       const data = response.data;
-
+      console.log("Login data:", data);
       // Save token and role to localStorage
       localStorage.setItem("token", data.token);
+      localStorage.setItem("profilePic", JSON.stringify(data.profilePic));
+      localStorage.setItem("user", JSON.stringify(data.user));
+
       localStorage.setItem("role", data.role);
       login(data.token, data.role); // This will automatically redirect based on role
     } catch (error: any) {
