@@ -15,6 +15,7 @@ import CoinBase from "../assets/Coinbase.svg";
 import MetaMask from "../assets/fox.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import { sendCurrencyService } from "@/services/sendCurrencyService";
+import axios from "axios";
 
 type AdminWallet = {
   value: string;
@@ -36,12 +37,59 @@ const SendCurrency = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [adminWallets, setAdminWallets] = useState<AdminWallet[]>([]);
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingWallets, setIsLoadingWallets] = useState(false);
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login-register");
+          return;
+        }
 
-  // Add this constant for your API base URL
-  import.meta.env.VITE_URL; // Replace with your actual API URL
+        const response = await axios.get(`${import.meta.env.VITE_URL}/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
 
-  console.log(adminWallets);
+        // Handle profile picture URL
+        const userData = response.data;
+        if (userData.profilePic) {
+          userData.profilePic = `${import.meta.env.VITE_URL.slice(0, -4)}${
+            userData.profilePic
+          }`;
+        }
+
+        setUserData(userData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          toast.error("Please login again");
+          navigate("/login-register");
+        } else {
+          toast.error("Failed to load user data");
+        }
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
@@ -237,9 +285,17 @@ const SendCurrency = () => {
         <div className="mt-1 flex justify-center">
           <div className="w-full max-w-[350px] pb-2 border-1 relative border-white rounded-[20px] flex justify-center">
             <div className="flex flex-col items-center w-full">
-              <User2Icon className="text-white h-[60px] w-[60px] rounded-full border-2 border-white mt-2" />
+              {userData?.profilePic ? (
+                <img
+                  src={userData.profilePic}
+                  alt="Profile"
+                  className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2 object-cover"
+                />
+              ) : (
+                <User2Icon className="h-[80px] w-[80px] rounded-full border-2 border-white mt-2" />
+              )}
               <div className="text-white text-[15px] text-center mt-2">
-                John
+                {userData?.name || "User Name"}
               </div>
               <div className="mt-2 w-full flex justify-center">
                 <div className="bg-black w-[160px]  items-center rounded-lg gap-4 justify-center h-[50px] mx-auto flex">
