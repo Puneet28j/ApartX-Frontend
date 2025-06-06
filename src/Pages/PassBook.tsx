@@ -7,18 +7,8 @@ import { Button } from "@/components/ui/button";
 import TransactionList from "@/components/TransactionList";
 import ReceiptBg from "../assets/ReceiptBg.tsx.svg";
 import ReferAndEarn from "../assets/ReferAndEarn.svg";
-import BinanceImage from "../assets/3495812.svg";
-import MetamaskImage from "../assets/fox.svg";
-import CoinbaseImage from "../assets/Coinbase.svg";
-import TrustWalletImage from "../assets/TrustWallet.svg";
-import type { TransactionData } from "@/components/TransactionCard";
 
-const walletTypeImages: Record<string, string> = {
-  binance: BinanceImage,
-  metamask: MetamaskImage,
-  coinbase: CoinbaseImage,
-  trustwallet: TrustWalletImage,
-};
+import type { TransactionData } from "@/components/TransactionCard";
 
 const Passbook = () => {
   const navigate = useNavigate();
