@@ -15,14 +15,15 @@ const storage = multer.diskStorage({
     cb(null, `user-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
-
+const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only image files are allowed!"), false);
+    cb(new Error("Only JPG, PNG, and WebP images are allowed!"), false);
   }
 };
+
 
 const upload = multer({
   storage,

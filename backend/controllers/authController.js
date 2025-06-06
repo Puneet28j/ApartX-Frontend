@@ -188,42 +188,52 @@ exports.updateProfile = async (req, res) => {
     if (email) user.email = email;
     if (mobile) user.mobile = mobile;
 
+
+    
     // Handle profile picture upload
-    if (req.file) {
-      try {
-        const outputPath = path.join(
-          __dirname,
-          "../uploads/profile_pic",
-          `resized-${req.file.filename}`
-        );
-        const publicPath = `/uploads/profile_pic/resized-${req.file.filename}`;
+  if (req.file) {
+  try {
+    console.log("🟢 Received file:", req.file);
 
-        // Delete old profile picture if exists
-        if (user.profilePic) {
-          const oldPath = path.join(__dirname, "..", user.profilePic);
-          if (fs.existsSync(oldPath)) {
-            fs.unlinkSync(oldPath);
-          }
-        }
+    const outputPath = path.join(
+      __dirname,
+      "../uploads/profile_pic",
+      `resized-${req.file.filename}`
+    );
+    const publicPath = `/uploads/profile_pic/resized-${req.file.filename}`;
 
-        // Resize and save new image
-        await sharp(req.file.path)
-          .resize(300, 300, {
-            fit: "cover",
-            position: "center",
-          })
-          .toFile(outputPath);
-
-        // Delete original uploaded file
-        fs.unlinkSync(req.file.path);
-
-        // Update user profile pic path
-        user.profilePic = publicPath;
-      } catch (error) {
-        console.error("Image processing error:", error);
-        return res.status(500).json({ message: "Error processing image" });
-      }
+    // Ensure original file exists before sharp
+    if (!fs.existsSync(req.file.path)) {
+      console.error("❌ Uploaded file not found:", req.file.path);
+      return res.status(400).json({ message: "Uploaded file is missing" });
     }
+
+    // Try resizing
+  await sharp(req.file.path)
+  .resize(300, 300, {
+    fit: "cover",
+    position: "center",
+  })
+  .toFile(outputPath);
+
+// ⚠️ Windows fix: wait briefly before unlink
+setTimeout(() => {
+  fs.promises.unlink(req.file.path).catch((err) =>
+    console.error("File delete failed (delayed):", err)
+  );
+}, 100);
+
+
+    user.profilePic = publicPath;
+  } catch (error) {
+    console.error("❌ Image processing error:", error.message);
+    return res.status(500).json({
+      message: "Error processing image",
+      error: error.message,
+    });
+  }
+}
+
 
     await user.save();
 
