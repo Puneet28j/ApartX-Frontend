@@ -11,18 +11,7 @@ import BinanceImage from "../assets/3495812.svg";
 import MetamaskImage from "../assets/fox.svg";
 import CoinbaseImage from "../assets/Coinbase.svg";
 import TrustWalletImage from "../assets/TrustWallet.svg";
-
-interface TransactionData {
-  id: string;
-  username: string;
-  time: string;
-  type: string;
-  amount: number;
-  walletType: string;
-  walletImage: string;
-
-  // walletImage: string;
-}
+import type { TransactionData } from "@/components/TransactionCard";
 
 const walletTypeImages: Record<string, string> = {
   binance: BinanceImage,
@@ -35,6 +24,8 @@ const Passbook = () => {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  console.log(transactions);
 
   const fetchPassbookData = async () => {
     setIsLoading(true);
@@ -52,21 +43,23 @@ const Passbook = () => {
         },
       });
 
-      const formattedTransactions: TransactionData[] =
-        response.data.transactions.map((tx: any) => {
-          const walletType = tx.walletType?.toLowerCase() || "binance";
-          return {
-            id: tx._id,
-            username: tx.userId?.walletID || "Unknown",
-            time: new Date(tx.createdAt).toLocaleString(),
-            type: tx.type,
-            amount: tx.amount,
-            walletType,
-            walletImage: walletTypeImages[walletType] || BinanceImage,
-          };
-        });
+      console.log(response.data, "passbook");
 
-      setTransactions(formattedTransactions);
+      // const formattedTransactions: TransactionData[] =
+      //   response.data.transactions.map((tx: any) => {
+      //     const walletType = tx.walletType?.toLowerCase() || "binance";
+      //     return {
+      //       id: tx._id,
+      //       username: tx.walletID || "Unknown",
+      //       time: new Date(tx.createdAt).toLocaleString(),
+      //       type: tx.type,
+      //       amount: tx.amount,
+      //       walletType,
+      //       walletImage: walletTypeImages[walletType] || BinanceImage,
+      //     };
+      //   });
+
+      setTransactions(response.data.transactions);
     } catch (error) {
       console.error("Error fetching passbook:", error);
       toast.error("Failed to load transactions");

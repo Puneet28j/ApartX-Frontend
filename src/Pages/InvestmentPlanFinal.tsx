@@ -49,7 +49,8 @@ const InvestmentPlanFinal = () => {
         toast.error("Session expired. Please login again");
         setTimeout(() => navigate("/login-register"), 1500);
       } else {
-        toast.error(error.message || "Failed to create investment");
+        toast.error(error?.message || "Failed to create investment");
+        console.log(error);
       }
     } finally {
       setIsLoading(false);

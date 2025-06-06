@@ -288,7 +288,7 @@ const MainScreen = () => {
                     <span className="text-base sm:text-lg">{coin.label}</span>
                   </div>
                   <span className="text-green-400 text-base sm:text-lg font-medium">
-                    {coin.value}
+                    {isLoading ? "Loading..." : `$ ${walletBalance}`}
                   </span>
                 </div>
                 {index < currencyConfig.length - 1 && (

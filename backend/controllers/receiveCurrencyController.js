@@ -149,7 +149,7 @@ exports.updateReceiveStatus = async (req, res) => {
           type: "Withdrawal", // ✅ Use capitalized "Deposit" to match enum
           amount: amount,
           balanceAfter: newBalance, // ✅ Provide required balanceAfter field
-          walletID: withdrawRequest.wallet,
+          walletID: userWallet.walletID,
           description: `Deposit approved - ${withdrawRequest.wallet} wallet`,
         });
 

@@ -16,6 +16,8 @@ app.use(
       "http://localhost:5000",
       "https://apart-x.pro",
       "http://localhost:5173",
+      "https://qs3rfs46-5000.inc1.devtunnels.ms",
+      "https://qs3rfs46-5173.inc1.devtunnels.ms",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],

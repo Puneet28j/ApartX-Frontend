@@ -1,6 +1,7 @@
 const UserInvestment = require("../models/UserInvestment");
 const InvestmentPlan = require("../models/InvestmentPlan");
 const UserWallet = require("../models/UserWallet");
+const WalletTransaction = require("../models/WalletTransaction");
 
 exports.investInPlan = async (req, res) => {
   try {
@@ -16,13 +17,24 @@ exports.investInPlan = async (req, res) => {
       return res.status(400).json({ message: "Amount out of allowed range" });
     }
 
+    let userWallet = await UserWallet.findOne({
+      userId: userId,
+    });
+    // const userWallet = await UserWallet.findOne({ userId: userId });
     const roi = plan.roi;
     const dailyEarning = parseFloat(((amount * roi) / 100).toFixed(2));
     const totalDays = plan.durationDays;
     const startDate = new Date();
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + totalDays);
-
+    const previousBalance = userWallet.balance;
+    if (previousBalance < amount) {
+      return res.status(400).json({
+        message: "Insufficient balance in your account",
+      });
+    }
+    userWallet.balance -= amount;
+    const newBalance = userWallet.balance;
     const newInvestment = new UserInvestment({
       userId,
       planId,
@@ -35,6 +47,16 @@ exports.investInPlan = async (req, res) => {
     });
 
     await newInvestment.save();
+    await userWallet.save();
+    const walletTransaction = new WalletTransaction({
+      userId,
+      type: "Invest", // ✅ Use capitalized "Deposit" to match enum
+      amount: amount,
+      balanceAfter: newBalance, // ✅ Provide required balanceAfter field
+      walletID: userWallet.walletID,
+      description: `Invest in  ${planId} plan `,
+    });
+    await walletTransaction.save();
     res
       .status(201)
       .json({ message: "Investment successful", investment: newInvestment });
