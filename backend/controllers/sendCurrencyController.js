@@ -34,8 +34,22 @@ exports.createSendCurrency = async (req, res) => {
 exports.getAllSendRequests = async (req, res) => {
   try {
     const requests = await SendCurrency.find()
-      .populate("userId", "name email mobile")
+      .populate("userId", "name email mobile profilePic")
       .sort({ createdAt: -1 });
+
+    res.status(200).json({ data: requests });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching requests", error: err.message });
+  }
+};
+exports.getAllSendRequestsRecent = async (req, res) => {
+  try {
+    const requests = await SendCurrency.find()
+      .populate("userId", "name email mobile profilePic")
+      .sort({ createdAt: -1 })
+      .limit(6);
 
     res.status(200).json({ data: requests });
   } catch (err) {

@@ -7,6 +7,7 @@ const {
   getAllSendRequests,
   getSendRequestById,
   updateSendStatus,
+  getAllSendRequestsRecent,
 } = require("../controllers/sendCurrencyController");
 
 const { verifyToken: auth } = require("../middlewares/authMiddleware");
@@ -38,6 +39,7 @@ router.post(
   createSendCurrency
 );
 router.get("/send-currency", auth, isAdmin, getAllSendRequests);
+router.get("/send-currency-recent", auth, isAdmin, getAllSendRequestsRecent);
 router.get("/send-currency/:id", auth, isAdmin, getSendRequestById);
 router.put("/send-currency/:id", auth, isAdmin, updateSendStatus); // ✅ Corrected
 

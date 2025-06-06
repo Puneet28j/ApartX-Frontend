@@ -48,97 +48,6 @@ import { ProfileEditDialog } from "./Profile";
 import axios from "axios";
 import axiosInstance from "@/utils/axiosConfig";
 
-const data = [
-  {
-    id: 1,
-    type: "Deposit",
-    plan: "Basic Plan",
-    profileName: "John Doe",
-    mobile: "+1234567890",
-    amount: "$500.00",
-    dateTime: "2023-10-01 12:00 PM",
-    status: "Completed",
-    remarks: "Deposit successful",
-  },
-  {
-    id: 2,
-    type: "Withdrawal",
-    plan: "Premium Plan",
-    profileName: "Jane Smith",
-    mobile: "+0987654321",
-    amount: "$1000.00",
-    dateTime: "2023-10-02 1:30 PM",
-    status: "Pending",
-    remarks: "Withdrawal in process",
-  },
-  {
-    id: 3,
-    type: "Deposit",
-    plan: "Standard Plan",
-    profileName: "Alice Johnson",
-    mobile: "+1122334455",
-    amount: "$750.00",
-    dateTime: "2023-10-03 2:45 PM",
-    status: "Completed",
-    remarks: "Deposit successful",
-  },
-  {
-    id: 4,
-    type: "Withdrawal",
-    plan: "Basic Plan",
-    profileName: "Bob Brown",
-    mobile: "+5566778899",
-    amount: "$300.00",
-    dateTime: "2023-10-04 3:15 PM",
-    status: "Failed",
-    remarks: "Insufficient funds",
-  },
-  {
-    id: 5,
-    type: "Deposit",
-    plan: "Premium Plan",
-    profileName: "Charlie Davis",
-    mobile: "+2233445566",
-    amount: "$1200.00",
-    dateTime: "2023-10-05 4:00 PM",
-    status: "Completed",
-    remarks: "Deposit successful",
-  },
-
-  {
-    id: 6,
-    type: "Withdrawal",
-    plan: "Standard Plan",
-    profileName: "Eve Wilson",
-    mobile: "+3344556677",
-    amount: "$800.00",
-    dateTime: "2023-10-06 5:30 PM",
-    status: "Pending",
-    remarks: "Withdrawal in process",
-  },
-  {
-    id: 7,
-    type: "Deposit",
-    plan: "Basic Plan",
-    profileName: "Frank Miller",
-    mobile: "+4455667788",
-    amount: "$600.00",
-    dateTime: "2023-10-07 6:15 PM",
-    status: "Completed",
-    remarks: "Deposit successful",
-  },
-  {
-    id: 8,
-    type: "Withdrawal",
-    plan: "Premium Plan",
-    profileName: "Grace Lee",
-    mobile: "+9988776655",
-    amount: "$400.00",
-    dateTime: "2023-10-08 7:45 PM",
-    status: "Failed",
-    remarks: "Insufficient funds",
-  },
-];
 const Dashboard = () => {
   const { logout } = useAuth();
   const handleLogout = () => {
@@ -155,6 +64,8 @@ const Dashboard = () => {
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [receiveCurrencydata, setReceiveCurrencydata] = useState<any[]>([]);
+  const [investmentsData, setInvestmentsData] = useState<any[]>([]);
+  const [adminPassbook, setAdminPassbook] = useState<any[]>([]);
   const {
     data: sendCurrencyData,
     loading,
@@ -164,8 +75,39 @@ const Dashboard = () => {
 
   useEffect(() => {
     getReceiveCurrencyData();
+    GetAllInvestmentsData();
+    getAdminPassbooks();
   }, []);
-  console.log("Receive Currency Data:", receiveCurrencydata);
+
+  const GetAllInvestmentsData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login-register");
+        return;
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_URL}/all-investments`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+      if (response.data) {
+        setInvestmentsData(response.data.investments || []);
+        return response.data; // Adjust based on your API response structure
+      } else {
+        throw new Error(response.data.message || "Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching receive currency data:", error);
+      toast.error("Failed to fetch receive currency data");
+    }
+  };
   const getReceiveCurrencyData = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -181,7 +123,6 @@ const Dashboard = () => {
           Accept: "application/json",
         },
       });
-      console.log("Response from receive currency API:", response.data);
       if (response.data) {
         setReceiveCurrencydata(response.data.data || []);
         return response.data.receiveCurrency; // Adjust based on your API response structure
@@ -191,6 +132,35 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching receive currency data:", error);
       toast.error("Failed to fetch receive currency data");
+    }
+  };
+  const getAdminPassbooks = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login-register");
+        return;
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_URL}/admin/passbooks`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+      if (response.data) {
+        setAdminPassbook(response.data.data || []);
+        return response.data; // Adjust based on your API response structure
+      } else {
+        throw new Error(response.data.message || "Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching receive currency data:", error);
+      toast.error("Failed to fetch admin passbook data");
     }
   };
 
@@ -270,7 +240,7 @@ const Dashboard = () => {
       path.charAt(0).toUpperCase() + path.slice(1)
     );
   };
-
+  console.log(receiveCurrencydata, "ygydyegdydhawgyuwgd");
   const [activeTab, setActiveTab] = useState(getCurrentTab());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -317,10 +287,11 @@ const Dashboard = () => {
                 id: item._id,
                 type: "Deposit",
                 plan: item.wallet || "N/A",
+                profilePic: item?.userId?.profilePic,
                 profileName: item.userId?.name || "Unknown User",
                 mobile: item.userId?.mobile || "N/A",
                 amount: String(item.amount || 0),
-                dateTime: new Date(item.createdAt).toLocaleString(),
+                dateTime: new Date(item?.createdAt),
                 status: item.status || "Pending",
                 remarks: item.remark || "",
                 screenshot: item.screenshot || "",
@@ -372,10 +343,11 @@ const Dashboard = () => {
                   id: item._id,
                   type: "Deposit",
                   plan: item.wallet || "N/A",
+                  profilePic: item.userId.profilePic,
                   profileName: item.userId?.name || "Unknown User",
                   mobile: item.userId?.mobile || "N/A",
                   amount: String(item.amount || 0),
-                  dateTime: new Date(item.createdAt).toLocaleString(),
+                  dateTime: new Date(item?.createdAt),
                   status: item.status || "Pending",
                   remarks: item.remark || "",
                   // screenshot: item.screenshot || "",
@@ -424,9 +396,49 @@ const Dashboard = () => {
         });
 
       case "Investments":
-        return renderDashBoardTabs({ title: "Investments", data });
+        return renderDashBoardTabs({
+          title: "Investments",
+          data:
+            investmentsData.length > 0
+              ? investmentsData.map((item) => ({
+                  id: item._id,
+                  type: "Deposit",
+                  plan: item?.planId?.name || "N/A",
+                  profileName: item.userId?.name || "Unknown User",
+                  profilePic: item.userId?.profilePic,
+                  mobile: item.userId?.mobile || "N/A",
+                  amount: String(item.amount || 0),
+                  dateTime: new Date(item?.planId?.createdAt),
+                  status: item.status || "Pending",
+                  remarks: item.remark || "",
+                  roi: item.roi,
+                  // screenshot: item.screenshot || "",
+                  // walletID: item.walletID || "",
+                }))
+              : [],
+        });
       case "Transaction":
-        return renderDashBoardTabs({ title: "Transaction", data });
+        return renderDashBoardTabs({
+          title: "Transaction",
+          data:
+            adminPassbook.length > 0
+              ? adminPassbook.map((item) => ({
+                  id: item._id,
+                  type: "Deposit",
+                  plan: item?.walletID || "N/A",
+                  profileName: item.userId?.name || "Unknown User",
+                  profilePic: item.userId?.profilePic,
+                  mobile: item.userId?.mobile || "N/A",
+                  amount: String(item.amount || 0),
+                  dateTime: new Date(item?.createdAt),
+                  status: item.type || "Pending",
+                  remarks: item.remark || "",
+                  // roi:item.
+                  // screenshot: item.screenshot || "",
+                  // walletID: item.walletID || "",
+                }))
+              : [],
+        });
       case "Investors":
         return <InvestorsList />;
       case "Plans":

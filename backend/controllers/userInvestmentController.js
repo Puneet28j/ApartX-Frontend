@@ -44,23 +44,23 @@ exports.investInPlan = async (req, res) => {
 };
 
 // Admin: View all user investments
-// exports.getAllInvestments = async (req, res) => {
-//   try {
-//     const investments = await UserInvestment.find()
-//       .populate("userId", "name mobile profilePic")
-//       .populate("planId", "name  createdAt amount")
-//       .sort({ createdAt: -1 });
+exports.getAllInvestments = async (req, res) => {
+  try {
+    const investments = await UserInvestment.find()
+      .populate("userId", "name mobile profilePic")
+      .populate("planId", "name  createdAt amount")
+      .sort({ createdAt: -1 });
 
-//     res.status(200).json({ investments });
-//   } catch (err) {
-//     res
-//       .status(500)
-//       .json({ message: "Error fetching investments", error: err.message });
-//   }
-// };
+    res.status(200).json({ investments });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching investments", error: err.message });
+  }
+};
 
 // Admin: View all user investments (grouped by user)
-exports.getAllInvestments = async (req, res) => {
+exports.getAllInvestors = async (req, res) => {
   try {
     const grouped = await UserInvestment.aggregate([
       {

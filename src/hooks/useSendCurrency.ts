@@ -9,14 +9,15 @@ interface SendCurrencyData {
     name: string;
     email: string;
     mobile: string;
+    profilePic: string;
   };
   amount: number;
   wallet: string;
-  walletID: string;
+  walletID?: string | undefined;
   status: string;
   remark: string;
-  screenshot: string;
-  createdAt: string;
+  screenshot?: string | undefined;
+  createdAt: Date;
 }
 
 // Create axios instance with default config
@@ -41,6 +42,9 @@ axiosInstance.interceptors.request.use(
 
 export const useSendCurrency = () => {
   const [data, setData] = useState<SendCurrencyData[]>([]);
+  const [recentData, setrecentData] = useState<any[]>([]);
+
+  // const [recentloading, setRecentLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -63,7 +67,6 @@ export const useSendCurrency = () => {
       if (!Array.isArray(dataArray)) {
         throw new Error(`Invalid data format. Expected array`);
       }
-
       setData(dataArray);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
@@ -82,6 +85,44 @@ export const useSendCurrency = () => {
       setData([]);
     } finally {
       setLoading(false);
+    }
+  };
+  const fetchDataRecent = async () => {
+    try {
+      // setRecentLoading(true);
+      setError(null);
+
+      const response = await axiosInstance.get("/send-currency-recent");
+
+      if (!response.data) {
+        throw new Error("No data received from server");
+      }
+
+      const dataArray = Array.isArray(response.data)
+        ? response.data
+        : response.data.data;
+
+      if (!Array.isArray(dataArray)) {
+        throw new Error(`Invalid data format. Expected array`);
+      }
+      setrecentData(dataArray);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error fetching data:", errorMessage);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        toast.error("Session expired. Please login again.");
+        navigate("/login-register");
+      } else {
+        toast.error(errorMessage);
+      }
+
+      setError(errorMessage);
+      setrecentData([]);
+    } finally {
+      // setRecentLoading(false);
     }
   };
 
@@ -124,9 +165,18 @@ export const useSendCurrency = () => {
 
   useEffect(() => {
     fetchData();
+    fetchDataRecent();
   }, []);
 
-  return { data, loading, error, refresh: fetchData, updateStatus };
+  return {
+    data,
+    loading,
+    error,
+    refresh: fetchData,
+    updateStatus,
+    recentData,
+    fetchDataRecent,
+  };
 };
 
 // export const useReceiveCurrency = () => {

@@ -26,11 +26,13 @@ export interface DataTableProps {
     type: string;
     plan: string;
     profileName: string;
+    profilePic?: string;
     mobile: string;
     amount: string;
-    dateTime: string;
+    dateTime: Date;
     status: string;
     remarks: string;
+    roi?: string;
     screenshot?: string;
     walletID?: string;
   }[];
@@ -52,6 +54,10 @@ const getStatusStyles = (status: string) => {
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
     case "failed":
       return "bg-red-100 text-red-800 border-red-200";
+    case "withdrawal":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "deposit":
+      return "bg-green-100 text-green-800 border-green-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
   }
@@ -91,7 +97,6 @@ const MobileCard = ({
       setIsProcessing(false);
     }
   };
-
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3 shadow-md shadow-gray-100/50 mx-2">
       {/* Header Section */}
@@ -104,15 +109,19 @@ const MobileCard = ({
             <h3 className="font-bold text-base text-gray-900 truncate">
               {title}
             </h3>
-            <p className="text-xs text-gray-500">Transaction</p>
+            {/* <p className="text-xs text-gray-500">{title}</p> */}
           </div>
         </div>
         <span
-          className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${getStatusStyles(
+          className={`inline-flex items-center  px-2 py-1 rounded-lg text-xs font-medium ${getStatusStyles(
             dataColumns.status
           )}`}
         >
-          {dataColumns.status}
+          {`${
+            title === "Investments"
+              ? `${dataColumns.roi} %`
+              : dataColumns.status
+          }`}
         </span>
       </div>
 
@@ -120,7 +129,15 @@ const MobileCard = ({
       <div className="bg-gray-50 rounded-lg p-3 mb-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 ring-1 ring-white shadow-sm">
-            <AvatarImage src={virat} alt="User" className="object-cover" />
+            <AvatarImage
+              src={
+                `${import.meta.env.VITE_URL.slice(0, -4)}${
+                  dataColumns?.profilePic
+                }` || virat
+              }
+              alt="User"
+              className="object-cover"
+            />
             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-sm">
               {dataColumns.profileName
                 .split(" ")
@@ -142,7 +159,13 @@ const MobileCard = ({
       {/* Transaction Details */}
       <div className="space-y-2 mb-4">
         <div className="flex items-center justify-between py-2 border-b border-gray-100">
-          <span className="text-xs font-medium text-gray-500">Plan</span>
+          <span className="text-xs font-medium text-gray-500">
+            {title === "Withdrawals"
+              ? "Wallet"
+              : title === "Transaction"
+              ? "WalletId"
+              : "Plan"}
+          </span>
           <span className="font-bold text-sm text-gray-900 truncate ml-2">
             {dataColumns.plan}
           </span>
@@ -158,7 +181,7 @@ const MobileCard = ({
         <div className="flex items-center justify-between py-2 border-b border-gray-100">
           <span className="text-xs font-medium text-gray-500">Date</span>
           <span className="font-medium text-sm text-gray-900 truncate ml-2">
-            {dataColumns.dateTime}
+            {dataColumns?.dateTime.toDateString()}
           </span>
         </div>
 
@@ -315,12 +338,24 @@ const DepositComponent = ({
                   <TableHeader className="bg-gray-100 font-bold">
                     <TableRow className="font-extrabold">
                       <TableHead>Type</TableHead>
-                      <TableHead>Plan</TableHead>
+                      <TableHead>
+                        {title === "Withdrawals"
+                          ? "Wallet"
+                          : title === "Transaction"
+                          ? "Wallet"
+                          : "Plan"}
+                      </TableHead>
                       <TableHead>Profile Name</TableHead>
                       <TableHead>Mobile</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Date & Time</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>
+                        {title === "Transaction"
+                          ? "Type"
+                          : title === "Investments"
+                          ? "Roi"
+                          : "Status"}
+                      </TableHead>
                       {title !== "Transaction" && title !== "Investments" && (
                         <>
                           <TableHead className="w-[200px]">Remarks</TableHead>
@@ -340,7 +375,7 @@ const DepositComponent = ({
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
                               <AvatarImage
-                                src={virat}
+                                src={dataColumns.profilePic || virat}
                                 alt="User"
                                 className="object-cover"
                               />
@@ -353,14 +388,20 @@ const DepositComponent = ({
                         </TableCell>
                         <TableCell>{dataColumns.mobile}</TableCell>
                         <TableCell>{dataColumns.amount}</TableCell>
-                        <TableCell>{dataColumns.dateTime}</TableCell>
+                        <TableCell>
+                          {dataColumns.dateTime.toLocaleDateString("en-IN")}
+                        </TableCell>
                         <TableCell>
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
                               dataColumns.status
                             )}`}
                           >
-                            {dataColumns.status}
+                            {`${
+                              title === "Investments"
+                                ? `${dataColumns.roi} %`
+                                : dataColumns.status
+                            }`}
                           </span>
                         </TableCell>
                         {title !== "Transaction" && title !== "Investments" && (

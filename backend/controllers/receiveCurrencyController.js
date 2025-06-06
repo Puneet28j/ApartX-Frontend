@@ -5,9 +5,9 @@ const WalletTransaction = require("../models/WalletTransaction");
 
 exports.createReceiveCurrency = async (req, res) => {
   try {
-    const { amount, wallet } = req.body;
+    const { amount, wallet, walletId } = req.body;
 
-    if (!amount || !wallet) {
+    if (!amount || !wallet || !walletId) {
       return res
         .status(400)
         .json({ message: "Amount and wallet are required." });
@@ -30,7 +30,7 @@ exports.createReceiveCurrency = async (req, res) => {
 exports.getAllReceiveRequests = async (req, res) => {
   try {
     const receiveRequests = await ReceiveCurrency.find()
-      .populate("userId", "name email mobile")
+      .populate("userId", "name email mobile profilePic")
       .populate("walletQrImage", "qrImage")
       .sort({ createdAt: -1 });
 
