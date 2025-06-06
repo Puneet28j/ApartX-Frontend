@@ -16,9 +16,6 @@ import {
 import { ArrowDownRight, Check, Loader2, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// const IMAGE_BASE_LOCALHOST = "http://localhost:5000/uploads/screenshots/";
-const IMAGE_BASE = "https://apart-x.pro/uploads/screenshots/"; // Update this to your production URL
-
 export interface DataTableProps {
   title: string;
   data: {
@@ -34,6 +31,7 @@ export interface DataTableProps {
     remarks: string;
     roi?: string;
     screenshot?: string;
+    walletQr?: string;
     walletID?: string;
   }[];
   loading?: boolean;
@@ -84,7 +82,7 @@ const MobileCard = ({
   updateRemarks?: (id: number, remarks: string) => Promise<void>;
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-
+  console.log(dataColumns.screenshot, "datacolumnscreenshot");
   const handleAction = async (action: "approve" | "reject") => {
     try {
       setIsProcessing(true);
@@ -97,6 +95,7 @@ const MobileCard = ({
       setIsProcessing(false);
     }
   };
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3 shadow-md shadow-gray-100/50 mx-2">
       {/* Header Section */}
@@ -249,10 +248,22 @@ const MobileCard = ({
               </Button>
             </>
           )}
-          {dataColumns.screenshot && (
+          {dataColumns?.screenshot && (
             <ScreenshotDialog
               title="Screenshot"
-              imageUrl={`${IMAGE_BASE}${dataColumns.screenshot}`}
+              imageUrl={`${import.meta.env.VITE_URL.slice(
+                0,
+                -4
+              )}/uploads/screenshots/${dataColumns?.screenshot}`}
+              walletAddress={dataColumns.walletID}
+            />
+          )}
+          {dataColumns?.walletQr && title === "Withdrawals" && (
+            <ScreenshotDialog
+              title="Qrcode"
+              imageUrl={`${import.meta.env.VITE_URL.slice(0, -4)}/${
+                dataColumns.walletQr
+              }`}
               walletAddress={dataColumns.walletID}
             />
           )}
@@ -272,7 +283,7 @@ const DepositComponent = ({
 }: DataTableProps) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [editingRemarkId, setEditingRemarkId] = useState<number | null>(null);
-
+  console.log(data, "vcvcvcvcvcv");
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -466,10 +477,26 @@ const DepositComponent = ({
                                 {dataColumns.screenshot && (
                                   <ScreenshotDialog
                                     title="Screenshot"
-                                    imageUrl={`${IMAGE_BASE}${dataColumns.screenshot}`}
+                                    imageUrl={`${import.meta.env.VITE_URL.slice(
+                                      0,
+                                      -4
+                                    )}/uploads/screenshots/${
+                                      dataColumns?.screenshot
+                                    }`}
                                     walletAddress={dataColumns.walletID}
                                   />
                                 )}
+                                {dataColumns.walletQr &&
+                                  title === "Withdrawals" && (
+                                    <ScreenshotDialog
+                                      title="Qrcode"
+                                      imageUrl={`${import.meta.env.VITE_URL.slice(
+                                        0,
+                                        -4
+                                      )}/${dataColumns.walletQr}`}
+                                      walletAddress={dataColumns.walletID}
+                                    />
+                                  )}
                               </div>
                             </TableCell>
                           </>

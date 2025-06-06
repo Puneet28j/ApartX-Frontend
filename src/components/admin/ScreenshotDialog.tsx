@@ -25,7 +25,7 @@ export const ScreenshotDialog = ({
   walletAddress,
 }: ScreenshotDialogProps) => {
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(walletAddress || imageUrl);
+    navigator.clipboard.writeText(walletAddress!);
   };
 
   const handleDownload = () => {
@@ -36,7 +36,6 @@ export const ScreenshotDialog = ({
     link.click();
     document.body.removeChild(link);
   };
-
   return (
     <Dialog>
       <DialogTrigger asChild>

@@ -9,8 +9,9 @@ interface ComboboxProps {
     value: string;
     label: string;
     icon: string;
+    walletID?: string;
   }[];
-  onChange?: (value: string) => void;
+  onChange?: (value: string, id: string) => void;
   onOpenChange?: (isOpen: boolean) => void;
 }
 
@@ -22,6 +23,7 @@ const Combobox: React.FC<ComboboxProps> = ({
 }) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const [ID, setID] = React.useState("");
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const selectedWallet = wallets.find((wallet) => wallet.value === value);
@@ -52,8 +54,10 @@ const Combobox: React.FC<ComboboxProps> = ({
 
   const handleSelect = (wallet: (typeof wallets)[0]) => {
     const newValue = wallet.value === value ? "" : wallet.value;
+    const newId = wallet.walletID === ID ? "" : wallet.walletID;
     setValue(newValue);
-    onChange?.(newValue);
+    setID(newId!);
+    onChange?.(newValue, newId!); // ✅ Use newId instead of ID
     setOpen(false);
   };
 

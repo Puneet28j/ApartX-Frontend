@@ -5,19 +5,32 @@ const WalletTransaction = require("../models/WalletTransaction");
 
 exports.createReceiveCurrency = async (req, res) => {
   try {
-    const { amount, wallet, walletId } = req.body;
+    const { amount, wallet, walletID } = req.body;
 
-    if (!amount || !wallet || !walletId) {
+    if (!amount || !wallet || !walletID) {
       return res
         .status(400)
-        .json({ message: "Amount and wallet are required." });
+        .json({ message: "Amount, wallet, and walletID are required." });
+    }
+
+    // ✅ Fix: Use findOne with proper query and await
+    const walletInfo = await UserWallet.findOne({ walletID: walletID });
+
+    // ✅ Check if wallet exists
+    if (!walletInfo) {
+      return res
+        .status(404)
+        .json({ message: "Wallet not found with the provided walletID." });
     }
 
     const newReceive = new ReceiveCurrency({
-      userId: req.user?._id, // optional if using auth
+      userId: req.user?._id,
       amount,
       wallet,
+      walletID,
+      walletQrImage: walletInfo.qrImage, // ✅ Now this will have the actual value
     });
+
     await newReceive.save();
     res
       .status(201)
@@ -31,7 +44,6 @@ exports.getAllReceiveRequests = async (req, res) => {
   try {
     const receiveRequests = await ReceiveCurrency.find()
       .populate("userId", "name email mobile profilePic")
-      .populate("walletQrImage", "qrImage")
       .sort({ createdAt: -1 });
 
     res.status(200).json({ data: receiveRequests });
@@ -121,6 +133,11 @@ exports.updateReceiveStatus = async (req, res) => {
 
         // Calculate new balance
         const previousBalance = userWallet.balance;
+        if (previousBalance < amount) {
+          return res.status(400).json({
+            message: "Insufficient balance in users account",
+          });
+        }
         userWallet.balance -= amount;
         const newBalance = userWallet.balance;
 

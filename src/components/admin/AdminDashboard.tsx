@@ -72,7 +72,7 @@ const Dashboard = () => {
     updateStatus,
     refresh,
   } = useSendCurrency();
-
+  console.log(sendCurrencyData, "asdsadasdadas");
   useEffect(() => {
     getReceiveCurrencyData();
     GetAllInvestmentsData();
@@ -240,7 +240,6 @@ const Dashboard = () => {
       path.charAt(0).toUpperCase() + path.slice(1)
     );
   };
-  console.log(receiveCurrencydata, "ygydyegdydhawgyuwgd");
   const [activeTab, setActiveTab] = useState(getCurrentTab());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -305,7 +304,6 @@ const Dashboard = () => {
               toast.success("Deposit approved successfully");
               await refresh();
             } catch (error) {
-              console.error("Failed to approve:", error);
               toast.error("Failed to approve deposit");
             }
           },
@@ -350,8 +348,9 @@ const Dashboard = () => {
                   dateTime: new Date(item?.createdAt),
                   status: item.status || "Pending",
                   remarks: item.remark || "",
+                  walletQr: item.walletQrImage,
                   // screenshot: item.screenshot || "",
-                  // walletID: item.walletID || "",
+                  walletID: item.walletID || "",
                 }))
               : [],
           loading: false,
@@ -360,9 +359,9 @@ const Dashboard = () => {
               await updateWithdrawalStatus(id, "Approved", "Deposit approved");
               toast.success("Deposit approved successfully");
               await getReceiveCurrencyData();
-            } catch (error) {
+            } catch (error: any) {
               console.error("Failed to approve:", error);
-              toast.error("Failed to approve deposit");
+              toast.error(error.data.message);
             }
           },
           onReject: async (id) => {

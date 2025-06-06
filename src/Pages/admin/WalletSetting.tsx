@@ -65,14 +65,15 @@ const AddWalletDialog = ({ onWalletAdd }: { onWalletAdd: () => void }) => {
       toast.error("Please wait, submission in progress");
       return;
     }
+    // More flexible validation for text input
+    const normalizedWalletType = formData.walletType.toLowerCase().trim();
     if (
-      formData.walletType !== "binance" &&
-      formData.walletType !== "metamask" &&
-      formData.walletType !== "coinbase" &&
-      formData.walletType !== "trustwallet"
+      !["binance", "metamask", "coinbase", "trustwallet"].includes(
+        normalizedWalletType
+      )
     ) {
       toast.error(
-        "Please select a valid wallet type (binance, metamask, coinbase, trustwallet)"
+        "Please enter a valid wallet type (binance, metamask, coinbase, trustwallet)"
       );
       return;
     }
@@ -86,7 +87,7 @@ const AddWalletDialog = ({ onWalletAdd }: { onWalletAdd: () => void }) => {
 
       const formDataToSend = new FormData();
       formDataToSend.append("walletID", formData.walletID);
-      formDataToSend.append("walletType", formData.walletType);
+      formDataToSend.append("walletType", normalizedWalletType);
       formDataToSend.append("balance", formData.balance);
       if (previewUrl) {
         const response = await fetch(previewUrl);

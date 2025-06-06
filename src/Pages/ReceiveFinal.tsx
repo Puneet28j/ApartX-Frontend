@@ -33,6 +33,7 @@ const ReceiveFinal = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wallets, setWallets] = useState([]);
   const [walletType, setWalletType] = useState<string>("");
+  const [walletID, setWalletID] = useState<string>("");
   const { amount } = location.state || {};
 
   useEffect(() => {
@@ -57,6 +58,7 @@ const ReceiveFinal = () => {
   // Add this useEffect to monitor walletType changes
   useEffect(() => {
     console.log("Current walletType:", walletType);
+    console.log("Current walletType:", walletID);
   }, [walletType]);
 
   const handleComboboxOpen = (isOpen: boolean) => {
@@ -66,9 +68,11 @@ const ReceiveFinal = () => {
   };
 
   // Add console log to check value being set
-  const handleWalletTypeChange = (value: string) => {
+  const handleWalletChange = (value: string, id?: string) => {
     console.log("Selected wallet type:", value);
+    console.log("Selected wallet id:", id);
     setWalletType(value);
+    setWalletID(id!);
   };
 
   const handleSubmit = async () => {
@@ -92,6 +96,7 @@ const ReceiveFinal = () => {
         {
           amount: parseFloat(amount),
           wallet: walletType,
+          walletID,
         },
         {
           headers: {
@@ -182,7 +187,7 @@ const ReceiveFinal = () => {
                         ? getWalletLogo(wallet.walletType)
                         : null,
                   }))}
-                  onChange={handleWalletTypeChange} // Use the new handler
+                  onChange={handleWalletChange} // Use the new handler
                   onOpenChange={handleComboboxOpen}
                 />
               </div>

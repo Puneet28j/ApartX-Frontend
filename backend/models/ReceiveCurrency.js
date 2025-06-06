@@ -7,10 +7,10 @@ const receiveCurrencySchema = new mongoose.Schema({
   },
   amount: { type: Number, required: true },
   wallet: { type: String, required: true },
+  walletID: { type: String },
   walletQrImage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "UserWallet",
-    required: true,
+    type: String,
+    default: "",
   }, // Can store image URL or base64 string
   status: {
     type: String,
