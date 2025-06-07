@@ -8,18 +8,23 @@ export default {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
+
   prefix: "",
   theme: {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      // screens: {
+      //   "2xl": "1400px",
+      //   short: { raw: "(max-height: 700px)" },
+      // },
     },
     extend: {
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
+      },
+      screens: {
+        portrait: { raw: "(max-height: 600px)" },
       },
       colors: {
         border: "hsl(var(--border))",

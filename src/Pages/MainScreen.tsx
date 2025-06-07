@@ -1,11 +1,11 @@
 import Bg from "@/assets/Untitled design (12).png";
 import { BookText, Home, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import USDTLogo from "../assets/usdt logo.svg";
+// import USDTLogo from "../assets/usdt logo.svg";
 import PhoneImage from "../assets/Blue 3D and modern Crypto currency smartphone Poster (1).png";
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+// import { Separator } from "@/components/ui/separator";
 import InvestIcon from "../assets/Invest.svg";
 import Meshgradient from "../assets/mesh-gradient 1.svg";
 import ReceiveDollar from "../assets/Recive Dollar.svg";
@@ -14,6 +14,7 @@ import SendDollar from "../assets/Send Dollar.svg";
 import usdtblack from "../assets/UsdtBlack.svg";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import BannerCarousel from "@/components/CaraouselBanner";
 
 const MainScreen = () => {
   const navigate = useNavigate();
@@ -164,7 +165,7 @@ const MainScreen = () => {
     }
   };
 
-  const currencyConfig = [{ label: "USDT", value: "$ 0.00", icon: USDTLogo }];
+  // const currencyConfig = [{ label: "USDT", value: "$ 0.00", icon: USDTLogo }];
 
   return (
     <div className="w-full h-full relative overflow-hidden bg-[#2D2B2B]">
@@ -180,7 +181,7 @@ const MainScreen = () => {
       {/* === Scrollable Foreground Content === */}
       <div className="relative z-20 h-full overflow-y-auto pb-20 px-4">
         {/* User Greeting */}
-        <div className="flex flex-col items-start gap-2 mb-2 mt-4">
+        <div className="  sm:flex-col sm:items-start portrait:items-center-safe portrait:flex gap-2 mb-2 mt-4">
           {isProfileLoading ? (
             // Loading state for profile picture
             <div className="w-12 h-12 rounded-full bg-gray-300 animate-pulse" />
@@ -217,7 +218,7 @@ const MainScreen = () => {
                 className="h-[20px] fill-black w-[20px]"
               />
               <span className="text-2xl md:text-3xl font-bold mt-2">
-                {isLoading ? "Loading..." : `$ ${walletBalance}`}
+                {isLoading ? "Loading..." : `$ ${walletBalance.toFixed(2)}`}
               </span>
             </div>
             <div className="flex flex-col gap-4">
@@ -273,7 +274,7 @@ const MainScreen = () => {
         </div>
 
         {/* Crypto Balances */}
-        <div className="text-white mb-4">
+        {/* <div className="text-white mb-4">
           <h2 className="text-lg font-semibold mb-3">Crypto Balance</h2>
           <div className="bg-[#111111] rounded-2xl px-4 sm:px-8 p-4 space-y-4">
             {currencyConfig.map((coin, index) => (
@@ -297,23 +298,25 @@ const MainScreen = () => {
               </div>
             ))}
           </div>
+        </div> */}
+        <div className="w-full">
+          <BannerCarousel button={false} />
         </div>
-
         {/* Bottom Text and About Button */}
         <div className="fixed bottom-12 left-0 right-0 z-20 px-4 max-w-lg mx-auto">
           <div className="flex items-center justify-center">
-            {/* Phone Image */}
+            {/* Phone Imagse */}
             <div className="w-auto">
               <img
                 src={PhoneImage}
                 alt="Phone"
-                className="h-[200px] w-[140px] object-contain"
+                className="sm:h-[200px] xl:h-[150px] xl:w-[110px] portrait:h-[150px] portrait:w-[105px]  sm:w-[140px] object-contain"
               />
             </div>
 
             {/* Text and Button Container */}
             <div className="flex flex-col items-start gap-2">
-              <h3 className="text-white text-left text-lg sm:text-2xl leading-tight font-medium">
+              <h3 className="text-white text-left text-lg xl:text-lg xl:leading-5 portrait:text-xl sm:text-2xl portrait:leading-4.5 leading-tight font-medium">
                 Get Detail
                 <br />
                 insight about
@@ -321,7 +324,7 @@ const MainScreen = () => {
               </h3>
               <button
                 onClick={() => navigate("/pdf-viewer")}
-                className="text-white bg-red-600 rounded-full px-3 py-1.5 text-[14px] sm:text-[16px] font-semibold
+                className="text-white bg-red-600 rounded-full px-3 py-1.5 text-[14px] xl:text-[8px] portrait:text-[10px] sm:text-[16px] font-semibold
     hover:bg-red-700 transition-colors duration-200 shadow-lg hover:shadow-xl w-fit"
               >
                 About Apart-X
