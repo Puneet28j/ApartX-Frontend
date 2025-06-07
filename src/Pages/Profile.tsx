@@ -6,7 +6,6 @@ import {
   Home,
   LogOut,
   Mail,
-  Pencil,
   Phone,
   Plus,
   User,
@@ -14,7 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MyWalletsManagement } from "@/components/MyWalletsManagement";
+// import { MyWalletsManagement } from "@/components/MyWalletsManagement";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,

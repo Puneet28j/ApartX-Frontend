@@ -10,7 +10,7 @@ import InvestIcon from "../assets/Invest.svg";
 import Meshgradient from "../assets/mesh-gradient 1.svg";
 import ReceiveDollar from "../assets/Recive Dollar.svg";
 import ReferAndEarn from "../assets/ReferAndEarn.svg";
-import SendDollar from "../assets/Send Dollar.svg";
+// import SendDollar from "../assets/Send Dollar.svg";
 import usdtblack from "../assets/UsdtBlack.svg";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -81,7 +81,7 @@ const MainScreen = () => {
       }
     }
   };
-const [showWalletManager, setShowWalletManager] = useState(false);
+// const [showWalletManager, setShowWalletManager] = useState(false);
   const fetchUserProfile = async () => {
     setIsProfileLoading(true);
     try {

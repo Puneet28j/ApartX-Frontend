@@ -164,7 +164,7 @@ export const MyWalletsManagement = () => {
     }
   };
 
-  const activeWallet = userWallets.find((w) => w.isActive);
+  // const activeWallet = userWallets.find((w) => w.isActive);
 
   return (
     <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
