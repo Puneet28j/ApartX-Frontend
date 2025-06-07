@@ -113,7 +113,7 @@ const InviteAndEarn = () => {
 
         {/* Code Section */}
         <div className="mx-auto py-2 mt-2 w-[200px] h-[40px] text-center bg-[#4C4343] rounded-md flex items-center justify-center px-4">
-          <div className="text-white leading-[32px] text-[28px] font-medium">
+          <div className="text-white leading-[32px] text-[23px] font-medium flex justify-center">
             {referralCode}
           </div>
           <CopyButton textToCopy={referralCode} />
