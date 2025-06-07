@@ -19,54 +19,61 @@ const InviteAndEarn = () => {
 
   useEffect(() => {
     const fetchReferralInfo = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast.error("Please login again");
-          navigate("/login-register");
-          return;
-        }
+  try {
+    const token = localStorage.getItem("token");
+    const BASE_URL = import.meta.env.VITE_URL; // Ensure this is https://apart-x.pro/api
 
-        // Fetch user info
-        const userRes = await fetch(`${import.meta.env.VITE_URL}/me`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+    if (!token) {
+      toast.error("Please login again");
+      navigate("/login-register");
+      return;
+    }
 
-        if (!userRes.ok) {
-          if (userRes.status === 401) {
-            localStorage.removeItem("token");
-            navigate("/login-register");
-            toast.error("Session expired. Please login again.");
-            return;
-          }
-          throw new Error(`User fetch failed`);
-        }
+    // ✅ Fetch user profile
+    const userRes = await fetch(`${BASE_URL}/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
 
-        const userData = await userRes.json();
-        setReferralCode(userData.referralCode || "N/A");
-
-        // Fetch referred users
-        const referredRes = await fetch(`${import.meta.env.VITE_URL}/referrals/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!referredRes.ok) throw new Error("Failed to fetch referred users");
-
-        const referredData = await referredRes.json();
-        setReferredFriends(referredData.referred || []);
-      } catch (error) {
-        console.error("Error fetching referral info:", error);
-        toast.error("Failed to load referral data");
-      } finally {
-        setIsLoading(false);
+    if (!userRes.ok) {
+      if (userRes.status === 401) {
+        localStorage.removeItem("token");
+        toast.error("Session expired. Please login again.");
+        navigate("/login-register");
+        return;
       }
-    };
+      throw new Error(`User fetch failed with status ${userRes.status}`);
+    }
+
+    const userData = await userRes.json();
+    setReferralCode(userData.referralCode || "N/A");
+
+    // ✅ Fetch referred users
+    const referredRes = await fetch(`${BASE_URL}/referrals/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!referredRes.ok) {
+      throw new Error(`Referred users fetch failed with status ${referredRes.status}`);
+    }
+
+    const referredData = await referredRes.json();
+    setReferredFriends(referredData.referred || []);
+  } catch (error) {
+    console.error("❌ Referral Info Fetch Error:", error);
+    toast.error("Failed to load referral data");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
     fetchReferralInfo();
   }, [navigate]);

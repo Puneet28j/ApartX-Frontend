@@ -15,6 +15,7 @@ import usdtblack from "../assets/UsdtBlack.svg";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import BannerCarousel from "@/components/CaraouselBanner";
+import { MyWalletsManagement } from "@/components/MyWalletsManagement";
 
 const MainScreen = () => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const MainScreen = () => {
       }
     }
   };
-
+const [showWalletManager, setShowWalletManager] = useState(false);
   const fetchUserProfile = async () => {
     setIsProfileLoading(true);
     try {
@@ -240,15 +241,9 @@ const MainScreen = () => {
 
         {/* Send / Receive Actions */}
         <div className="bg-[#111111] rounded-2xl py-4 px-4 sm:px-6 flex justify-around items-center mb-6 text-white">
-          <div className="flex flex-col items-center gap-1">
-            <button onClick={() => navigate("/select-wallet-send")}>
-              <img
-                src={SendDollar}
-                alt="Send"
-                className="h-7 w-7 sm:h-8 sm:w-8"
-              />
-              <span className="text-xs sm:text-sm">Send</span>
-            </button>
+          <div className="flex flex-col justify-center items-center gap-1">
+           
+                      <MyWalletsManagement />
           </div>
           <div className="h-6 w-px bg-white opacity-40" />
           <div className="flex flex-col items-center gap-1">

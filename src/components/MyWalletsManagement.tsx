@@ -14,7 +14,7 @@ import Binance from "../assets/binance.svg";
 import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
-
+import SendDollar from "../assets/Send Dollar.svg";
 // Update WalletData interface to match backend model
 interface WalletData {
   id: string;
@@ -170,18 +170,27 @@ export const MyWalletsManagement = () => {
     <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
       <DrawerTrigger asChild>
         <div className="flex items-center justify-center gap-3 cursor-pointer">
-          <div className="bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 rounded-xl shadow-md">
+          <button >
+              <img
+                src={SendDollar}
+                alt="Send"
+                className="h-7 w-7 sm:h-8 sm:w-8"
+              />
+              
+              <span className="text-xs sm:text-sm">Wallet</span>
+            </button>
+          {/* <div className="bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 rounded-xl shadow-md">
             <Wallet className="w-5 h-5 text-white" />
-          </div>
+          </div> */}
           <div className="text-center">
-            <span className="text-sm text-white font-semibold block">
+            {/* <span className="text-sm text-white font-semibold block">
               {activeWallet?.type.toUpperCase() || "No Active Wallet"}
-            </span>
-            <span className="text-sm text-white font-semibold block">
+            </span> */}
+            {/* <span className="text-sm text-white font-semibold block">
               {activeWallet?.address.slice(0, 6)}...
               {activeWallet?.address.slice(-4) || "N/A"}
-            </span>
-            <span className="text-xs text-gray-400">Tap to manage</span>
+            </span> */}
+            {/* <span className="text-xs text-gray-400">Tap to manage</span> */}
           </div>
         </div>
       </DrawerTrigger>

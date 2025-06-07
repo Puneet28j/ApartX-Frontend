@@ -448,6 +448,7 @@ const ProfileScreen: React.FC = () => {
           {/* Name Input */}
           <div className="relative w-full flex justify-center mb-4">
             <input
+            onClick={startEditingName}
               ref={nameInputRef}
               className={`bg-transparent border-b ${isEditingName ? "border-white" : "border-gray-500"
                 } text-center text-3xl font-bold focus:outline-none px-10 pt-3 transition-colors w-full`}
@@ -458,11 +459,7 @@ const ProfileScreen: React.FC = () => {
               }
               onBlur={() => setIsEditingName(false)}
               onKeyDown={(e) => handleKeyDown(e, setIsEditingName)}
-            />
-            <Pencil
-              size={18}
-              className="absolute top-1 right-3 text-gray-300 cursor-pointer hover:text-white transition-colors"
-              onClick={startEditingName}
+              placeholder="Enter Name"
             />
           </div>
         </div>
@@ -485,12 +482,6 @@ const ProfileScreen: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-2 mx-4">
-          <button
-            onClick={() => navigate("/portfolio")}
-            className="w-full border-2 border-[#6552FE] text-[#6552FE] py-3 rounded-full text-center font-bold text-lg"
-          >
-            View Portfolio
-          </button>
 
           {hasChanges && (
             <div className="flex gap-3 mt-4">
@@ -677,8 +668,8 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       </div>
 
       {/* Mobile Section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-center gap-3 mb-3">
+      <div className="mb-0">
+        <div className="flex items-center justify-center gap-3 mb-0">
           <div className="bg-gradient-to-br from-[#10B981] to-[#059669] p-3 rounded-xl shadow-md">
             <Phone className="w-5 h-5 text-white" />
           </div>
@@ -708,23 +699,6 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       </div>
 
       {/* Wallet Section */}
-      <div
-        className="bg-gradient-to-r from-[#262626] to-[#1f1f1f] rounded-xl p-4 border border-gray-600 cursor-pointer hover:bg-[#2a2a2a] transition-colors"
-      // onClick={() => setShowWalletDrawer(true)}
-      >
-        {/* <div className="flex items-center justify-center gap-3">
-          <div className="bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 rounded-xl shadow-md">
-            <Wallet className="w-5 h-5 text-white" />
-          </div>
-          <div className="text-center">
-            <span className="text-sm text-white font-semibold block">
-              Wallet Connected
-            </span>
-            <span className="text-xs text-gray-400">Tap to manage</span>
-          </div>
-        </div> */}
-        <MyWalletsManagement />
-      </div>
     </div>
   );
 };

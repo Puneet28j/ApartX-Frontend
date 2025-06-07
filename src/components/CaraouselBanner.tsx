@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
-// import Image5 from "@/assets/1.jpg";
-// import Image6 from "@/assets/2.jpg";
-// import Image7 from "@/assets/3.jpg";
-// import Image8 from "@/assets/4.jpg";
-import Image1 from "@/assets/1.svg";
-import Image2 from "@/assets/2.svg";
-import Image3 from "@/assets/3.svg";
-import Image4 from "@/assets/4.svg";
+import Image1 from "@/assets/1.jpg";
+import Image2 from "@/assets/2.jpg";
+import Image3 from "@/assets/3.jpg";
+import Image4 from "@/assets/4.jpg";
 
 const BannerCarousel = ({ button = true }: { button?: boolean }) => {
   // Sample banner images - you can replace with your own
