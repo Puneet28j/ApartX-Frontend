@@ -72,7 +72,7 @@ const Dashboard = () => {
     updateStatus,
     refresh,
   } = useSendCurrency();
-  console.log(sendCurrencyData, "asdsadasdadas");
+  // console.log(sendCurrencyData, "asdsadasdadas");
   useEffect(() => {
     getReceiveCurrencyData();
     GetAllInvestmentsData();
@@ -356,8 +356,8 @@ const Dashboard = () => {
           loading: false,
           onApprove: async (id) => {
             try {
-              await updateWithdrawalStatus(id, "Approved", "Deposit approved");
-              toast.success("Deposit approved successfully");
+              await updateWithdrawalStatus(id, "Approved", "Withdrawal approved");
+              toast.success("Withdrawal approved successfully");
               await getReceiveCurrencyData();
             } catch (error: any) {
               console.error("Failed to approve:", error);
@@ -369,13 +369,13 @@ const Dashboard = () => {
               await updateWithdrawalStatus(
                 id,
                 "Disapproved",
-                "Deposit rejected"
+                "Withdrawal rejected"
               );
-              toast.success("Deposit rejected successfully");
+              toast.success("Withdrawal rejected successfully");
               await getReceiveCurrencyData();
             } catch (error) {
               console.error("Failed to reject:", error);
-              toast.error("Failed to reject deposit");
+              toast.error("Failed to reject Withdrawal");
             }
           },
           updateRemarks: async (id, remarks) => {

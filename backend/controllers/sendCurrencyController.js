@@ -122,13 +122,12 @@ exports.updateSendStatus = async (req, res) => {
         });
 
         if (!userWallet) {
-          userWallet = new UserWallet({
-            userId: depositRequest.userId,
-            walletType: normalizedWalletType,
-            walletID: depositRequest.walletID,
-            balance: 0,
-          });
-        }
+  return res.status(400).json({
+    message: `Wallet of type '${normalizedWalletType}' does not exist for this user.`,
+    error: "User wallet not found. Please create the wallet manually before approving deposit.",
+  });
+}
+
 
         // Update wallet balance - ensure amount is a number
         const amount = parseFloat(depositRequest.amount);

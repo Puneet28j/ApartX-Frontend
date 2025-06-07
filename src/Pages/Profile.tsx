@@ -418,9 +418,9 @@ const ProfileScreen: React.FC = () => {
                     });
                     setPreview("");
                   }}
-                  onLoad={() =>
-                    console.log("Image loaded successfully:", preview)
-                  }
+                // onLoad={() =>
+                //   console.log("Image loaded successfully:", preview)
+                // }
                 />
               ) : (
                 <User className="w-[143px] h-[143px] text-white" />
@@ -449,9 +449,8 @@ const ProfileScreen: React.FC = () => {
           <div className="relative w-full flex justify-center mb-4">
             <input
               ref={nameInputRef}
-              className={`bg-transparent border-b ${
-                isEditingName ? "border-white" : "border-gray-500"
-              } text-center text-3xl font-bold focus:outline-none px-10 pt-3 transition-colors w-full`}
+              className={`bg-transparent border-b ${isEditingName ? "border-white" : "border-gray-500"
+                } text-center text-3xl font-bold focus:outline-none px-10 pt-3 transition-colors w-full`}
               value={name}
               readOnly={!isEditingName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -492,21 +491,14 @@ const ProfileScreen: React.FC = () => {
           >
             View Portfolio
           </button>
-          <button
-            onClick={() => navigate("/invite-and-earn")}
-            className="w-full border-2 border-[#6552FE] text-[#FEF052] py-3 rounded-full text-center font-bold text-lg"
-          >
-            Invite & Earn
-          </button>
 
           {hasChanges && (
             <div className="flex gap-3 mt-4">
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`flex-1 bg-[#6552FE] text-white py-2.5 rounded-full text-center font-medium text-base flex items-center justify-center gap-2 ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`flex-1 bg-[#6552FE] text-white py-2.5 rounded-full text-center font-medium text-base flex items-center justify-center gap-2 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 {isSubmitting ? (
                   <>
@@ -553,10 +545,10 @@ const ProfileScreen: React.FC = () => {
                       wallet.type === "binance"
                         ? Binance
                         : wallet.type === "metamask"
-                        ? MetaMask
-                        : wallet.type === "coinbase"
-                        ? CoinBase
-                        : TrustWallet
+                          ? MetaMask
+                          : wallet.type === "coinbase"
+                            ? CoinBase
+                            : TrustWallet
                     }
                     alt={wallet.type}
                     className="w-10 h-10"
@@ -568,11 +560,10 @@ const ProfileScreen: React.FC = () => {
                 </div>
                 <button
                   // onClick={() => handleSetDefault(wallet.type)}
-                  className={`px-4 py-2 rounded-full text-sm ${
-                    wallet.isDefault
+                  className={`px-4 py-2 rounded-full text-sm ${wallet.isDefault
                       ? "bg-[#6552FE] text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                    }`}
                 >
                   {wallet.isDefault ? "Default" : "Set as Default"}
                 </button>
@@ -657,82 +648,69 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     <div className="bg-gradient-to-r from-[#333] to-[#444] rounded-2xl p-4 mx-2 mb-8 shadow-lg">
       {/* Email Section */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center justify-center gap-3 mb-3">
           <div className="bg-gradient-to-br from-[#6552FE] to-[#8B5CF6] p-3 rounded-xl shadow-md">
             <Mail className="w-5 h-5 text-white" />
           </div>
           <span className="text-sm text-white font-semibold">
-            Email Address
+            <input
+              ref={emailInputRef}
+              onClick={startEditingEmail}
+              type="email"
+              className={`w-full bg-[#222] border-2 ${isEditingEmail
+                  ? "border-[#6552FE] shadow-lg shadow-[#6552FE]/20"
+                  : "border-gray-600"
+                } rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all duration-300 pr-10`}
+              value={email}
+              readOnly={!isEditingEmail}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
+              onBlur={() => setIsEditingEmail(false)}
+              onKeyDown={(e) => handleKeyDown(e, setIsEditingEmail)}
+              placeholder="Enter email address"
+            />
           </span>
         </div>
         <div className="relative">
-          <input
-            ref={emailInputRef}
-            type="email"
-            className={`w-full bg-[#222] border-2 ${
-              isEditingEmail
-                ? "border-[#6552FE] shadow-lg shadow-[#6552FE]/20"
-                : "border-gray-600"
-            } rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all duration-300 pr-10`}
-            value={email}
-            readOnly={!isEditingEmail}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setEmail(e.target.value)
-            }
-            onBlur={() => setIsEditingEmail(false)}
-            onKeyDown={(e) => handleKeyDown(e, setIsEditingEmail)}
-            placeholder="Enter email address"
-          />
-          <button
-            onClick={startEditingEmail}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#6552FE] transition-colors duration-200 p-1 rounded-md hover:bg-gray-700"
-          >
-            <Pencil size={16} />
-          </button>
         </div>
       </div>
 
       {/* Mobile Section */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center justify-center gap-3 mb-3">
           <div className="bg-gradient-to-br from-[#10B981] to-[#059669] p-3 rounded-xl shadow-md">
             <Phone className="w-5 h-5 text-white" />
           </div>
           <span className="text-sm text-white font-semibold">
-            Mobile Number
+            <input
+              ref={mobileInputRef}
+              onClick={startEditingMobile}
+              type="tel"
+              className={`w-full bg-[#222] border-2 ${isEditingMobile
+                  ? "border-[#10B981] shadow-lg shadow-[#10B981]/20"
+                  : "border-gray-600"
+                } rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all duration-300 pr-10`}
+              value={mobile}
+              readOnly={!isEditingMobile}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setMobile(e.target.value)
+              }
+              onBlur={() => setIsEditingMobile(false)}
+              onKeyDown={(e) => handleKeyDown(e, setIsEditingMobile)}
+              placeholder="Enter mobile number"
+            />
           </span>
         </div>
         <div className="relative">
-          <input
-            ref={mobileInputRef}
-            type="tel"
-            className={`w-full bg-[#222] border-2 ${
-              isEditingMobile
-                ? "border-[#10B981] shadow-lg shadow-[#10B981]/20"
-                : "border-gray-600"
-            } rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all duration-300 pr-10`}
-            value={mobile}
-            readOnly={!isEditingMobile}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setMobile(e.target.value)
-            }
-            onBlur={() => setIsEditingMobile(false)}
-            onKeyDown={(e) => handleKeyDown(e, setIsEditingMobile)}
-            placeholder="Enter mobile number"
-          />
-          <button
-            onClick={startEditingMobile}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#10B981] transition-colors duration-200 p-1 rounded-md hover:bg-gray-700"
-          >
-            <Pencil size={16} />
-          </button>
+
         </div>
       </div>
 
       {/* Wallet Section */}
       <div
         className="bg-gradient-to-r from-[#262626] to-[#1f1f1f] rounded-xl p-4 border border-gray-600 cursor-pointer hover:bg-[#2a2a2a] transition-colors"
-        // onClick={() => setShowWalletDrawer(true)}
+      // onClick={() => setShowWalletDrawer(true)}
       >
         {/* <div className="flex items-center justify-center gap-3">
           <div className="bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 rounded-xl shadow-md">

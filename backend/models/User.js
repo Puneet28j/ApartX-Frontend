@@ -38,6 +38,8 @@ otpExpiry: { type: Date },
   },
   mpin: String,
   deviceId: String, // for device-specific MPIN
-});
+}
+,
+  { timestamps: true } );
 
 module.exports = mongoose.model("User", userSchema);

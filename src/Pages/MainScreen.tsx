@@ -252,12 +252,12 @@ const MainScreen = () => {
           <div className="h-6 w-px bg-white opacity-40" />
           <div className="flex flex-col items-center gap-1">
             <img
-              onClick={() => navigate("/select-wallet-receive")}
+              onClick={() => navigate("/portfolio")}
               src={ReceiveDollar}
               alt="Receive"
               className="h-7 w-7 sm:h-8 sm:w-8"
             />
-            <span className="text-xs sm:text-sm">Receive</span>
+            <span className="text-xs sm:text-sm">View Portfolio</span>
           </div>
           <div className="h-6 w-px bg-white opacity-40" />
           <div className="flex flex-col items-center gap-1">

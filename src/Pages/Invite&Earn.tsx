@@ -5,19 +5,20 @@ import CopyButton from "../components/CopyButton";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-const referredFriends = Array(5).fill({
-  mobile: "9456789658",
-  name: "Demo name",
-  date: "05-May-2025",
-});
+type ReferredFriend = {
+  mobile: string;
+  name: string;
+  joinedAt: string | null;
+};
 
 const InviteAndEarn = () => {
   const navigate = useNavigate();
   const [referralCode, setReferralCode] = useState("");
+  const [referredFriends, setReferredFriends] = useState<ReferredFriend[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReferralCode = async () => {
+    const fetchReferralInfo = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -26,58 +27,68 @@ const InviteAndEarn = () => {
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_URL}/me`, {
+        // Fetch user info
+        const userRes = await fetch(`${import.meta.env.VITE_URL}/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-            Accept: "application/json",
           },
-          credentials: "include",
         });
 
-        if (!response.ok) {
-          if (response.status === 401) {
+        if (!userRes.ok) {
+          if (userRes.status === 401) {
             localStorage.removeItem("token");
             navigate("/login-register");
             toast.error("Session expired. Please login again.");
             return;
           }
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`User fetch failed`);
         }
-        const data = await response.json();
-        setReferralCode(data.referralCode || "N/A");
+
+        const userData = await userRes.json();
+        setReferralCode(userData.referralCode || "N/A");
+
+        // Fetch referred users
+        const referredRes = await fetch(`${import.meta.env.VITE_URL}/referrals/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!referredRes.ok) throw new Error("Failed to fetch referred users");
+
+        const referredData = await referredRes.json();
+        setReferredFriends(referredData.referred || []);
       } catch (error) {
-        console.error("Error fetching referral code:", error);
+        console.error("Error fetching referral info:", error);
+        toast.error("Failed to load referral data");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchReferralCode();
-  }, []);
-  console.log("Referral Code:", referralCode);
-  // Method 1: Get current domain dynamically
+    fetchReferralInfo();
+  }, [navigate]);
+
   const getCurrentDomain = () => {
-    const protocol = window.location.protocol; // http: or https:
-    const hostname = window.location.hostname; // domain name
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
     const port = window.location.port ? `:${window.location.port}` : "";
     return `${protocol}//${hostname}${port}`;
   };
 
   const referralLink = `${getCurrentDomain()}/register?ref=${referralCode}`;
+
   if (isLoading) {
     return <div className="text-white text-center mt-4">Loading...</div>;
   }
 
   return (
     <div className="relative flex flex-col h-screen max-h-screen bg-black text-white overflow-hidden">
-      {/* Top Section (Fixed Height) */}
+      {/* Top Section */}
       <div className="shrink-0">
-        {/* Gradient Overlay */}
         <div className="absolute h-[180px] inset-x-0 top-0 bg-gradient-to-b from-[#6552FE] via-[#683594] to-[#6B1111] opacity-90 z-10" />
-
-        {/* Top Bar */}
         <div className="relative z-20 pt-6 pl-4">
           <button
             onClick={() => navigate(-1)}
@@ -87,19 +98,13 @@ const InviteAndEarn = () => {
           </button>
         </div>
 
-        {/* Title Row */}
         <div className="flex justify-around items-center mt-[40px] relative z-10">
           <div className="text-[26px] font-racing leading-[100%]">
             Invite & Earn
           </div>
-          <img
-            src={inviteearn}
-            className="h-[100px] sm:h-[146px] w-auto"
-            alt=""
-          />
+          <img src={inviteearn} className="h-[100px] sm:h-[146px] w-auto" alt="" />
         </div>
 
-        {/* Subtitle */}
         <div className="text-center my-3 text-xl font-bold z-10">
           <span className="text-white">Apart-</span>
           <span className="text-[#6552FE] font-bold">X</span>
@@ -107,28 +112,27 @@ const InviteAndEarn = () => {
         </div>
 
         <div className="text-[14px] mx-auto max-w-[380px] p-3 text-center">
-          Invite & Earn upto 6% extra income bonus on deposit by your friend as
-          a reward. Be your own boss!
+          Invite & Earn up to 6% extra income bonus on deposit by your friend as a reward. Be your own boss!
         </div>
 
-        {/* Code Section */}
+        {/* Referral Code */}
         <div className="mx-auto py-2 mt-2 w-[200px] h-[40px] text-center bg-[#4C4343] rounded-md flex items-center justify-center px-4">
-          <div className="text-white leading-[32px] text-[23px] font-medium flex justify-center">
+          <div className="text-white leading-[32px] flex justify-center text-[23px] font-medium">
             {referralCode}
           </div>
           <CopyButton textToCopy={referralCode} />
         </div>
 
-        {/* Share Link */}
+        {/* Referral Link */}
         <div className="ml-1 mt-2 flex items-center space-x-2 px-3">
-          <div className="w-[90%] h-10 px-1 flex items-center text-[14px] text-black bg-white rounded-md">
+          <div className="w-[90%] h-10 justify-center px-1 flex items-center text-[14px] text-black bg-white rounded-md overflow-x-auto">
             {referralLink}
           </div>
           <CopyButton textToCopy={referralLink} />
         </div>
       </div>
 
-      {/* Scrollable Table Section */}
+      {/* Referred Friends Table */}
       <div className="flex-1 overflow-y-auto mt-4 mb-4 px-4">
         <div className="text-sm mb-2">Referred Friends</div>
         <div className="rounded-md overflow-hidden">
@@ -137,18 +141,34 @@ const InviteAndEarn = () => {
             <div>Profile Name</div>
             <div>Date to Join</div>
           </div>
-          {referredFriends.map((friend, idx) => (
-            <div
-              key={idx}
-              className={`grid grid-cols-3 text-center py-2 text-sm border-t border-gray-700 ${
-                idx % 2 === 0 ? "bg-[#4c4343]" : "bg-[#716666]"
-              }`}
-            >
-              <div>{friend.mobile}</div>
-              <div>{friend.name}</div>
-              <div>{friend.date}</div>
+          {referredFriends.length > 0 ? (
+            referredFriends.map((friend, idx) => (
+              <div
+                key={idx}
+                className={`grid grid-cols-3 text-center py-2 text-sm border-t border-gray-700 ${
+                  idx % 2 === 0 ? "bg-[#4c4343]" : "bg-[#716666]"
+                }`}
+              >
+                <div>{friend.mobile}</div>
+                <div>{friend.name || "N/A"}</div>
+                <div>
+                {friend.joinedAt
+  ? new Date(friend.joinedAt).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+  : "—"}
+
+
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-4 text-sm text-gray-400">
+              No referrals yet.
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
