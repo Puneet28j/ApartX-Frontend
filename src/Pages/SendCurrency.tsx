@@ -358,7 +358,7 @@ const SendCurrency = () => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col">
                 <label className="text-white font-medium text-sm">
-                  Wallet ID
+                  Wallet ID Token Type BEP-20
                 </label>
                 <input
                   value={walletID}

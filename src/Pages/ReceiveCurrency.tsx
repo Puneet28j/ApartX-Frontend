@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import USDTLOGO from "../assets/usdt logo.svg";
+import { ArrowLeft } from "lucide-react";
 
 const ReceiveCurrency = () => {
   const navigate = useNavigate();
@@ -54,6 +55,12 @@ const ReceiveCurrency = () => {
     fetchUserData();
   }, [navigate]);
 
+  const backnavigation = () => {
+    {
+      navigate(-1);
+    }
+  };
+
   const handleContinue = () => {
     if (!amount || parseFloat(amount) <= 0) {
       toast.error("Please enter a valid amount");
@@ -77,6 +84,17 @@ const ReceiveCurrency = () => {
         <div>Loading...</div>
       ) : (
         <>
+        
+          {" "}
+          <div className="flex flex-col gap-1 mb-3">
+            <button
+              onClick={backnavigation}
+              className="flex items-center gap-2 text-white text-sm"
+            >
+              <ArrowLeft size={20} className="h-8 w-8 m-1 text-white" />
+            </button>
+            <div className="border-t border-white border-4 w-full" />
+          </div>
           {/* Content */}
           <div className="flex flex-col gap-6 w-full flex-grow">
             {/* Header */}

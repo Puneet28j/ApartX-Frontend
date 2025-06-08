@@ -167,7 +167,7 @@ const AddWalletDialog = ({ onWalletAdd }: { onWalletAdd: () => void }) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="walletID">Wallet Address</Label>
+            <Label htmlFor="walletID">Wallet ID Token Type BEP-20</Label>
             <Input
               id="walletID"
               value={formData.walletID}
@@ -353,9 +353,9 @@ export const WalletSetting = () => {
                       <h3 className="font-medium text-base text-gray-600">
                         {wallet.walletType}
                       </h3>
-                      <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
+                      {/* <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
                         ${wallet.balance.toLocaleString()}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </div>
@@ -364,7 +364,7 @@ export const WalletSetting = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
                     <div className="space-y-1">
-                      <span className="text-sm text-gray-500">Wallet ID</span>
+                      <span className="text-sm text-gray-500">Wallet ID Token Type BEP-20</span>
                       <div className="flex items-center gap-2 bg-white p-2 rounded border border-gray-100">
                         <span className="text-sm font-medium truncate">
                           {wallet.walletID}
