@@ -64,6 +64,19 @@ exports.getUserWallets = async (req, res) => {
       .json({ message: "Error fetching wallets", error: err.message });
   }
 };
+exports.getUserActiveWallet = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const wallet = await UserWallet.find({ userId: userId, isActive: true });
+    res.status(200).json({ wallet });
+    console.log("User active wallet fetched successfully", wallet);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching user active wallet",
+      error: err.message,
+    });
+  }
+};
 
 exports.updateWallet = async (req, res) => {
   try {
@@ -125,7 +138,6 @@ exports.toggleWalletStatus = async (req, res) => {
     });
   }
 };
-
 
 exports.updateWalletBalance = async (req, res) => {
   try {

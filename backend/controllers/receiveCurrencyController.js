@@ -135,7 +135,7 @@ exports.updateReceiveStatus = async (req, res) => {
         const previousBalance = userWallet.balance;
         if (previousBalance < amount) {
           return res.status(400).json({
-            message: "Insufficient balance in users account",
+            message: `Insufficient balance in users ${normalizedWalletType}  account`,
           });
         }
         userWallet.balance -= amount;
