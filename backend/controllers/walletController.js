@@ -13,16 +13,16 @@ exports.addWallet = async (req, res) => {
     }
 
     // ✅ Check if a wallet of this type already exists for the user
-    const existingWallet = await UserWallet.findOne({
-      userId,
-      walletType,
-    });
+    // const existingWallet = await UserWallet.findOne({
+    //   userId,
+    //   walletType,
+    // });
 
-    if (existingWallet) {
-      return res.status(409).json({
-        message: `You already have a ${walletType} wallet`,
-      });
-    }
+    // if (existingWallet) {
+    //   return res.status(409).json({
+    //     message: `You already have a ${walletType} wallet`,
+    //   });
+    // }
 
     if (
       !["binance", "metamask", "coinbase", "trustwallet"].includes(walletType)
@@ -95,26 +95,37 @@ exports.updateWallet = async (req, res) => {
 exports.toggleWalletStatus = async (req, res) => {
   try {
     const { walletId } = req.params;
+    const userId = req.user._id;
 
-    const wallet = await UserWallet.findOne({
+    const walletToActivate = await UserWallet.findOne({
       _id: walletId,
-      userId: req.user._id,
+      userId,
     });
 
-    if (!wallet) {
+    if (!walletToActivate) {
       return res.status(404).json({ message: "Wallet not found" });
     }
 
-    wallet.isActive = !wallet.isActive;
-    await wallet.save();
+    // If toggling to active, make others inactive
+    if (!walletToActivate.isActive) {
+      await UserWallet.updateMany({ userId }, { isActive: false });
+    }
 
-    res.status(200).json({ message: "Wallet status toggled", wallet });
+    walletToActivate.isActive = !walletToActivate.isActive;
+    await walletToActivate.save();
+
+    res.status(200).json({
+      message: "Wallet status toggled",
+      wallet: walletToActivate,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error toggling wallet status", error: err.message });
+    res.status(500).json({
+      message: "Error toggling wallet status",
+      error: err.message,
+    });
   }
 };
+
 
 exports.updateWalletBalance = async (req, res) => {
   try {

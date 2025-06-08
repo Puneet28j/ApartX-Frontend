@@ -26,6 +26,14 @@ type AdminWallet = {
   adminName: string;
 };
 
+type UserWallet = {
+  walletType: string;
+  isActive: boolean;
+  walletID: string;
+  balance: number;
+};
+
+
 const SendCurrency = () => {
   const navigate = useNavigate();
   const [selectedWallet, setSelectedWallet] = useState("");
@@ -37,7 +45,7 @@ const SendCurrency = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [adminWallets, setAdminWallets] = useState<AdminWallet[]>([]);
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<{ wallets: UserWallet[]; name?: string; profilePic?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingWallets, setIsLoadingWallets] = useState(false);
   // Fetch user data
@@ -133,6 +141,7 @@ const SendCurrency = () => {
     const formData = new FormData();
     formData.append("amount", amount);
 
+    
     // Get the wallet TYPE (label) instead of wallet ID
     const walletType =
       adminWallets.find((w) => w.value === selectedWallet)?.label || "";
@@ -140,6 +149,8 @@ const SendCurrency = () => {
 
     formData.append("walletID", walletID);
 
+
+    
     if (screenshot) {
       formData.append("screenshot", screenshot);
     }
