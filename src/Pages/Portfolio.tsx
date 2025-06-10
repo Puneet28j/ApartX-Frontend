@@ -9,7 +9,7 @@ import ReferAndEarn from "../assets/ReferAndEarn.svg";
 const Portfolio = () => {
   const navigate = useNavigate();
   const [portfolioData, setPortfolioData] = useState<PortfolioData[]>([]);
-  const [totalWallet, setTotalWallet] = useState<number>(0);
+  // const [totalWallet, setTotalWallet] = useState<number>(0);
 
   useEffect(() => {
     const fetchInvestments = async () => {
@@ -35,8 +35,6 @@ const Portfolio = () => {
 
         setPortfolioData(formattedData);
 
-        const total = formattedData.reduce((sum: number, item: PortfolioData) => sum + item.amount, 0);
-        setTotalWallet(total);
       } catch (error) {
         console.error("Failed to fetch portfolio data:", error);
       }

@@ -57,8 +57,7 @@ const MainScreen = () => {
     const data = await response.json();
     setWalletBalance(data.totalBalance || 0);
   } catch (error) {
-    toast.error("Failed to load wallet balance");
-    if (error.message === "401") {
+    toast.error("Failed to load wallet balance"); {
       localStorage.removeItem("token");
       navigate("/login-register");
     }
