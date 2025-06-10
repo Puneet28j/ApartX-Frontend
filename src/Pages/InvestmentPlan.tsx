@@ -32,20 +32,28 @@ const InvestmentPlan = () => {
     fetchPlans();
   }, []);
 
-  const fetchPlans = async () => {
-    try {
-      const plans = await investmentService.fetchPlans();
-      setPlans(plans.filter((plan: Plan) => plan.isActive));
-      if (plans.length > 0) {
-        setSelectedPlan(plans[0]);
-        setAmount(plans[0].minAmount);
-      }
-      setLoading(false);
-    } catch (error: any) {
-      toast.error("Failed to fetch investment plans");
-      setLoading(false);
+const fetchPlans = async () => {
+  try {
+    const plans = await investmentService.fetchPlans();
+
+    // ✅ Only active plans
+    const activePlans = plans.filter((plan: Plan) => plan.isActive);
+
+    setPlans(activePlans);
+
+    // ✅ Set default selected only from active plans
+    if (activePlans.length > 0) {
+      setSelectedPlan(activePlans[0]);
+      setAmount(activePlans[0].minAmount);
     }
-  };
+
+    setLoading(false);
+  } catch (error: any) {
+    toast.error("Failed to fetch investment plans");
+    setLoading(false);
+  }
+};
+
 
   const validateAmount = (
     value: number,

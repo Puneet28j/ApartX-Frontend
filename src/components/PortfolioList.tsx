@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
-export interface PortfolioData {
+export type PortfolioData = {
   id: string;
   plan: string;
   date: string;
-  amount: number;
-}
+  amount: number; // this is currentAmount
+  roi: number;
+  investedAmount: number;
+};
+
 
 const PortfolioList = ({
   portfolioData,
@@ -30,10 +33,18 @@ const PortfolioList = ({
       {portfolioData.map((item) => (
         <div
           key={item.id}
-          className="grid grid-cols-4 items-center px-4 py-3 bg-gray-900 rounded-lg"
+          className="grid grid-cols-6 items-center px-4 py-3 bg-gray-900 rounded-lg"
         >
           <div className="text-sm">{item.plan}</div>
+          <div className="text-sm text-center">{item.roi}%</div>
           <div className="text-sm text-center">{item.date}</div>
+          <div
+            className={`text-sm text-right ${
+              item.investedAmount >= 0 ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {item.investedAmount.toLocaleString()}
+          </div>
           <div
             className={`text-sm text-right ${
               item.amount >= 0 ? "text-green-500" : "text-red-500"

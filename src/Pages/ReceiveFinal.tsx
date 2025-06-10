@@ -31,7 +31,7 @@ const ReceiveFinal = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [wallets, setWallets] = useState([]);
+  const [wallets, setWallets] = useState<any[]>([]); // ✅ Ensures it's never undefined
   const [walletType, setWalletType] = useState<string>("");
   const [walletID, setWalletID] = useState<string>("");
   const { amount } = location.state || {};
@@ -69,11 +69,10 @@ const ReceiveFinal = () => {
 
   // Add console log to check value being set
   const handleWalletChange = (value: string, id?: string) => {
-    console.log("Selected wallet type:", value);
-    console.log("Selected wallet id:", id);
-    setWalletType(value);
-    setWalletID(id!);
-  };
+  setWalletType(value);
+  setWalletID(id || ""); // fallback
+};
+
 
   const handleSubmit = async () => {
     try {
@@ -90,6 +89,11 @@ const ReceiveFinal = () => {
         toast.error("Please select a wallet and enter amount");
         return;
       }
+console.log("💥 Sending to API:", {
+  amount: parseFloat(amount),
+  wallet: walletType,
+  walletID,
+});
 
       const response = await axios.post(
         `${import.meta.env.VITE_URL}/receive`,
@@ -171,25 +175,23 @@ const ReceiveFinal = () => {
               <div className="mt-4 w-full flex flex-col justify-center">
                 <div className="text-white text-center">Select wallet</div>
                 <Combobox
-                  placeholder="Enter Wallet"
-                  wallets={wallets.map((wallet: any) => ({
-                    value: wallet.walletType, // Add explicit value property
-                    ...(typeof wallet === "object" && wallet !== null
-                      ? wallet
-                      : {}),
-                    label:
-                      wallet && wallet.walletType
-                        ? wallet.walletType.charAt(0).toUpperCase() +
-                          wallet.walletType.slice(1)
-                        : "",
-                    icon:
-                      wallet && wallet.walletType
-                        ? getWalletLogo(wallet.walletType)
-                        : null,
-                  }))}
-                  onChange={handleWalletChange} // Use the new handler
-                  onOpenChange={handleComboboxOpen}
-                />
+  placeholder="Enter Wallet"
+  wallets={
+    Array.isArray(wallets)
+      ? wallets.map((wallet: any) => ({
+          value: wallet.walletType,
+          walletID: wallet._id, // ✅ FIXED: Must be walletID (not id)
+          label:
+            wallet.walletType?.charAt(0).toUpperCase() +
+            wallet.walletType.slice(1),
+          icon: wallet.walletType ? getWalletLogo(wallet.walletType) : null,
+        }))
+      : []
+  }
+  onChange={handleWalletChange}
+  onOpenChange={handleComboboxOpen}
+/>
+
               </div>
             </div>
           </div>

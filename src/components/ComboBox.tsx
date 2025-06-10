@@ -8,12 +8,13 @@ interface ComboboxProps {
   wallets: {
     value: string;
     label: string;
-    icon: string;
+    icon: string | null; // ✅ changed from `string` to `string | null`
     walletID?: string;
   }[];
   onChange?: (value: string, id: string) => void;
   onOpenChange?: (isOpen: boolean) => void;
 }
+
 
 const Combobox: React.FC<ComboboxProps> = ({
   placeholder,
@@ -52,14 +53,15 @@ const Combobox: React.FC<ComboboxProps> = ({
     };
   }, []);
 
-  const handleSelect = (wallet: (typeof wallets)[0]) => {
-    const newValue = wallet.value === value ? "" : wallet.value;
-    const newId = wallet.walletID === ID ? "" : wallet.walletID;
-    setValue(newValue);
-    setID(newId!);
-    onChange?.(newValue, newId!); // ✅ Use newId instead of ID
-    setOpen(false);
-  };
+const handleSelect = (wallet: (typeof wallets)[0]) => {
+  const newValue = wallet.value === value ? "" : wallet.value;
+  const newId = wallet.walletID === ID ? "" : wallet.walletID;
+  setValue(newValue);
+  setID(newId!);
+  onChange?.(wallet.value, wallet.walletID || ""); // ✅ Fixed here
+  setOpen(false);
+};
+
 
   return (
     <div className="flex justify-center w-full" ref={dropdownRef}>
@@ -75,7 +77,7 @@ const Combobox: React.FC<ComboboxProps> = ({
           {selectedWallet ? (
             <div className="flex items-center gap-2 flex-1 justify-center">
               <img
-                src={selectedWallet.icon}
+                src={selectedWallet.icon ?? undefined}
                 alt=""
                 className="h-[55px] w-[55px]"
               />
@@ -111,10 +113,11 @@ const Combobox: React.FC<ComboboxProps> = ({
                   className="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] cursor-pointer text-white hover:text-black transition-colors"
                 >
                   <img
-                    src={wallet.icon}
-                    alt={wallet.label}
-                    className="h-8 w-8 flex-shrink-0"
-                  />
+  src={wallet.icon ?? undefined} // ✅ safely fallback to undefined
+  alt={wallet.label}
+  className="h-8 w-8 flex-shrink-0"
+/>
+
                   <span className="text-md font-medium flex-1">
                     {wallet.label.toLocaleUpperCase()}
                   </span>

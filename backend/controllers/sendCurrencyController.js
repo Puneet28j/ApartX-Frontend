@@ -5,6 +5,9 @@ const ReferralTree = require("../models/ReferralTree");
 const { logTransaction } = require("../utils/transactionLogger");
 const WalletTransaction = require("../models/WalletTransaction");
 
+const VirtualWallet = require("../models/VirtualWallet");
+const { credit } = require("../services/walletService");
+
 exports.createSendCurrency = async (req, res) => {
   try {
     const {
@@ -14,66 +17,38 @@ exports.createSendCurrency = async (req, res) => {
       userActiveWalletID,
       userActiveWalletType,
     } = req.body;
-    const screenshotFile = req.file;
 
-    // Validate required fields
+    const screenshotFile = req.file;
+    const userId = req.user?._id;
+
+    // Required fields check
     if (
       !amount ||
       !wallet ||
       !walletID ||
       !screenshotFile ||
       !userActiveWalletID ||
-      !userActiveWalletID
+      !userActiveWalletType
     ) {
       return res
         .status(400)
         .json({ message: "All fields including screenshot are required." });
     }
-    const userId = req.user?._id;
-    console.log(userActiveWalletID, userActiveWalletID);
-    const userWallet = await UserWallet.findOne({
-      userId,
-      walletType: userActiveWalletType.toLowerCase().trim(),
-      walletID: userActiveWalletID,
-      isActive: true,
-    });
-    console.log("Looking for active user wallet with:", {
-      userId,
-      walletType: userActiveWalletType.toLowerCase().trim(),
-      walletID: userActiveWalletID,
-    });
 
-    if (!userWallet) {
-      console.log("No wallet found for:", {
-        userId,
-        wallet: userActiveWalletID,
-        walletType: userActiveWalletType.toLowerCase().trim(),
-      });
-      return res.status(400).json({
-        message:
-          "No active wallet found. Please create or activate a wallet before sending currency.",
-      });
-    }
+    // ✅ Check admin wallet only
     const adminActiveWallet = await UserWallet.findOne({
       walletType: wallet.toLowerCase().trim(),
       walletID: walletID,
       isActive: true,
     });
-    console.log("Looking for active admin wallet with:", {
-      walletType: wallet.toLowerCase().trim(),
-      walletID,
-    });
 
     if (!adminActiveWallet) {
-      console.log("No wallet found for:", {
-        wallet,
-        walletType,
-      });
       return res.status(400).json({
-        message: `No admin active wallet found with this ${walletID} and ${wallet}.`,
+        message: `No admin active wallet found with ${walletID} and ${wallet}.`,
       });
     }
-    // ✅ 2. Check for existing pending request for same wallet type + ID
+
+    // ✅ Check for duplicate pending request
     const existingPending = await SendCurrency.findOne({
       userId,
       wallet: wallet.toLowerCase(),
@@ -88,7 +63,7 @@ exports.createSendCurrency = async (req, res) => {
       });
     }
 
-    // ✅ 3. Create send request if validations pass
+    // ✅ Save the request (screenshot already validated)
     const newSend = new SendCurrency({
       userId,
       amount,
@@ -109,6 +84,7 @@ exports.createSendCurrency = async (req, res) => {
     res.status(500).json({ message: "Error", error: err.message });
   }
 };
+
 
 exports.getAllSendRequests = async (req, res) => {
   try {
@@ -154,71 +130,59 @@ exports.updateSendStatus = async (req, res) => {
 
     const user = await User.findById(depositRequest.userId);
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid user in this request",
-        details: "Associated user account not found",
-      });
+      return res.status(400).json({ message: "Associated user not found" });
     }
 
     depositRequest.status = status;
     if (remark) depositRequest.remark = remark;
 
     if (status === "Approved") {
-      try {
-        const normalizedWalletType = depositRequest.wallet.toLowerCase();
+      const amount = parseFloat(depositRequest.amount);
+      if (isNaN(amount)) throw new Error("Invalid amount value");
 
-        if (
-          !["trustwallet", "binance", "metamask", "coinbase"].includes(
-            normalizedWalletType
-          )
-        ) {
-          return res.status(400).json({
-            message: "Invalid wallet type",
-            details:
-              "Supported wallets: trustwallet, binance, metamask, coinbase",
-          });
+      // ✅ Step 1: Credit to Virtual Wallet
+      let virtualWallet = await VirtualWallet.findOne({ userId: user._id });
+      if (!virtualWallet) {
+        virtualWallet = new VirtualWallet({ userId: user._id, balance: 0 });
+      }
+      virtualWallet.balance += amount;
+      await virtualWallet.save();
+
+      // ✅ Step 2: Check if it's the first approved deposit ≥ ₹300
+      const firstApproved = await SendCurrency.findOne({
+        userId: user._id,
+        status: "Approved",
+        _id: { $ne: depositRequest._id },
+      });
+
+      if (!firstApproved && amount >= 300) {
+        // ✅ Step 3: Apply 3-level referral bonus
+        let currentUserId = user._id;
+        const levels = [6, 3, 1];
+
+        for (let i = 0; i < levels.length; i++) {
+          const ref = await ReferralTree.findOne({ childId: currentUserId });
+          if (!ref || !ref.parentId) break;
+
+          const parentWallet = await VirtualWallet.findOne({ userId: ref.parentId });
+          if (parentWallet) {
+            const bonus = (amount * levels[i]) / 100;
+            parentWallet.balance += bonus;
+            await parentWallet.save();
+
+            // Log transaction
+            const tx = new WalletTransaction({
+              userId: ref.parentId,
+              type: "Referral Bonus",
+              amount: bonus,
+              balanceAfter: parentWallet.balance,
+              description: `Level ${i + 1} referral bonus from user ${user.mobile}`,
+            });
+            await tx.save();
+          }
+
+          currentUserId = ref.parentId;
         }
-
-        const userWallet = await UserWallet.findOne({
-          userId: depositRequest.userId,
-          walletType: normalizedWalletType,
-          isActive: true,
-        });
-
-        if (!userWallet) {
-          return res.status(400).json({
-            message: `Active wallet of type '${normalizedWalletType}' not found for this user.`,
-            error:
-              "User must have an active wallet of the same type before approving deposit.",
-          });
-        }
-
-        const amount = parseFloat(depositRequest.amount);
-        if (isNaN(amount)) throw new Error("Invalid amount value");
-
-        userWallet.balance += amount;
-        await userWallet.save();
-
-        const walletTransaction = new WalletTransaction({
-          userId: depositRequest.userId,
-          type: "Deposit",
-          amount,
-          balanceAfter: userWallet.balance,
-          walletID: depositRequest.walletID,
-          description: `Deposit approved - ${depositRequest.wallet} wallet`,
-        });
-
-        await walletTransaction.save();
-        console.log(
-          "Wallet transaction created successfully:",
-          walletTransaction
-        );
-      } catch (walletError) {
-        console.error("Wallet update error:", walletError);
-        return res.status(500).json({
-          message: "Failed to process deposit",
-          error: walletError.message,
-        });
       }
     }
 
@@ -226,7 +190,7 @@ exports.updateSendStatus = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Deposit ${status.toLowerCase()} successfully`,
+      message: `Deposit ${status.toLowerCase()} successfully` ,
       data: depositRequest,
     });
   } catch (err) {
@@ -238,6 +202,8 @@ exports.updateSendStatus = async (req, res) => {
     });
   }
 };
+
+
 
 exports.getSendRequestById = async (req, res) => {
   try {
@@ -258,3 +224,5 @@ exports.getSendRequestById = async (req, res) => {
       .json({ message: "Error fetching request", error: err.message });
   }
 };
+
+

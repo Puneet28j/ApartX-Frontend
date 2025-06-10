@@ -10,19 +10,20 @@ import {
 } from "@/components/ui/drawer";
 import { Wallet, Check } from "lucide-react";
 import { toast } from "sonner";
+
 import Binance from "../assets/binance.svg";
 import MetaMask from "../assets/fox.svg";
 import CoinBase from "../assets/Coinbase.svg";
 import TrustWallet from "../assets/TrustWallet.svg";
 import SendDollar from "../assets/Send Dollar.svg";
-// Update WalletData interface to match backend model
+
+// ✅ Updated interface to match backend
 interface WalletData {
   id: string;
-  type: string;
-  address: string;
+  walletName: string;
+  walletAddress: string;
   isActive: boolean;
-  balance: number;
-  qrImage?: string;
+  qrCodeUrl?: string;
 }
 
 export const MyWalletsManagement = () => {
@@ -33,7 +34,6 @@ export const MyWalletsManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch user wallets when drawer opens
   const fetchUserWallets = async () => {
     try {
       setIsLoading(true);
@@ -51,23 +51,27 @@ export const MyWalletsManagement = () => {
         },
       });
 
-      const formattedWallets = response.data.wallets.map((wallet: any) => ({
+      const walletsArray = response.data?.data;
+if (!Array.isArray(walletsArray)) {
+  toast.error("Invalid wallet response");
+  return;
+}
+
+const formattedWallets = walletsArray.map((wallet: any) => ({
+
         id: wallet._id,
-        type: wallet.walletType,
-        address: wallet.walletID,
+        walletName: wallet.walletType || "unknown", 
+        walletAddress: wallet.walletID,
         isActive: wallet.isActive,
-        balance: wallet.balance || 0,
-        qrImage: wallet.qrImage,
+        qrCodeUrl: wallet.qrCodeUrl,
       }));
 
       setUserWallets(formattedWallets);
 
-      // Set active wallet as selected
-      const activeWallet = formattedWallets.find((w: WalletData) => w.isActive);
+      const activeWallet = formattedWallets.find((w) => w.isActive);
       if (activeWallet) {
         setSelectedWallet(activeWallet.id);
       } else if (formattedWallets.length > 0) {
-        // If no active wallet but wallets exist, select the first one
         setSelectedWallet(formattedWallets[0].id);
       }
     } catch (error) {
@@ -85,7 +89,7 @@ export const MyWalletsManagement = () => {
   }, [openDrawer]);
 
   const handleWalletSelection = async (walletId: string) => {
-    if (isUpdating) return; // Prevent multiple simultaneous updates
+    if (isUpdating) return;
 
     try {
       setIsUpdating(true);
@@ -95,7 +99,6 @@ export const MyWalletsManagement = () => {
         return;
       }
 
-      // Optimistically update the UI first
       setSelectedWallet(walletId);
       setUserWallets((prevWallets) =>
         prevWallets.map((wallet) => ({
@@ -104,33 +107,11 @@ export const MyWalletsManagement = () => {
         }))
       );
 
-      // Make API calls to update the backend
-      // First, deactivate all wallets
-      const deactivatePromises = userWallets
-        .filter((wallet) => wallet.isActive && wallet.id !== walletId)
-        .map((wallet) =>
-          axios.patch(
-            `${import.meta.env.VITE_URL}/wallet/${wallet.id}/toggle`,
-            {},
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          )
-        );
-
-      await Promise.all(deactivatePromises);
-
-      // Then activate the selected wallet (only if it's not already active)
-      const targetWallet = userWallets.find((w) => w.id === walletId);
-      if (!targetWallet?.isActive) {
-        await axios.patch(
-          `${import.meta.env.VITE_URL}/wallet/${walletId}/toggle`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      }
+      await axios.put(
+        `${import.meta.env.VITE_URL}/wallet/set-active/${walletId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       toast.success("Default wallet updated successfully");
     } catch (error) {
@@ -140,76 +121,44 @@ export const MyWalletsManagement = () => {
           error.response?.data?.message || "Failed to update default wallet";
         toast.error(errorMessage);
       }
-      // Refresh wallets to ensure UI is in sync with backend
       await fetchUserWallets();
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const getWalletIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "binance":
-        return Binance;
-      case "metamask":
-        return MetaMask;
-      case "coinbase":
-        return CoinBase;
-      case "trustwallet":
-        return TrustWallet;
-      case "new":
-        return TrustWallet;
-      default:
-        return TrustWallet;
-    }
-  };
+const getWalletIcon = (name: string | undefined) => {
+  const safeName = name?.toLowerCase?.() || "";
+  switch (safeName) {
+    case "binance":
+      return Binance;
+    case "metamask":
+      return MetaMask;
+    case "coinbase":
+      return CoinBase;
+    case "trustwallet":
+      return TrustWallet;
+    default:
+      return TrustWallet;
+  }
+};
 
-  // const activeWallet = userWallets.find((w) => w.isActive);
 
   return (
     <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
       <DrawerTrigger asChild>
         <div className="flex items-center justify-center gap-3 cursor-pointer">
-          <button >
-              <img
-                src={SendDollar}
-                alt="Send"
-                className="h-7 w-7 sm:h-8 sm:w-8"
-              />
-              
-              <span className="text-xs sm:text-sm">Wallet</span>
-            </button>
-          {/* <div className="bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 rounded-xl shadow-md">
-            <Wallet className="w-5 h-5 text-white" />
-          </div> */}
-          <div className="text-center">
-            {/* <span className="text-sm text-white font-semibold block">
-              {activeWallet?.type.toUpperCase() || "No Active Wallet"}
-            </span> */}
-            {/* <span className="text-sm text-white font-semibold block">
-              {activeWallet?.address.slice(0, 6)}...
-              {activeWallet?.address.slice(-4) || "N/A"}
-            </span> */}
-            {/* <span className="text-xs text-gray-400">Tap to manage</span> */}
-          </div>
+          <button>
+            <img src={SendDollar} alt="Send" className="h-7 w-7 sm:h-8 sm:w-8" />
+            <span className="text-xs sm:text-sm">Wallet</span>
+          </button>
         </div>
       </DrawerTrigger>
 
       <DrawerContent className="bg-[#1a1a1a] border-gray-800 text-white font-display max-w-lg w-full mx-auto h-[70vh]">
         <DrawerHeader className="border-b border-gray-800 sticky top-0 bg-[#1a1a1a] z-10">
-          <DrawerTitle className="text-xl text-white font-semibold flex items-center justify-between">
+          <DrawerTitle className="text-xl text-white font-semibold">
             My Wallets
-            {/* <Button
-              onClick={() => {
-                setOpenDrawer(false);
-                navigate("/add-wallet");
-              }}
-              size="sm"
-              className="bg-[#6552FE] hover:bg-[#5542EE] text-white"
-            >
-              <Plus size={16} className="mr-1" />
-              Add
-            </Button> */}
           </DrawerTitle>
         </DrawerHeader>
 
@@ -235,16 +184,6 @@ export const MyWalletsManagement = () => {
                     Add your first wallet to get started
                   </p>
                 </div>
-                {/* <Button
-                  onClick={() => {
-                    setOpenDrawer(false);
-                    navigate("/add-wallet");
-                  }}
-                  className="bg-[#6552FE] hover:bg-[#5542EE] text-white px-6 py-2"
-                >
-                  <Plus size={20} className="mr-2" />
-                  Add New Wallet
-                </Button> */}
               </div>
             </div>
           ) : (
@@ -267,20 +206,18 @@ export const MyWalletsManagement = () => {
                   onClick={() => handleWalletSelection(wallet.id)}
                 >
                   <div className="flex items-center gap-4">
-                    {/* Wallet Icon */}
                     <div className="flex-shrink-0">
                       <img
-                        src={getWalletIcon(wallet.type)}
-                        alt={wallet.type}
+                        src={getWalletIcon(wallet.walletName)}
+                        alt={wallet.walletName}
                         className="w-12 h-12 rounded-lg"
                       />
                     </div>
 
-                    {/* Wallet Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="font-semibold capitalize text-lg text-white truncate">
-                          {wallet.type}
+                          {wallet.walletName}
                         </p>
                         {wallet.isActive && (
                           <span className="px-2 py-1 text-xs bg-[#6552FE] text-white rounded-full">
@@ -289,14 +226,10 @@ export const MyWalletsManagement = () => {
                         )}
                       </div>
                       <p className="text-sm text-gray-400 truncate font-mono">
-                        {wallet.address}
-                      </p>
-                      <p className="text-sm text-green-400 font-medium mt-1">
-                        Balance: ${wallet.balance.toFixed(2)}
+                        {wallet.walletAddress}
                       </p>
                     </div>
 
-                    {/* Radio Button */}
                     <div className="flex-shrink-0">
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
@@ -312,7 +245,6 @@ export const MyWalletsManagement = () => {
                     </div>
                   </div>
 
-                  {/* Loading indicator for this specific wallet */}
                   {isUpdating && selectedWallet === wallet.id && (
                     <div className="absolute inset-0 bg-black/20 rounded-xl flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#6552FE]"></div>

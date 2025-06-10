@@ -16,11 +16,13 @@ const userSchema = new mongoose.Schema({
     unique: true, // this user's own code
   },
   referredBy: {
-  type: String,
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
   required: function () {
     return this.role !== "admin";
   },
 },
+
 
   name: String,
   email: {

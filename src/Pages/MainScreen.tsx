@@ -32,55 +32,41 @@ const MainScreen = () => {
   }, []);
 
   const getWalletBalance = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("No token found, redirecting to login");
-        navigate("/login-register");
-        return;
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_URL}/wallets/total`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.status === 401) {
-        throw new Error("401");
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Full API Response:", data);
-
-      if (data && typeof data.totalBalance !== "undefined") {
-        setWalletBalance(data.totalBalance);
-      } else {
-        console.error("Invalid data structure received:", data);
-        toast.error("Invalid balance data received");
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching wallet balance:", error);
-      toast.error("Failed to load wallet balance");
-      setIsLoading(false);
-
-      if (error instanceof Error && error.message === "401") {
-        localStorage.removeItem("token");
-        navigate("/login-register");
-      }
+  try {
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login-register");
+      return;
     }
-  };
+
+    const response = await fetch(
+      `${import.meta.env.VITE_URL}/wallets/virtual-balance`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 401) throw new Error("401");
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+
+    const data = await response.json();
+    setWalletBalance(data.totalBalance || 0);
+  } catch (error) {
+    toast.error("Failed to load wallet balance");
+    if (error.message === "401") {
+      localStorage.removeItem("token");
+      navigate("/login-register");
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 // const [showWalletManager, setShowWalletManager] = useState(false);
   const fetchUserProfile = async () => {
     setIsProfileLoading(true);

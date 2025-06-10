@@ -1,9 +1,10 @@
 const UserWallet = require("../models/UserWallet");
 const WalletTransaction = require("../models/WalletTransaction");
+const VirtualWallet = require("../models/VirtualWallet");
 
 exports.addWallet = async (req, res) => {
   try {
-    const { walletID, walletType, balance } = req.body;
+    const { walletID, walletType } = req.body;
     const userId = req.user._id;
 
     if (!walletID || !walletType) {
@@ -12,34 +13,22 @@ exports.addWallet = async (req, res) => {
         .json({ message: "walletID and walletType are required" });
     }
 
-    // ✅ Check if a wallet of this type already exists for the user
-    // const existingWallet = await UserWallet.findOne({
-    //   userId,
-    //   walletType,
-    // });
-
-    // if (existingWallet) {
-    //   return res.status(409).json({
-    //     message: `You already have a ${walletType} wallet`,
-    //   });
-    // }
-
-    if (
-      !["binance", "metamask", "coinbase", "trustwallet"].includes(walletType)
-    ) {
+    // ✅ Validate walletType
+    const allowedTypes = ["binance", "metamask", "coinbase", "trustwallet"];
+    if (!allowedTypes.includes(walletType.toLowerCase())) {
       return res.status(400).json({
-        message:
-          "Invalid wallet type. Must be one of: binance, metamask, coinbase, trustwallet.",
+        message: "Invalid wallet type. Must be one of: binance, metamask, coinbase, trustwallet.",
       });
     }
+
     const qrImagePath = req.file ? req.file.path : null;
 
     const newWallet = new UserWallet({
       walletID,
-      walletType,
+      walletType: walletType.toLowerCase(),
       userId,
       qrImage: qrImagePath,
-      balance: balance || 0,
+      // ❌ REMOVE balance from here
     });
 
     await newWallet.save();
@@ -52,18 +41,34 @@ exports.addWallet = async (req, res) => {
   }
 };
 
+
 exports.getUserWallets = async (req, res) => {
   try {
     const userId = req.user._id;
+
     const wallets = await UserWallet.find({ userId });
-    res.status(200).json({ wallets });
-    console.log("User wallets fetched successfully", wallets);
+
+    // ✅ Map the wallets to include required fields only
+    const formattedWallets = wallets.map(wallet => ({
+      _id: wallet._id,
+      walletType: wallet.walletType,
+      walletAddress: wallet.walletID,
+      isActive: wallet.isActive, // ✅ required for selection
+      qrImage: wallet.qrImage || null, // optional
+    }));
+
+    res.status(200).json({ data: formattedWallets });
+
+
+    console.log("✅ User wallets fetched:", formattedWallets);
   } catch (err) {
+    console.error("❌ Error fetching wallets:", err.message);
     res
       .status(500)
       .json({ message: "Error fetching wallets", error: err.message });
   }
 };
+
 exports.getUserActiveWallet = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -267,5 +272,19 @@ exports.deleteWallet = async (req, res) => {
     res.status(200).json({ message: "Wallet deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+// GET /wallets/virtual-balance
+exports.getVirtualWalletBalance = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const wallet = await VirtualWallet.findOne({ userId });
+    const total = wallet?.balance || 0;
+    res.status(200).json({ totalBalance: total });
+  } catch (err) {
+    console.error("Failed to get virtual wallet balance:", err);
+    res.status(500).json({ message: "Failed to fetch balance" });
   }
 };

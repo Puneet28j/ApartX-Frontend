@@ -48,21 +48,21 @@ exports.registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newReferralCode = generateReferralCode(mobile);
 
-    // ✅ Create user without fallback email
+    // ✅ Create user with correct referredBy as ObjectId
     const user = new User({
       mobile,
       password: hashedPassword,
       referralCode: newReferralCode,
-      referredBy: referrerCode,
+      referredBy: referrer?._id || null,  // ✅ FIXED HERE
       name,
-      email, // ✅ save exactly what frontend sent
+      email,
       profilePic,
       role,
     });
 
     await user.save();
 
-    // ✅ Create referral tree for users
+    // ✅ Create referral tree entry
     if (role !== "admin" && referrer) {
       const parentTree = await ReferralTree.findOne({ userId: referrer._id });
 

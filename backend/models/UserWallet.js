@@ -13,12 +13,12 @@ const userWalletSchema = new mongoose.Schema(
       trim: true,
     },
     walletType: {
-      type: String,
-      required: true,
-      enum: ["binance", "metamask", "coinbase", "trustwallet"],
-      lowercase: true,
-      trim: true,
-    },
+  type: String,
+  required: true,
+  enum: ["binance", "metamask", "coinbase", "trustwallet"],
+  lowercase: true,
+  trim: true,
+},
     qrImage: {
       type: String,
     },

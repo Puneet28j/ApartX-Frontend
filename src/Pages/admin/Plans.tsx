@@ -46,7 +46,6 @@ const PlanDialog = ({
     minAmount: plan?.minAmount || "",
     maxAmount: plan?.maxAmount || "",
     roi: plan?.roi || "",
-    durationDays: plan?.durationDays || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,18 +161,7 @@ const PlanDialog = ({
                   required
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="durationDays">Duration (Days)</Label>
-                <Input
-                  id="durationDays"
-                  name="durationDays"
-                  type="number"
-                  placeholder="e.g., 30"
-                  value={formData.durationDays}
-                  onChange={handleChange}
-                  // required
-                />
-              </div>
+            
             </div>
           </div>
           <DialogFooter>
@@ -331,14 +319,6 @@ export const Plans = () => {
                     <div className="text-xs md:text-sm text-gray-500">ROI</div>
                     <div className="text-sm md:text-base font-semibold text-green-600">
                       {plan.roi}%
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-xs md:text-sm text-gray-500">
-                      Duration
-                    </div>
-                    <div className="text-sm md:text-base font-semibold">
-                      {plan.durationDays} Days
                     </div>
                   </div>
                 </div>

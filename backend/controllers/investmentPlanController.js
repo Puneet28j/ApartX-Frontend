@@ -3,13 +3,13 @@ const InvestmentPlan = require("../models/InvestmentPlan");
 // 🔸 Add Plan
 exports.addPlan = async (req, res) => {
   try {
-    const { name, minAmount, maxAmount, roi, durationDays } = req.body;
+    const { name, minAmount, maxAmount, roi } = req.body;
 
     if (!name || !minAmount || !maxAmount || !roi ) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const newPlan = new InvestmentPlan({ name, minAmount, maxAmount, roi, durationDays });
+    const newPlan = new InvestmentPlan({ name, minAmount, maxAmount, roi });
     await newPlan.save();
 
     res.status(201).json({ message: "Plan created", plan: newPlan });

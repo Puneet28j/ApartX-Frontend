@@ -36,7 +36,6 @@ type UserWallet = {
 const SendCurrency = () => {
   const navigate = useNavigate();
   const [selectedWallet, setSelectedWallet] = useState("");
-  const [userActiveWallet, setUserActiveWallet] = useState<any>([]);
   const [amount, setAmount] = useState("");
   const [walletID, setWalletID] = useState("");
   const [showWalletIDInput, setShowWalletIDInput] = useState(false);
@@ -53,7 +52,6 @@ const SendCurrency = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingWallets, setIsLoadingWallets] = useState(false);
 
-  console.log(userActiveWallet, "user active wallets");
   // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
@@ -93,60 +91,7 @@ const SendCurrency = () => {
         setIsLoading(false);
       }
     };
-    const fetchUserActiveWallet = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/login-register");
-          return;
-        }
-
-        const response = await axios.get(
-          `${import.meta.env.VITE_URL}/active-wallet`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-          }
-        );
-
-        if (
-          response.data &&
-          response.data.wallet &&
-          Array.isArray(response.data.wallet)
-        ) {
-          setUserActiveWallet(response.data.wallet);
-          console.log(
-            "Set userActiveWallet from wallet array:",
-            response.data.wallet
-          );
-        } else if (response.data && response.data.wallet) {
-          // If wallet is a single object, wrap it in an array
-          setUserActiveWallet([response.data.wallet]);
-          console.log("Wrapped single wallet in array:", [
-            response.data.wallet,
-          ]);
-        } else {
-          // Fallback for other structures
-          console.warn("Unexpected API response structure:", response.data);
-          setUserActiveWallet([]);
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching user active wallet:", error);
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          toast.error("Please login again");
-          navigate("/login-register");
-        } else {
-          toast.error("Failed to load user active wallet");
-        }
-        setIsLoading(false);
-      }
-    };
-    fetchUserActiveWallet();
+  
     fetchUserData();
   }, [navigate]);
 
@@ -207,30 +152,11 @@ const SendCurrency = () => {
 
     formData.append("walletID", walletID);
     // Fix: Access the first element of the array since userActiveWallet is an array
-    const activeWallet =
-      userActiveWallet.length > 0 ? userActiveWallet[0] : null;
+    
 
-    // Add debugging logs
-    console.log("userActiveWallet array:", userActiveWallet);
-    console.log("activeWallet (first element):", activeWallet);
+  formData.append("userActiveWalletID", "none");
+formData.append("userActiveWalletType", "none");
 
-    if (!activeWallet) {
-      toast.error("No active wallet found.Please create a new wallet.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Add debugging for what we're sending
-    console.log("Sending to backend:", {
-      userActiveWalletID: activeWallet.walletID,
-      userActiveWalletType: activeWallet.walletType,
-      amount: amount,
-      wallet: walletType,
-      walletID: walletID,
-    });
-
-    formData.append("userActiveWalletID", activeWallet.walletID);
-    formData.append("userActiveWalletType", activeWallet.walletType);
 
     if (screenshot) {
       formData.append("screenshot", screenshot);

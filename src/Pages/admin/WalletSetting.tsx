@@ -244,7 +244,7 @@ export const WalletSetting = () => {
         },
       });
 
-      setWallets(response.data.wallets);
+    setWallets(response.data.data); // ✅ Corrected to match API
     } catch (error) {
       console.error("Error fetching wallets:", error);
       toast.error("Failed to fetch wallets");
@@ -279,7 +279,7 @@ export const WalletSetting = () => {
       }
 
       const response = await axios.delete(
-        `${import.meta.env.VITE_URL}/deleteWallet/${walletId}`,
+        `${import.meta.env.VITE_URL}/wallet/${walletId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
