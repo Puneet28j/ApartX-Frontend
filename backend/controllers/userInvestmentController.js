@@ -94,6 +94,48 @@ exports.getMyActiveInvestments = async (req, res) => {
   }
 };
 
+// controllers/investmentController.js or .ts
+exports.exitInvestment = async (req, res) => {
+  try {
+    const investmentId = req.params.id;
+    const userId = req.user._id;
+
+    const investment = await UserInvestment.findOne({ _id: investmentId, userId });
+
+    if (!investment || investment.isCompleted) {
+      return res.status(400).json({ message: "Invalid or already exited investment" });
+    }
+
+    const startDate = new Date(investment.startDate);
+    const now = new Date();
+    const daysPassed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+
+    const principal = investment.amount;
+    const roi = investment.roi;
+    const currentAmount = principal * Math.pow(1 + roi / 100, daysPassed);
+
+    // Update investment
+    investment.isCompleted = true;
+    await investment.save();
+
+    // Add to user's wallet
+    const wallet = await UserWallet.findOne({ userId });
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    wallet.balance += parseFloat(currentAmount.toFixed(2));
+    await wallet.save();
+
+    res.status(200).json({
+      message: "Investment exited successfully",
+      creditedAmount: currentAmount.toFixed(2),
+    });
+  } catch (error) {
+    console.error("Exit Investment Error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 // ✅ Admin: View All Investments (With User & Plan Info)
 exports.getAllInvestments = async (req, res) => {

@@ -1,5 +1,6 @@
 // components/TransactionList.tsx
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,14 +20,21 @@ const PortfolioList = ({
   portfolioData: PortfolioData[];
 }) => {
   const handleExit = async (id: string) => {
-    try {
-      console.log("User Id:", id);
-      // Add your exit logic here
-      toast.success("Investment exited successfully");
-    } catch (error) {
-      toast.error("Failed to exit investment");
-    }
-  };
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.put(`${import.meta.env.VITE_URL}/exit-investment/${id}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    toast.success(`Investment exited! ₹${response.data.creditedAmount} credited.`);// Refresh UI after exit
+  } catch (error) {
+    console.error("Exit Error:", error);
+    toast.error("Failed to exit investment");
+  }
+};
+
 
   return (
     <div className="space-y-2">
