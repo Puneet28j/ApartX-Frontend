@@ -15,7 +15,7 @@ const {
   getAdminWallets,
   deleteWallet,
   getUserActiveWallet,
-  getVirtualWalletBalance, // ✅ NEW CONTROLLER
+  getVirtualBalance, // ✅ NEW CONTROLLER
 } = require("../controllers/walletController");
 
 const { verifyToken } = require("../middlewares/authMiddleware");
@@ -40,7 +40,7 @@ router.put("/wallet/set-active/:walletId", verifyToken, toggleWalletStatus);
 router.delete("/wallet/:walletId", verifyToken, deleteWallet);
 
 // ✅ VIRTUAL WALLET ROUTES
-router.get("/wallets/virtual-balance", verifyToken, getVirtualWalletBalance); // 👈 New route
+router.get("/wallets/virtual-balance", verifyToken, getVirtualBalance); // 👈 New route
 
 // ✅ BALANCE (for individual user wallets, not virtual)
 router.put("/wallet/:walletId/balance", verifyToken, updateWalletBalance);
